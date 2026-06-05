@@ -1,0 +1,1724 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AgroLink – Farmer Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Raleway:wght@300;400;600;700;800&family=Caveat:wght@600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Raleway',sans-serif;background:#041206;color:white;min-height:100vh;overflow-x:hidden}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:rgba(255,255,255,.03)}
+::-webkit-scrollbar-thumb{background:rgba(86,194,57,.3);border-radius:3px}
+
+/* BG */
+.bg{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.bg-grad{position:absolute;inset:0;background:radial-gradient(ellipse at 10% 20%,rgba(30,90,20,.5),transparent 55%),radial-gradient(ellipse at 90% 80%,rgba(20,60,12,.45),transparent 55%),linear-gradient(160deg,#041206,#071a08)}
+.bg-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(86,194,57,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(86,194,57,.03) 1px,transparent 1px);background-size:44px 44px;animation:gridDrift 50s linear infinite}
+@keyframes gridDrift{to{background-position:44px 44px}}
+.bg-orb{position:absolute;border-radius:50%;filter:blur(90px);animation:orbFloat ease-in-out infinite}
+@keyframes orbFloat{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(15px,-15px) scale(1.1)}}
+.wheat-row{position:fixed;bottom:0;left:0;right:0;height:64px;display:flex;gap:3px;align-items:flex-end;padding:0 6px;z-index:1;pointer-events:none;overflow:hidden}
+.wstalk{width:2px;background:linear-gradient(to top,#6b4f0a,#b89020);border-radius:1px;transform-origin:bottom;animation:wsway var(--d,3s) ease-in-out infinite var(--dl,0s);position:relative;flex-shrink:0}
+@keyframes wsway{0%,100%{transform:rotate(-7deg)}50%{transform:rotate(7deg)}}
+.wstalk::after{content:'';position:absolute;top:-8px;left:-3px;width:8px;height:11px;background:linear-gradient(135deg,#6b4f0a,#b89020);border-radius:2px 2px 0 0}
+
+/* SIDEBAR */
+.sidebar{width:230px;flex-shrink:0;background:rgba(3,12,4,.95);border-right:1px solid rgba(86,194,57,.12);display:flex;flex-direction:column;padding:0;position:fixed;top:0;left:0;bottom:0;z-index:100;backdrop-filter:blur(20px)}
+.sb-logo{display:flex;align-items:center;gap:10px;padding:22px 20px 20px;border-bottom:1px solid rgba(86,194,57,.1)}
+.sb-logo-icon{font-size:26px;filter:drop-shadow(0 0 10px rgba(86,194,57,.7))}
+.sb-logo-text{font-family:'Playfair Display',serif;font-size:19px;font-weight:900;letter-spacing:2px;color:#56c239;text-shadow:0 0 20px rgba(86,194,57,.4)}
+.sb-nav{flex:1;padding:16px 12px;display:flex;flex-direction:column;gap:3px;overflow-y:auto}
+.sb-sec{font-size:9px;font-weight:800;letter-spacing:2.5px;text-transform:uppercase;color:rgba(255,255,255,.2);padding:12px 10px 5px}
+.sb-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:11px;cursor:pointer;transition:all .25s;font-size:12.5px;font-weight:700;color:rgba(255,255,255,.4);letter-spacing:.4px;border:1px solid transparent;text-decoration:none}
+.sb-item:hover{background:rgba(86,194,57,.07);color:rgba(255,255,255,.75);border-color:rgba(86,194,57,.12)}
+.sb-item.active{background:rgba(86,194,57,.14);color:#56c239;border-color:rgba(86,194,57,.28);box-shadow:0 3px 12px rgba(86,194,57,.1)}
+.sb-icon{font-size:16px;width:20px;text-align:center;flex-shrink:0}
+.sb-badge{margin-left:auto;background:rgba(255,80,80,.2);color:#ff6b6b;font-size:9px;font-weight:800;padding:2px 7px;border-radius:50px}
+.sb-badge.green{background:rgba(86,194,57,.2);color:#56c239}
+.sb-bottom{padding:14px 12px;border-top:1px solid rgba(86,194,57,.1)}
+.sb-profile1:hover{background:rgba(255,255,255,.05)}
+.sb-profile1{padding:14px;background:rgba(86,194,57,.05);border:1px solid rgba(86,194,57,.15);border-radius:14px;margin-bottom:24px;text-align:center}
+.sb-avatar{width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#1a5c1e,#56c239);display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto 10px;border:2px solid rgba(86,194,57,.3)}
+
+.sb-pname{font-size:12px;font-weight:700;color:rgba(255,255,255,.75)}
+.sb-prole{font-size:9px;color:rgba(86,194,57,.7);letter-spacing:.5px;text-transform:uppercase}
+
+/* MAIN */
+.main{margin-left:230px;flex:1;min-height:100vh;position:relative;z-index:10}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:20px 28px 0;margin-bottom:24px}
+.page-title{font-family:'Playfair Display',serif;font-size:26px;font-weight:700;color:white}
+.page-sub{font-size:12px;color:rgba(255,255,255,.38);margin-top:3px}
+.topbar-actions{display:flex;align-items:center;gap:10px}
+.tbtn{padding:9px 16px;border-radius:11px;border:1.5px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:rgba(255,255,255,.55);font-family:'Raleway',sans-serif;font-size:12px;font-weight:700;cursor:pointer;transition:all .25s;letter-spacing:.4px;display:flex;align-items:center;gap:6px}
+.tbtn:hover{background:rgba(255,255,255,.08);color:white}
+.tbtn.primary{background:linear-gradient(135deg,#1a5c1e,#56c239);border-color:transparent;color:white;box-shadow:0 4px 14px rgba(86,194,57,.3)}
+.tbtn.primary:hover{box-shadow:0 6px 20px rgba(86,194,57,.5);transform:translateY(-1px)}
+.notif-dot{width:8px;height:8px;border-radius:50%;background:#ff6b6b;position:relative}
+.notif-dot::after{content:'';position:absolute;inset:-2px;border-radius:50%;border:2px solid rgba(255,107,107,.4);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.5);opacity:0}}
+
+/* TAB SYSTEM */
+.tab-bar{display:flex;gap:4px;padding:0 28px;margin-bottom:24px;border-bottom:1px solid rgba(86,194,57,.1);overflow-x:auto}
+.tab-btn{padding:11px 18px;border:none;background:none;color:rgba(255,255,255,.35);font-family:'Raleway',sans-serif;font-size:12px;font-weight:700;cursor:pointer;border-bottom:2.5px solid transparent;transition:all .25s;letter-spacing:.5px;text-transform:uppercase;white-space:nowrap;display:flex;align-items:center;gap:7px;margin-bottom:-1px}
+.tab-btn:hover{color:rgba(255,255,255,.7)}
+.tab-btn.active{color:#56c239;border-bottom-color:#56c239}
+.tab-panel{display:none;padding:0 28px 100px;animation:tabIn .3s ease both}
+.tab-panel.active{display:block}
+@keyframes tabIn{0%{opacity:0;transform:translateY(8px)}100%{opacity:1;transform:translateY(0)}}
+
+/* CARD */
+.card{background:rgba(7,26,8,.82);border:1px solid rgba(86,194,57,.14);border-radius:18px;padding:22px;position:relative;overflow:hidden;transition:border-color .3s,box-shadow .3s}
+.card:hover{border-color:rgba(86,194,57,.25);box-shadow:0 6px 32px rgba(0,0,0,.4)}
+.card-title{font-size:10px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:rgba(86,194,57,.7);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.card-title::after{content:'';flex:1;height:1px;background:rgba(86,194,57,.1)}
+.grid{display:grid;gap:18px}
+.g2{grid-template-columns:1fr 1fr}
+.g3{grid-template-columns:1fr 1fr 1fr}
+.g-8-4{grid-template-columns:2fr 1fr}
+.g-6-6{grid-template-columns:1fr 1fr}
+
+/* STATS */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
+.stat{background:rgba(7,26,8,.82);border:1px solid rgba(86,194,57,.13);border-radius:16px;padding:18px 20px;transition:all .25s;cursor:default}
+.stat:hover{border-color:rgba(86,194,57,.3);transform:translateY(-2px)}
+.stat-ic{font-size:26px;margin-bottom:6px}
+.stat-v{font-family:'Playfair Display',serif;font-size:26px;font-weight:700;color:white;line-height:1}
+.stat-l{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:rgba(255,255,255,.3);margin-top:4px}
+.stat-d{font-size:10px;font-weight:700;margin-top:3px}
+.up{color:#56c239}.down{color:#ff6b6b}.neutral{color:rgba(255,255,255,.3)}
+
+/* WEATHER */
+.w-main{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px}
+.w-temp{font-family:'Playfair Display',serif;font-size:52px;font-weight:900;line-height:1}
+.w-temp sup{font-size:18px;color:rgba(255,255,255,.5);vertical-align:super}
+.w-cond{font-size:13px;color:rgba(255,255,255,.45);margin-top:3px;font-weight:600}
+.w-loc{font-size:11px;color:rgba(86,194,57,.7);margin-top:2px}
+.w-icon{font-size:56px;filter:drop-shadow(0 4px 14px rgba(255,200,0,.2))}
+.w-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
+.wstat{background:rgba(255,255,255,.04);border-radius:11px;padding:9px 10px;text-align:center}
+.wstat-v{font-size:16px;font-weight:800;color:white;margin-bottom:1px}
+.wstat-l{font-size:9px;color:rgba(255,255,255,.3);letter-spacing:.8px;text-transform:uppercase}
+.forecast{display:flex;gap:7px;overflow-x:auto;padding-bottom:3px}
+.fday{flex-shrink:0;background:rgba(255,255,255,.03);border-radius:11px;padding:9px 12px;text-align:center;min-width:64px;border:1px solid rgba(255,255,255,.06);cursor:default;transition:border-color .25s}
+.fday:hover{border-color:rgba(86,194,57,.3)}
+.fday-n{font-size:9px;color:rgba(255,255,255,.35);font-weight:700;letter-spacing:.5px;margin-bottom:5px;text-transform:uppercase}
+.fday-i{font-size:20px;margin-bottom:3px}
+.fday-h{font-size:12px;font-weight:800;color:white}
+.fday-l{font-size:10px;color:rgba(255,255,255,.3)}
+
+/* CROP HEALTH */
+.crop-row{display:flex;align-items:center;gap:12px;padding:11px 13px;background:rgba(255,255,255,.025);border-radius:13px;border:1px solid rgba(255,255,255,.06);transition:all .25s;cursor:pointer;margin-bottom:8px}
+.crop-row:last-child{margin-bottom:0}
+.crop-row:hover{background:rgba(86,194,57,.06);border-color:rgba(86,194,57,.18)}
+.crop-em{font-size:26px;flex-shrink:0}
+.crop-inf{flex:1}
+.crop-nm{font-size:13px;font-weight:700;color:white;margin-bottom:1px}
+.crop-st{font-size:10px;color:rgba(255,255,255,.35)}
+.hbar-wrap{width:76px;flex-shrink:0}
+.hbar{height:5px;background:rgba(255,255,255,.07);border-radius:3px;overflow:hidden;margin-bottom:3px}
+.hbar-f{height:100%;border-radius:3px;transition:width 1s ease}
+.hpct{font-size:10px;font-weight:700;text-align:right}
+.cdot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+
+/* ALERTS */
+.alert-item{display:flex;gap:10px;padding:11px 13px;border-radius:13px;border:1px solid;margin-bottom:8px}
+.alert-item:last-child{margin-bottom:0}
+.ai-red{background:rgba(255,60,60,.05);border-color:rgba(255,60,60,.2)}
+.ai-yellow{background:rgba(255,180,0,.05);border-color:rgba(255,180,0,.2)}
+.ai-green{background:rgba(86,194,57,.05);border-color:rgba(86,194,57,.2)}
+.ai-blue{background:rgba(0,180,216,.05);border-color:rgba(0,180,216,.2)}
+.alert-ic{font-size:18px;flex-shrink:0;margin-top:1px}
+.alert-t{font-size:11px;font-weight:800;margin-bottom:2px}
+.ai-red .alert-t{color:#ff6b6b}.ai-yellow .alert-t{color:#ffcc44}.ai-green .alert-t{color:#56c239}.ai-blue .alert-t{color:#00b4d8}
+.alert-m{font-size:11px;color:rgba(255,255,255,.45);line-height:1.5}
+
+/* IRRIGATION */
+.irrig-banner{display:flex;align-items:center;gap:14px;padding:14px;background:rgba(0,180,216,.06);border-radius:14px;border:1px solid rgba(0,180,216,.15);margin-bottom:14px}
+.irrig-icon{font-size:36px}
+.irrig-t{font-size:14px;font-weight:700;color:white;margin-bottom:2px}
+.irrig-s{font-size:11px;color:rgba(255,255,255,.4);line-height:1.5}
+.chips{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:14px}
+.chip{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border-radius:50px;font-size:11px;font-weight:700;letter-spacing:.3px}
+.cb{background:rgba(0,180,216,.1);border:1px solid rgba(0,180,216,.25);color:#00b4d8}
+.cg{background:rgba(86,194,57,.1);border:1px solid rgba(86,194,57,.25);color:#56c239}
+.co{background:rgba(255,140,0,.1);border:1px solid rgba(255,140,0,.25);color:#ff8c00}
+.sched-row{display:flex;align-items:center;gap:10px;padding:9px 12px;background:rgba(255,255,255,.03);border-radius:11px;margin-bottom:6px}
+.sched-row:last-child{margin-bottom:0}
+.sched-t{font-size:11px;font-weight:800;color:rgba(255,255,255,.5);width:48px;flex-shrink:0}
+.sched-c{font-size:12px;font-weight:700;color:white;flex:1}
+.sched-d{font-size:10px;color:rgba(0,180,216,.8);font-weight:600}
+.sched-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+
+/* MINI CHART */
+.mini-chart{display:flex;align-items:flex-end;gap:4px;height:48px;margin-top:4px}
+.bar{flex:1;border-radius:3px 3px 0 0;background:linear-gradient(to top,rgba(86,194,57,.3),rgba(86,194,57,.7));transition:height .8s ease;min-height:4px;cursor:pointer}
+.bar:hover{background:linear-gradient(to top,rgba(86,194,57,.5),#56c239)}
+.chart-labels{display:flex;justify-content:space-between;margin-top:4px}
+.chart-label{font-size:9px;color:rgba(255,255,255,.22);font-weight:700;letter-spacing:.5px}
+
+/* ═══ AI DETECTION TAB ═══ */
+.detect-layout{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start}
+.upload-zone{border:2px dashed rgba(86,194,57,.3);border-radius:18px;padding:32px 24px;text-align:center;cursor:pointer;transition:all .3s;background:rgba(86,194,57,.03);position:relative;overflow:hidden;min-height:200px;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.upload-zone:hover,.upload-zone.drag-over{border-color:rgba(86,194,57,.7);background:rgba(86,194,57,.08)}
+.upload-zone.has-img{padding:0;border-style:solid;border-color:rgba(86,194,57,.5)}
+.upload-zone.has-img .upload-content{display:none}
+.uf-input{position:absolute;inset:0;opacity:0;cursor:pointer;z-index:2}
+.upload-ic{font-size:46px;margin-bottom:10px;transition:transform .3s}
+.upload-zone:hover .upload-ic{transform:scale(1.1)}
+.upload-title{font-size:14px;font-weight:700;color:rgba(255,255,255,.7);margin-bottom:4px}
+.upload-sub{font-size:11px;color:rgba(255,255,255,.3);line-height:1.6}
+.preview-img{width:100%;height:280px;object-fit:cover;border-radius:16px;display:none}
+.preview-img.show{display:block}
+.preview-caption{font-size:11px;color:rgba(255,255,255,.35);padding:10px 0 8px;display:none}
+.preview-caption.show{display:block}
+.change-btn{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.5);font-family:'Raleway',sans-serif;font-size:11px;font-weight:700;padding:7px 16px;border-radius:9px;cursor:pointer;transition:all .25s;margin-bottom:10px;display:none}
+.change-btn.show{display:inline-block}
+.change-btn:hover{background:rgba(255,255,255,.1);color:white}
+.detect-btn{width:100%;padding:14px;border-radius:14px;border:none;background:linear-gradient(135deg,#1a5c1e,#56c239);color:white;font-family:'Raleway',sans-serif;font-size:13px;font-weight:800;cursor:pointer;transition:all .3s;letter-spacing:1.5px;text-transform:uppercase;box-shadow:0 6px 20px rgba(86,194,57,.3);margin-top:14px}
+.detect-btn:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 10px 28px rgba(86,194,57,.45)}
+.detect-btn:disabled{opacity:.45;cursor:not-allowed;transform:none}
+.detect-scanning{display:none;margin-top:14px}
+.detect-scanning.show{display:block}
+.scan-bar{height:4px;background:rgba(255,255,255,.07);border-radius:2px;overflow:hidden;margin-bottom:8px}
+.scan-fill{height:100%;background:linear-gradient(90deg,#1a5c1e,#56c239,#1a5c1e);background-size:200%;animation:scanAnim 1.5s linear infinite}
+@keyframes scanAnim{0%{background-position:0%}100%{background-position:200%}}
+.scan-txt{font-size:11px;color:rgba(86,194,57,.7);font-weight:700;letter-spacing:.5px;text-align:center}
+.result-panel{display:none;animation:resultIn .4s ease both}
+.result-panel.show{display:block}
+@keyframes resultIn{0%{opacity:0;transform:translateY(10px)}100%{opacity:1;transform:translateY(0)}}
+.result-header{display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:14px;margin-bottom:14px}
+.rh-red{background:rgba(255,60,60,.08);border:1px solid rgba(255,60,60,.2)}
+.rh-yellow{background:rgba(255,180,0,.08);border:1px solid rgba(255,180,0,.2)}
+.rh-green{background:rgba(86,194,57,.08);border:1px solid rgba(86,194,57,.2)}
+.result-icon{font-size:36px;flex-shrink:0}
+.result-dis{font-size:15px;font-weight:800;color:white;margin-bottom:3px}
+.result-conf{font-size:11px;font-weight:700;color:rgba(255,255,255,.45)}
+.result-body{display:flex;flex-direction:column;gap:12px}
+.result-section{padding:13px 15px;background:rgba(255,255,255,.03);border-radius:12px;border:1px solid rgba(255,255,255,.06)}
+.result-section-title{font-size:10px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:rgba(86,194,57,.7);margin-bottom:8px}
+.result-text{font-size:12px;color:rgba(255,255,255,.65);line-height:1.7}
+.result-text li{margin-left:16px;margin-bottom:4px}
+.history-row{display:flex;align-items:center;gap:12px;padding:10px 13px;background:rgba(255,255,255,.03);border-radius:12px;border:1px solid rgba(255,255,255,.05);margin-bottom:7px;cursor:pointer;transition:all .25s}
+.history-row:hover{background:rgba(86,194,57,.06);border-color:rgba(86,194,57,.18)}
+.history-thumb{width:44px;height:44px;border-radius:9px;object-fit:cover;flex-shrink:0;background:rgba(255,255,255,.05);display:flex;align-items:center;justify-content:center;font-size:20px}
+.history-info{flex:1}
+.history-crop{font-size:12px;font-weight:700;color:white;margin-bottom:1px}
+.history-dis{font-size:11px;color:rgba(255,255,255,.4)}
+.history-date{font-size:10px;color:rgba(255,255,255,.25);flex-shrink:0}
+.history-sev{font-size:10px;font-weight:800;padding:3px 9px;border-radius:50px;flex-shrink:0}
+.sev-high{background:rgba(255,60,60,.15);color:#ff6b6b}
+.sev-med{background:rgba(255,180,0,.15);color:#ffcc44}
+.sev-low{background:rgba(86,194,57,.15);color:#56c239}
+
+/* ═══ AI CHAT TAB ═══ */
+.chat-layout{display:grid;grid-template-columns:1fr 340px;gap:20px;align-items:start}
+.chat-window{background:rgba(7,26,8,.82);border:1px solid rgba(86,194,57,.14);border-radius:18px;overflow:hidden;display:flex;flex-direction:column;height:580px}
+.chat-header{padding:16px 20px;border-bottom:1px solid rgba(86,194,57,.1);display:flex;align-items:center;gap:10px;background:rgba(0,0,0,.2)}
+.chat-av{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#1a5c1e,#56c239);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.chat-name{font-size:13px;font-weight:700;color:white}
+.chat-status{font-size:10px;color:rgba(86,194,57,.7);display:flex;align-items:center;gap:4px}
+.chat-status::before{content:'';width:6px;height:6px;border-radius:50%;background:#56c239;flex-shrink:0}
+.chat-body{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px}
+.msg{display:flex;gap:8px;animation:msgPop .3s ease both}
+@keyframes msgPop{0%{transform:translateY(6px);opacity:0}100%{transform:translateY(0);opacity:1}}
+.msg.user{flex-direction:row-reverse}
+.msg-av{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.msg-av.ai-av{background:linear-gradient(135deg,#1a5c1e,#56c239)}
+.msg-av.u-av{background:rgba(255,255,255,.08)}
+.bubble{max-width:80%;padding:10px 13px;border-radius:14px;font-size:12.5px;line-height:1.65;font-weight:500}
+.msg.ai .bubble{background:rgba(86,194,57,.1);border:1px solid rgba(86,194,57,.2);color:rgba(255,255,255,.85);border-bottom-left-radius:3px}
+.msg.user .bubble{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.8);border-bottom-right-radius:3px}
+.typing-dots{display:flex;gap:4px;padding:10px 13px}
+.typing-dots span{width:6px;height:6px;background:#56c239;border-radius:50%;animation:td .9s ease-in-out infinite}
+.typing-dots span:nth-child(2){animation-delay:.15s}
+.typing-dots span:nth-child(3){animation-delay:.3s}
+@keyframes td{0%,80%,100%{transform:scale(.6);opacity:.5}40%{transform:scale(1);opacity:1}}
+.chat-footer{padding:12px 16px;border-top:1px solid rgba(86,194,57,.1);display:flex;gap:8px}
+.chat-inp{flex:1;padding:11px 13px;background:rgba(255,255,255,.05);border:1.5px solid rgba(255,255,255,.1);border-radius:12px;color:white;font-family:'Raleway',sans-serif;font-size:12.5px;outline:none;transition:all .3s;resize:none;max-height:90px;min-height:42px}
+.chat-inp::placeholder{color:rgba(255,255,255,.22)}
+.chat-inp:focus{background:rgba(86,194,57,.06);border-color:rgba(86,194,57,.4)}
+.chat-send{width:42px;height:42px;border-radius:11px;border:none;background:linear-gradient(135deg,#1a5c1e,#56c239);color:white;font-size:16px;cursor:pointer;transition:all .3s;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.chat-send:hover{transform:scale(1.08);box-shadow:0 4px 14px rgba(86,194,57,.4)}
+.quick-chips{display:flex;flex-wrap:wrap;gap:7px;padding:0 16px 12px}
+.qchip{padding:7px 13px;border-radius:50px;background:rgba(86,194,57,.07);border:1px solid rgba(86,194,57,.2);color:rgba(86,194,57,.8);font-family:'Raleway',sans-serif;font-size:11px;font-weight:700;cursor:pointer;transition:all .25s;letter-spacing:.3px}
+.qchip:hover{background:rgba(86,194,57,.15);color:#56c239}
+.chat-sidebar{display:flex;flex-direction:column;gap:14px}
+.tip-card{background:rgba(7,26,8,.82);border:1px solid rgba(86,194,57,.14);border-radius:16px;padding:18px}
+.tip-title{font-size:10px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:rgba(86,194,57,.6);margin-bottom:10px}
+.tip-item{display:flex;gap:8px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05);cursor:pointer;transition:opacity .2s}
+.tip-item:last-child{border-bottom:none;padding-bottom:0}
+.tip-item:hover{opacity:.75}
+.tip-emoji{font-size:18px;flex-shrink:0}
+.tip-text{font-size:11px;color:rgba(255,255,255,.5);line-height:1.5}
+.tip-text strong{color:rgba(255,255,255,.75)}
+
+/* ═══ SETTINGS TAB ═══ */
+.settings-layout{display:grid;grid-template-columns:220px 1fr;gap:20px;align-items:start}
+.settings-nav{background:rgba(7,26,8,.82);border:1px solid rgba(86,194,57,.14);border-radius:16px;padding:12px;display:flex;flex-direction:column;gap:3px;position:sticky;top:20px}
+.snav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:11px;cursor:pointer;font-size:12px;font-weight:700;color:rgba(255,255,255,.4);transition:all .25s;border:1px solid transparent}
+.snav-item:hover{background:rgba(86,194,57,.07);color:rgba(255,255,255,.75)}
+.snav-item.active{background:rgba(86,194,57,.13);color:#56c239;border-color:rgba(86,194,57,.25)}
+.snav-ic{font-size:16px;width:20px;text-align:center}
+.settings-content{display:flex;flex-direction:column;gap:16px}
+.s-section{background:rgba(7,26,8,.82);border:1px solid rgba(86,194,57,.14);border-radius:18px;padding:24px;display:none}
+.s-section.active{display:block}
+.s-section-title{font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:white;margin-bottom:4px}
+.s-section-sub{font-size:12px;color:rgba(255,255,255,.35);margin-bottom:20px}
+.s-divider{height:1px;background:rgba(86,194,57,.08);margin:16px 0}
+.s-row{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding:12px 0}
+.s-row+.s-row{border-top:1px solid rgba(255,255,255,.04)}
+.s-label{font-size:13px;font-weight:700;color:rgba(255,255,255,.75)}
+.s-sub{font-size:11px;color:rgba(255,255,255,.3);margin-top:2px;line-height:1.5}
+.s-right{flex-shrink:0}
+/* Toggle switch */
+.toggle{position:relative;width:44px;height:24px;flex-shrink:0}
+.toggle input{opacity:0;width:0;height:0}
+.toggle-slider{position:absolute;inset:0;background:rgba(255,255,255,.1);border-radius:50px;cursor:pointer;transition:.3s;border:1px solid rgba(255,255,255,.1)}
+.toggle-slider::before{content:'';position:absolute;width:18px;height:18px;border-radius:50%;background:rgba(255,255,255,.4);bottom:2px;left:2px;transition:.3s}
+.toggle input:checked+.toggle-slider{background:rgba(86,194,57,.3);border-color:rgba(86,194,57,.5)}
+.toggle input:checked+.toggle-slider::before{transform:translateX(20px);background:#56c239;box-shadow:0 0 8px rgba(86,194,57,.5)}
+/* Settings input */
+.s-input{padding:10px 14px;background:rgba(255,255,255,.04);border:1.5px solid rgba(255,255,255,.1);border-radius:12px;color:white;font-family:'Raleway',sans-serif;font-size:13px;outline:none;transition:all .3s;width:100%}
+.s-input:focus{background:rgba(86,194,57,.06);border-color:rgba(86,194,57,.4)}
+.s-input::placeholder{color:rgba(255,255,255,.22)}
+.s-select{padding:10px 14px;background:rgba(255,255,255,.04);border:1.5px solid rgba(255,255,255,.1);border-radius:12px;color:white;font-family:'Raleway',sans-serif;font-size:13px;outline:none;transition:all .3s;width:100%;appearance:none;cursor:pointer}
+.s-select:focus{background:rgba(86,194,57,.06);border-color:rgba(86,194,57,.4)}
+.s-select option{background:#0d2b0e}
+.s-form-group{display:flex;flex-direction:column;gap:7px;margin-bottom:14px}
+.s-form-label{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.4)}
+.s-avatar-row{display:flex;align-items:center;gap:14px;margin-bottom:20px}
+.s-avatar-big{width:70px;height:70px;border-radius:50%;background:linear-gradient(135deg,#1a5c1e,#56c239);display:flex;align-items:center;justify-content:center;font-size:32px;border:3px solid rgba(86,194,57,.4)}
+.s-btn{padding:10px 20px;border-radius:12px;font-family:'Raleway',sans-serif;font-size:12px;font-weight:700;cursor:pointer;transition:all .25s;letter-spacing:.4px}
+.s-btn-outline{background:transparent;border:1.5px solid rgba(86,194,57,.4);color:#56c239}
+.s-btn-outline:hover{background:rgba(86,194,57,.1)}
+.s-btn-primary{background:linear-gradient(135deg,#1a5c1e,#56c239);border:none;color:white;box-shadow:0 4px 14px rgba(86,194,57,.3)}
+.s-btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(86,194,57,.45)}
+.s-btn-danger{background:rgba(255,60,60,.08);border:1.5px solid rgba(255,60,60,.25);color:#ff6b6b}
+.s-btn-danger:hover{background:rgba(255,60,60,.15)}
+.db-status{display:flex;align-items:center;gap:8px;padding:12px 16px;border-radius:12px;border:1px solid rgba(86,194,57,.2);background:rgba(86,194,57,.06);margin-bottom:12px}
+.db-dot{width:8px;height:8px;border-radius:50%;background:#56c239;flex-shrink:0;box-shadow:0 0 8px rgba(86,194,57,.6)}
+.db-name{font-size:12px;font-weight:700;color:white;margin-bottom:1px}
+.db-info{font-size:10px;color:rgba(255,255,255,.35)}
+.db-badge{margin-left:auto;font-size:10px;font-weight:800;padding:3px 10px;border-radius:50px;background:rgba(86,194,57,.15);color:#56c239}
+.save-bar{position:sticky;bottom:20px;padding:14px 20px;background:rgba(7,26,8,.95);border:1px solid rgba(86,194,57,.2);border-radius:14px;display:flex;align-items:center;justify-content:space-between;backdrop-filter:blur(12px);box-shadow:0 8px 32px rgba(0,0,0,.5);margin-top:20px}
+.save-txt{font-size:12px;color:rgba(255,255,255,.45)}
+
+/* Shimmer loading animation */
+@keyframes shimmer{0%{opacity:.4}50%{opacity:.9}100%{opacity:.4}}
+/* Profile avatar hover */
+.s-avatar-big{cursor:pointer;transition:all .3s}
+.s-avatar-big:hover{transform:scale(1.05);box-shadow:0 0 24px rgba(86,194,57,.4)}
+/* TOAST */
+.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-80px);background:rgba(7,26,8,.97);border:1px solid rgba(86,194,57,.35);color:#56c239;padding:12px 24px;border-radius:12px;font-family:'Raleway',sans-serif;font-size:13px;font-weight:700;z-index:9999;box-shadow:0 8px 32px rgba(0,0,0,.5);letter-spacing:.4px;transition:transform .35s cubic-bezier(.34,1.56,.64,1)}
+.toast.show{transform:translateX(-50%) translateY(0)}
+
+@media(max-width:900px){
+  .sidebar{transform:translateX(-100%);transition:transform .3s}
+  .sidebar.open{transform:translateX(0)}
+  .main{margin-left:0}
+  .stats-row,.g2,.g3,.g-8-4,.g-6-6,.detect-layout,.chat-layout,.settings-layout{grid-template-columns:1fr}
+  .tab-bar{padding:0 16px}
+  .tab-panel{padding:0 16px 100px}
+}
+</style>
+</head>
+<body>
+
+<div class="bg">
+  <div class="bg-grad"></div>
+  <div class="bg-grid"></div>
+  <div class="bg-orb" style="width:500px;height:500px;background:rgba(30,90,20,.1);top:-120px;left:-80px;animation-duration:14s"></div>
+  <div class="bg-orb" style="width:380px;height:380px;background:rgba(20,60,10,.09);bottom:5%;right:-60px;animation-duration:11s;animation-delay:-5s"></div>
+</div>
+<div class="wheat-row" id="wheat-row"></div>
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="sb-logo">
+    <div class="sb-logo-icon">🌾</div>
+    <div class="sb-logo-text">AGROLINK</div>
+  </div>
+  <nav class="sb-nav">
+    <div class="sb-sec">Dashboard</div>
+    <a class="sb-item active" onclick="switchTab('overview',this)"><span class="sb-icon">🏡</span>Home</a>
+    <a class="sb-item" onclick="switchTab('crops',this)"><span class="sb-icon">🌱</span>My Crops <span class="sb-badge green">3</span></a>
+    <a class="sb-item" onclick="switchTab('irrigation',this)"><span class="sb-icon">💧</span>Irrigation</a>
+    <div class="sb-sec">AI Tools</div>
+    <a class="sb-item" onclick="switchTab('detection',this)"><span class="sb-icon">🔬</span>Disease Detection</a>
+    <a class="sb-item" onclick="switchTab('assistant',this)"><span class="sb-icon">🤖</span>AI Assistant</a>
+    <div class="sb-sec">More</div>
+    <a class="sb-item" onclick="switchTab('market',this)"><span class="sb-icon">📊</span>Market Prices</a>
+    <a class="sb-item" onclick="switchTab('dealer-shop',this)"><span class="sb-icon">🏪</span>Dealer Products</a>
+    <a class="sb-item" onclick="switchTab('settings',this)"><span class="sb-icon">⚙️</span>Settings</a>
+    <a class="sb-item" onclick="doLogout()"><span class="sb-icon">🚪</span>Logout</a>
+  </nav>
+  <div class="sb-bottom">
+    <div class="sb-profile1" onclick="switchTab('settings',null)">
+      <div class="sb-avatar" id="sb-avatar-display">👨‍🌾</div>
+      <div><div class="sb-pname" id="sb-pname-display">Abzar Kumar</div><div class="sb-prole" id="sb-prole-display">Farmer · Karnataka</div></div>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main" id="main-content">
+
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div>
+      <div class="page-title" id="page-title-text">Good Morning, Ramesh 👋</div>
+      <div class="page-sub">Farm overview for <span id="today-date"></span></div>
+    </div>
+    <div class="topbar-actions">
+      <div class="notif-dot" title="3 alerts"></div>
+      <button class="tbtn" onclick="switchTab('assistant',null)">🤖 Ask AI</button>
+      <button class="tbtn primary" onclick="switchTab('detection',null)">📷 Scan Disease</button>
+    </div>
+  </div>
+
+  <!-- TAB BAR -->
+  <div class="tab-bar">
+    <button class="tab-btn active" id="tab-overview" onclick="switchTab('overview',this)">🏡 Home</button>
+    <button class="tab-btn" id="tab-crops" onclick="switchTab('crops',this)">🌱 My Crops</button>
+    <button class="tab-btn" id="tab-irrigation" onclick="switchTab('irrigation',this)">💧 Irrigation</button>
+    <button class="tab-btn" id="tab-detection" onclick="switchTab('detection',this)">🔬 Disease Detection</button>
+    <button class="tab-btn" id="tab-assistant" onclick="switchTab('assistant',this)">🤖 AI Assistant</button>
+    <button class="tab-btn" id="tab-market" onclick="switchTab('market',this)">📊 Market</button>
+    <button class="tab-btn" id="tab-dealer-shop" onclick="switchTab('dealer-shop',this)">🏪 Dealer Shop</button>
+    <button class="tab-btn" id="tab-settings" onclick="switchTab('settings',this)">⚙️ Settings</button>
+  </div>
+
+  <!-- ════════════════════════ OVERVIEW ════════════════════════ -->
+  <div class="tab-panel active" id="panel-overview">
+    <div class="stats-row">
+      <div class="stat"><div class="stat-ic">🌱</div><div class="stat-v">3</div><div class="stat-l">Active Crops</div><div class="stat-d up">↑ Kharif season</div></div>
+      <div class="stat"><div class="stat-ic">💧</div><div class="stat-v">4.2<span style="font-size:13px;color:rgba(255,255,255,.35)">hr</span></div><div class="stat-l">Irrigation Today</div><div class="stat-d up">On schedule</div></div>
+      <div class="stat"><div class="stat-ic">🌡️</div><div class="stat-v" id="stat-temp">—°</div><div class="stat-l">Temperature</div><div class="stat-d neutral" id="stat-temp-d">Loading…</div></div>
+      <div class="stat"><div class="stat-ic">🔬</div><div class="stat-v">2</div><div class="stat-l">AI Scans Done</div><div class="stat-d up">↑ This week</div></div>
+    </div>
+    <div class="grid g-8-4" style="margin-bottom:18px">
+      <!-- Weather -->
+      <div class="card">
+        <div class="card-title">🌦️ Weather — <span id="w-loc-label" style="color:rgba(255,255,255,.4);font-size:9px;text-transform:none;letter-spacing:0;font-weight:600;margin-left:4px">detecting…</span></div>
+        <div class="w-main">
+          <div><div class="w-temp" id="w-temp">—<sup>°C</sup></div><div class="w-cond" id="w-cond">Loading…</div><div class="w-loc" id="w-loc">📍 —</div></div>
+          <div class="w-icon" id="w-icon">⏳</div>
+        </div>
+        <div class="w-stats">
+          <div class="wstat"><div class="wstat-v" id="w-hum">—%</div><div class="wstat-l">Humidity</div></div>
+          <div class="wstat"><div class="wstat-v" id="w-wind">—</div><div class="wstat-l">Wind km/h</div></div>
+          <div class="wstat"><div class="wstat-v" id="w-rain">—mm</div><div class="wstat-l">Rain Today</div></div>
+        </div>
+        <div class="card-title" style="margin-bottom:10px">5-Day Forecast</div>
+        <div class="forecast" id="forecast-row"><div class="fday" style="opacity:.3"><div class="fday-n">—</div><div class="fday-i">⏳</div><div class="fday-h">—</div><div class="fday-l">—</div></div></div>
+      </div>
+      <!-- Alerts -->
+      <div class="card">
+        <div class="card-title">⚠️ Farm Alerts</div>
+        <div class="alert-item ai-red"><div class="alert-ic">🔴</div><div><div class="alert-t">Pest Risk — Rice</div><div class="alert-m">Brown Planthopper alert in your district.</div></div></div>
+        <div class="alert-item ai-yellow"><div class="alert-ic">🟡</div><div><div class="alert-t">Low Soil Moisture</div><div class="alert-m">Tomato field below 40%. Irrigate today.</div></div></div>
+        <div class="alert-item ai-green"><div class="alert-ic">🟢</div><div><div class="alert-t">Harvest Window</div><div class="alert-m">Wheat ready. Next 3 days ideal.</div></div></div>
+        <div class="alert-item ai-yellow"><div class="alert-ic">🟡</div><div><div class="alert-t">Rain Thursday</div><div class="alert-m">Heavy rain expected. Pause irrigation Wed.</div></div></div>
+      </div>
+    </div>
+    <div class="grid g-6-6">
+      <!-- Crop health -->
+      <div class="card">
+        <div class="card-title">🌿 Crop Health Status</div>
+        <div class="crop-row"><div class="crop-em">🌾</div><div class="crop-inf"><div class="crop-nm">Rice (Sona Masoori)</div><div class="crop-st">Tillering · Kharif</div></div><div class="hbar-wrap"><div class="hbar"><div class="hbar-f" style="width:82%;background:linear-gradient(90deg,#2a7a2e,#56c239)"></div></div><div class="hpct" style="color:#56c239">82%</div></div><div class="cdot" style="background:#56c239"></div></div>
+        <div class="crop-row"><div class="crop-em">🍅</div><div class="crop-inf"><div class="crop-nm">Tomato</div><div class="crop-st">Flowering · Rabi</div></div><div class="hbar-wrap"><div class="hbar"><div class="hbar-f" style="width:55%;background:linear-gradient(90deg,#c85000,#ff8c00)"></div></div><div class="hpct" style="color:#ff8c00">55%</div></div><div class="cdot" style="background:#ff8c00"></div></div>
+        <div class="crop-row"><div class="crop-em">🌾</div><div class="crop-inf"><div class="crop-nm">Wheat (Sharbati)</div><div class="crop-st">Maturity · Rabi</div></div><div class="hbar-wrap"><div class="hbar"><div class="hbar-f" style="width:91%;background:linear-gradient(90deg,#1a7a1a,#7ddd5c)"></div></div><div class="hpct" style="color:#7ddd5c">91%</div></div><div class="cdot" style="background:#7ddd5c"></div></div>
+        <div class="card-title" style="margin-top:16px">📊 Rainfall This Week (mm)</div>
+        <div class="mini-chart" id="rain-chart"></div>
+        <div class="chart-labels"><span class="chart-label">MON</span><span class="chart-label">TUE</span><span class="chart-label">WED</span><span class="chart-label">THU</span><span class="chart-label">FRI</span><span class="chart-label">SAT</span><span class="chart-label">SUN</span></div>
+      </div>
+      <!-- Irrigation summary -->
+      <div class="card">
+        <div class="card-title">💧 Today's Irrigation</div>
+        <div class="irrig-banner"><div class="irrig-icon">💧</div><div><div class="irrig-t">Recommendation Ready</div><div class="irrig-s">Drip irrigation. 2.8 hrs total based on weather + soil moisture.</div></div></div>
+        <div class="chips"><span class="chip cb">💧 Drip</span><span class="chip cg">🌡️ 28°C</span><span class="chip co">⚡ 2.8 hrs</span></div>
+        <div class="card-title">Schedule</div>
+        <div class="sched-row"><div class="sched-t">6:00 AM</div><div class="sched-c">🌾 Rice (Block A)</div><div class="sched-d">45 min</div><div class="sched-dot" style="background:#56c239"></div></div>
+        <div class="sched-row"><div class="sched-t">8:30 AM</div><div class="sched-c">🍅 Tomato (GH)</div><div class="sched-d">30 min</div><div class="sched-dot" style="background:#ff8c00"></div></div>
+        <div class="sched-row"><div class="sched-t">5:00 PM</div><div class="sched-c">🌾 Wheat (Block B)</div><div class="sched-d">60 min</div><div class="sched-dot" style="background:#7ddd5c"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════ CROPS ════════════════════════ -->
+  <div class="tab-panel" id="panel-crops">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+      <div style="font-size:13px;font-weight:700;color:rgba(255,255,255,.6)" id="crops-count-label">Loading crops…</div>
+      <button class="tbtn primary" onclick="openAddCropModal()">+ Add Crop</button>
+    </div>
+    <div class="grid g3" id="crops-grid" style="margin-bottom:20px">
+      <div style="text-align:center;padding:40px;color:rgba(255,255,255,.3);font-size:13px">Loading your crops…</div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════ IRRIGATION ════════════════════════ -->
+  <div class="tab-panel" id="panel-irrigation">
+    <div class="grid g-6-6" style="margin-bottom:18px">
+      <div class="card">
+        <div class="card-title">💧 Today's Recommendation</div>
+        <div class="irrig-banner"><div class="irrig-icon">💧</div><div><div class="irrig-t">Drip Irrigation — 2.8 hrs total</div><div class="irrig-s">Based on 28°C temperature, 68% humidity and black cotton soil moisture levels.</div></div></div>
+        <div class="chips"><span class="chip cb">💧 Drip System</span><span class="chip cg">🌡️ 28°C</span><span class="chip co">💦 68% Humidity</span><span class="chip cb">🪨 Black Cotton Soil</span></div>
+        <div class="card-title">Today's Schedule</div>
+        <div class="sched-row"><div class="sched-t">6:00 AM</div><div class="sched-c">🌾 Rice — Block A</div><div class="sched-d">45 min · Done ✓</div><div class="sched-dot" style="background:#56c239"></div></div>
+        <div class="sched-row"><div class="sched-t">8:30 AM</div><div class="sched-c">🍅 Tomato Greenhouse</div><div class="sched-d">30 min · Due now</div><div class="sched-dot" style="background:#ff8c00;animation:pulse 1.5s infinite"></div></div>
+        <div class="sched-row"><div class="sched-t">5:00 PM</div><div class="sched-c">🌾 Wheat — Block B</div><div class="sched-d">60 min · Upcoming</div><div class="sched-dot" style="background:rgba(255,255,255,.2)"></div></div>
+      </div>
+      <div class="card">
+        <div class="card-title">📊 Weekly Water Usage (litres)</div>
+        <div class="mini-chart" id="water-chart" style="height:80px"></div>
+        <div class="chart-labels"><span class="chart-label">MON</span><span class="chart-label">TUE</span><span class="chart-label">WED</span><span class="chart-label">THU</span><span class="chart-label">FRI</span><span class="chart-label">SAT</span><span class="chart-label">SUN</span></div>
+        <div style="margin-top:16px">
+          <div class="card-title" style="margin-bottom:10px">💡 AI Irrigation Tips</div>
+          <div class="alert-item ai-blue" style="margin-bottom:8px"><div class="alert-ic">💡</div><div><div class="alert-t">Skip Thursday Irrigation</div><div class="alert-m">Heavy rain (14mm) expected Thursday. AI recommends skipping evening irrigation to avoid waterlogging.</div></div></div>
+          <div class="alert-item ai-green"><div class="alert-ic">💡</div><div><div class="alert-t">Wheat Pre-Harvest Tip</div><div class="alert-m">Stop irrigation for wheat 7 days before harvest. This improves grain quality and eases combine operations.</div></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════ DISEASE DETECTION ════════════════════════ -->
+  <div class="tab-panel" id="panel-detection">
+    <div class="detect-layout">
+      <!-- Upload + result -->
+      <div style="display:flex;flex-direction:column;gap:16px">
+        <div class="card">
+          <div class="card-title">📷 Upload Crop Photo</div>
+          <div class="upload-zone" id="upload-zone">
+            <input type="file" class="uf-input" id="crop-file" accept="image/*" onchange="handleUpload(event)">
+            <div class="upload-content">
+              <div class="upload-ic">📷</div>
+              <div class="upload-title">Drag & drop or click to upload</div>
+              <div class="upload-sub">Photo of affected leaf, stem or fruit<br>JPG, PNG, HEIC — max 15MB</div>
+            </div>
+            <img class="preview-img" id="preview-img" src="" alt="preview">
+          </div>
+          <div class="preview-caption" id="preview-cap">Image ready for analysis</div>
+          <button class="change-btn" id="change-btn" onclick="document.getElementById('crop-file').click()">📷 Change Photo</button>
+          <!-- Crop select for context -->
+          <div style="margin-top:12px">
+            <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.35);margin-bottom:6px">Which crop is affected? (optional)</div>
+            <select id="affected-crop" style="width:100%;padding:10px 14px;background:rgba(255,255,255,.04);border:1.5px solid rgba(255,255,255,.1);border-radius:12px;color:white;font-family:'Raleway',sans-serif;font-size:13px;outline:none;appearance:none">
+              <option value="">Auto-detect from image</option>
+              <option>🌾 Rice</option><option>🍅 Tomato</option><option>🌾 Wheat</option><option>🥔 Potato</option><option>🧅 Onion</option><option>🌽 Maize</option><option>🫘 Soybean</option><option>🥦 Okra</option>
+            </select>
+          </div>
+          <button class="detect-btn" id="detect-btn" onclick="runDetection()" disabled>🔬 Analyse Disease</button>
+          <div class="detect-scanning" id="scan-anim">
+            <div class="scan-bar"><div class="scan-fill"></div></div>
+            <div class="scan-txt" id="scan-txt">Initialising AI model…</div>
+          </div>
+        </div>
+        <!-- Result -->
+        <div class="card result-panel" id="result-panel">
+          <div class="card-title">🧬 Detection Result</div>
+          <div class="result-header" id="result-header">
+            <div class="result-icon" id="result-ic">🦠</div>
+            <div><div class="result-dis" id="result-dis">—</div><div class="result-conf" id="result-conf">—</div></div>
+          </div>
+          <div class="result-body">
+            <div class="result-section"><div class="result-section-title">🔍 Cause</div><div class="result-text" id="result-cause">—</div></div>
+            <div class="result-section"><div class="result-section-title">💊 Treatment</div><div class="result-text" id="result-treat">—</div></div>
+            <div class="result-section"><div class="result-section-title">🛡️ Prevention</div><div class="result-text" id="result-prev">—</div></div>
+          </div>
+          <button class="detect-btn" onclick="switchTab('assistant',null)" style="margin-top:14px;background:rgba(86,194,57,.1);color:#56c239;border:1.5px solid rgba(86,194,57,.3);box-shadow:none">🤖 Ask AI for More Details</button>
+        </div>
+      </div>
+      <!-- Scan history -->
+      <div class="card">
+        <div class="card-title">📋 Scan History</div>
+        <div id="scan-history">
+          <div class="history-row"><div class="history-thumb">🍅</div><div class="history-info"><div class="history-crop">Tomato</div><div class="history-dis">Late Blight — 94% confidence</div></div><div><div class="history-sev sev-high">High</div><div class="history-date" style="margin-top:4px">2 days ago</div></div></div>
+          <div class="history-row"><div class="history-thumb">🌾</div><div class="history-info"><div class="history-crop">Rice</div><div class="history-dis">Leaf Curl Virus — 87% confidence</div></div><div><div class="history-sev sev-med">Medium</div><div class="history-date" style="margin-top:4px">5 days ago</div></div></div>
+          <div class="history-row"><div class="history-thumb">🌾</div><div class="history-info"><div class="history-crop">Wheat</div><div class="history-dis">Healthy — No disease detected</div></div><div><div class="history-sev sev-low">Healthy</div><div class="history-date" style="margin-top:4px">1 week ago</div></div></div>
+        </div>
+        <div class="card-title" style="margin-top:18px">🧠 How It Works</div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div style="display:flex;gap:10px;align-items:flex-start"><div style="width:24px;height:24px;border-radius:50%;background:rgba(86,194,57,.15);border:1px solid rgba(86,194,57,.3);color:#56c239;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px">1</div><div style="font-size:12px;color:rgba(255,255,255,.5);line-height:1.55"><strong style="color:rgba(255,255,255,.75)">Upload Photo</strong> — Take a clear photo of the affected plant part (leaf, stem or fruit)</div></div>
+          <div style="display:flex;gap:10px;align-items:flex-start"><div style="width:24px;height:24px;border-radius:50%;background:rgba(86,194,57,.15);border:1px solid rgba(86,194,57,.3);color:#56c239;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px">2</div><div style="font-size:12px;color:rgba(255,255,255,.5);line-height:1.55"><strong style="color:rgba(255,255,255,.75)">AI Analysis</strong> — Our vision model identifies disease, pest or deficiency with confidence score</div></div>
+          <div style="display:flex;gap:10px;align-items:flex-start"><div style="width:24px;height:24px;border-radius:50%;background:rgba(86,194,57,.15);border:1px solid rgba(86,194,57,.3);color:#56c239;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px">3</div><div style="font-size:12px;color:rgba(255,255,255,.5);line-height:1.55"><strong style="color:rgba(255,255,255,.75)">Treatment Plan</strong> — Get specific treatment steps, chemical names and prevention tips instantly</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════ AI ASSISTANT ════════════════════════ -->
+  <div class="tab-panel" id="panel-assistant">
+    <div class="chat-layout">
+      <div class="chat-window">
+        <div class="chat-header"><div class="chat-av">🤖</div><div><div class="chat-name">AgroLink AI Assistant</div><div class="chat-status">Online · Trained on Indian farming</div></div></div>
+        <div class="quick-chips">
+          <button class="qchip" onclick="askQuick('Best fertilizer for rice in black cotton soil?')">🌾 Rice fertilizer</button>
+          <button class="qchip" onclick="askQuick('How much water does tomato need this week?')">💧 Water needs</button>
+          <button class="qchip" onclick="askQuick('When should I harvest my wheat?')">🚜 Harvest time</button>
+          <button class="qchip" onclick="askQuick('What pests should I watch for this season?')">🐛 Pest alert</button>
+          <button class="qchip" onclick="askQuick('Current market price for rice in Karnataka?')">💰 Market price</button>
+        </div>
+        <div class="chat-body" id="chat-body">
+          <div class="msg ai"><div class="msg-av ai-av">🤖</div><div class="bubble">Namaste Ramesh! 🌾 I'm your AgroLink AI. Ask me anything about crop care, irrigation, pest control, market prices or weather-based advice. How can I help today?</div></div>
+        </div>
+        <div class="chat-footer">
+          <textarea class="chat-inp" id="chat-inp" placeholder="Ask anything about your farm…" rows="1" onkeydown="chatKeydown(event)"></textarea>
+          <button class="chat-send" onclick="sendChat()">➤</button>
+        </div>
+      </div>
+      <div class="chat-sidebar">
+        <div class="tip-card"><div class="tip-title">💡 Quick Tips</div>
+          <div class="tip-item" onclick="askQuick('Tell me about IPM for rice')"><div class="tip-emoji">🌾</div><div class="tip-text"><strong>IPM for Rice</strong> — Integrated pest management strategies for Kharif</div></div>
+          <div class="tip-item" onclick="askQuick('Drip irrigation setup for tomato in 0.75 acres?')"><div class="tip-emoji">💧</div><div class="tip-text"><strong>Drip for Tomato</strong> — Setup guide for small plots</div></div>
+          <div class="tip-item" onclick="askQuick('How to test soil pH at home?')"><div class="tip-emoji">🪨</div><div class="tip-text"><strong>Soil pH Testing</strong> — Simple DIY methods</div></div>
+          <div class="tip-item" onclick="askQuick('Government schemes for farmers in Karnataka 2025')"><div class="tip-emoji">🏛️</div><div class="tip-text"><strong>Govt Schemes</strong> — Karnataka farmer subsidies & loans</div></div>
+        </div>
+        <div class="tip-card"><div class="tip-title">📊 Crop Prices Today</div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05)"><span style="font-size:12px;color:rgba(255,255,255,.6)">🌾 Rice (Sona)</span><span style="font-size:13px;font-weight:700;color:#56c239">₹2,180/q</span></div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05)"><span style="font-size:12px;color:rgba(255,255,255,.6)">🌾 Wheat</span><span style="font-size:13px;font-weight:700;color:#56c239">₹2,015/q</span></div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05)"><span style="font-size:12px;color:rgba(255,255,255,.6)">🍅 Tomato</span><span style="font-size:13px;font-weight:700;color:#ff8c00">₹1,240/q</span></div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0"><span style="font-size:12px;color:rgba(255,255,255,.6)">🌻 Mustard</span><span style="font-size:13px;font-weight:700;color:#56c239">₹5,650/q</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════ MARKET ════════════════════════ -->
+  <div class="tab-panel" id="panel-market">
+    <div class="card"><div class="card-title">📊 Market Prices — Karnataka Mandis</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px">
+        <div style="padding:14px;background:rgba(255,255,255,.03);border-radius:13px;border:1px solid rgba(255,255,255,.07)"><div style="font-size:24px;margin-bottom:6px">🌾</div><div style="font-size:12px;font-weight:700;color:white;margin-bottom:2px">Rice (Sona Masoori)</div><div style="font-size:18px;font-weight:800;color:#56c239">₹2,180<span style="font-size:11px;color:rgba(255,255,255,.3)">/quintal</span></div><div style="font-size:10px;color:#56c239;font-weight:700;margin-top:3px">↑ 2.3% from last week</div></div>
+        <div style="padding:14px;background:rgba(255,255,255,.03);border-radius:13px;border:1px solid rgba(255,255,255,.07)"><div style="font-size:24px;margin-bottom:6px">🌾</div><div style="font-size:12px;font-weight:700;color:white;margin-bottom:2px">Wheat (Sharbati)</div><div style="font-size:18px;font-weight:800;color:#56c239">₹2,015<span style="font-size:11px;color:rgba(255,255,255,.3)">/quintal</span></div><div style="font-size:10px;color:#56c239;font-weight:700;margin-top:3px">↑ 0.8% from last week</div></div>
+        <div style="padding:14px;background:rgba(255,255,255,.03);border-radius:13px;border:1px solid rgba(255,255,255,.07)"><div style="font-size:24px;margin-bottom:6px">🍅</div><div style="font-size:12px;font-weight:700;color:white;margin-bottom:2px">Tomato</div><div style="font-size:18px;font-weight:800;color:#ff8c00">₹1,240<span style="font-size:11px;color:rgba(255,255,255,.3)">/quintal</span></div><div style="font-size:10px;color:#ff6b6b;font-weight:700;margin-top:3px">↓ 5.1% from last week</div></div>
+        <div style="padding:14px;background:rgba(255,255,255,.03);border-radius:13px;border:1px solid rgba(255,255,255,.07)"><div style="font-size:24px;margin-bottom:6px">🧅</div><div style="font-size:12px;font-weight:700;color:white;margin-bottom:2px">Onion</div><div style="font-size:18px;font-weight:800;color:#56c239">₹2,400<span style="font-size:11px;color:rgba(255,255,255,.3)">/quintal</span></div><div style="font-size:10px;color:#56c239;font-weight:700;margin-top:3px">↑ 8.2% from last week</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════ DEALER PRODUCTS ════════════════════════ -->
+  <div class="tab-panel" id="panel-dealer-shop">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
+      <div style="font-size:12px;color:rgba(255,255,255,.4)" id="dealer-product-count">Loading products...</div>
+      <div style="display:flex;gap:8px">
+        <select id="dealer-cat-filter" onchange="filterDealerProducts()" style="padding:8px 14px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:10px;color:rgba(255,255,255,.6);font-family:'Raleway',sans-serif;font-size:11px;font-weight:700;outline:none;cursor:pointer;appearance:none">
+          <option value="all">All Categories</option>
+          <option value="Seeds">🌱 Seeds</option>
+          <option value="Fertilizer">🧪 Fertilizer</option>
+          <option value="Pesticide">🧴 Pesticide</option>
+          <option value="Organic">🌿 Organic</option>
+          <option value="Irrigation">💧 Irrigation</option>
+          <option value="Machinery">🚜 Machinery</option>
+        </select>
+      </div>
+    </div>
+    <div class="product-grid" id="dealer-product-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px"></div>
+  </div>
+
+  <!-- ════════════════════════ SETTINGS ════════════════════════ -->
+  <div class="tab-panel" id="panel-settings">
+    <div class="settings-layout">
+      <!-- Settings Nav -->
+      <div class="settings-nav">
+        <div class="snav-item active" onclick="switchSettings('profile',this)"><span class="snav-ic">👤</span>Profile</div>
+        <div class="snav-item" onclick="switchSettings('farm',this)"><span class="snav-ic">🌿</span>Farm Details</div>
+        <div class="snav-item" onclick="switchSettings('notifications',this)"><span class="snav-ic">🔔</span>Notifications</div>
+        <div class="snav-item" onclick="switchSettings('privacy',this)"><span class="snav-ic">🔐</span>Privacy</div>
+        <div class="snav-item" onclick="switchSettings('database',this)"><span class="snav-ic">🗄️</span>Database Info</div>
+        <div class="snav-item" onclick="switchSettings('account',this)"><span class="snav-ic">⚠️</span>Account</div>
+      </div>
+
+      <!-- Settings Panels -->
+      <div class="settings-content">
+
+        <!-- PROFILE -->
+        <div class="s-section active" id="s-profile">
+          <div class="s-section-title">Profile Settings</div>
+          <div class="s-section-sub">Update your personal information and photo</div>
+          <div class="s-avatar-row">
+            <!-- Avatar display: shows uploaded photo or emoji fallback -->
+            <div class="s-avatar-big" id="profile-avatar-display" style="position:relative;overflow:hidden;cursor:pointer" onclick="document.getElementById('profile-photo-input').click()" title="Click to change photo">
+              <img id="profile-avatar-img" src="" alt="" style="display:none;width:100%;height:100%;object-fit:cover;border-radius:50%;position:absolute;inset:0">
+              <span id="profile-avatar-emoji">👨‍🌾</span>
+            </div>
+            <div>
+              <!-- Hidden real file input -->
+              <input type="file" id="profile-photo-input" accept="image/jpeg,image/png,image/webp" style="display:none" onchange="handleProfilePhotoChange(event)">
+              <button class="s-btn s-btn-outline" style="font-size:11px;padding:8px 16px" onclick="document.getElementById('profile-photo-input').click()">📷 Change Photo</button>
+              <div style="font-size:10px;color:rgba(255,255,255,.25);margin-top:5px">JPG or PNG, max 2MB · Click avatar or button</div>
+              <div id="photo-upload-status" style="font-size:10px;margin-top:5px;display:none"></div>
+            </div>
+          </div>
+          <!-- Loading skeleton shown before data arrives -->
+          <div id="profile-loading" style="display:flex;flex-direction:column;gap:10px;padding:8px 0">
+            <div style="height:14px;background:rgba(255,255,255,.07);border-radius:6px;width:60%;animation:shimmer 1.5s ease-in-out infinite"></div>
+            <div style="height:14px;background:rgba(255,255,255,.07);border-radius:6px;width:40%;animation:shimmer 1.5s ease-in-out infinite .2s"></div>
+            <div style="height:14px;background:rgba(255,255,255,.07);border-radius:6px;width:55%;animation:shimmer 1.5s ease-in-out infinite .4s"></div>
+          </div>
+          <div id="profile-fields" style="display:none">
+            <div class="grid g2">
+              <div class="s-form-group">
+                <div class="s-form-label">Full Name</div>
+                <input class="s-input" id="inp-name" type="text" placeholder="Full name">
+              </div>
+              <div class="s-form-group">
+                <div class="s-form-label">Username</div>
+                <div style="position:relative">
+                  <input class="s-input" id="inp-uid" type="text" placeholder="Username" readonly style="background:rgba(255,255,255,.02);color:rgba(255,255,255,.4);padding-right:70px">
+                  <span style="position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:9px;font-weight:700;color:rgba(255,255,255,.25);letter-spacing:.5px;text-transform:uppercase">Fixed</span>
+                </div>
+              </div>
+              <div class="s-form-group">
+                <div class="s-form-label">Phone Number</div>
+                <div style="position:relative">
+                  <input class="s-input" id="inp-phone" type="tel" placeholder="Phone" readonly style="background:rgba(255,255,255,.02);color:rgba(255,255,255,.4);padding-right:70px">
+                  <span style="position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:9px;font-weight:700;color:rgba(255,255,255,.25);letter-spacing:.5px;text-transform:uppercase">Fixed</span>
+                </div>
+              </div>
+              <div class="s-form-group">
+                <div class="s-form-label">Email (Optional)</div>
+                <input class="s-input" id="inp-email" type="email" placeholder="email@example.com">
+              </div>
+            </div>
+            <div class="s-divider"></div>
+            <!-- Read-only profile info row -->
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px" id="profile-info-row">
+              <div style="padding:11px 13px;background:rgba(255,255,255,.03);border-radius:12px;border:1px solid rgba(255,255,255,.06)">
+                <div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:4px">Role</div>
+                <div style="font-size:13px;font-weight:700;color:#56c239" id="info-role">—</div>
+              </div>
+              <div style="padding:11px 13px;background:rgba(255,255,255,.03);border-radius:12px;border:1px solid rgba(255,255,255,.06)">
+                <div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:4px">State</div>
+                <div style="font-size:13px;font-weight:700;color:white" id="info-state">—</div>
+              </div>
+              <div style="padding:11px 13px;background:rgba(255,255,255,.03);border-radius:12px;border:1px solid rgba(255,255,255,.06)">
+                <div style="font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:4px">Member Since</div>
+                <div style="font-size:13px;font-weight:700;color:white" id="info-since">—</div>
+              </div>
+            </div>
+            <div class="s-form-group">
+              <div class="s-form-label">Language Preference</div>
+              <select class="s-select" id="inp-language">
+                <option value="en">English</option>
+                <option value="hi">हिंदी (Hindi)</option>
+                <option value="kn">ಕನ್ನಡ (Kannada)</option>
+                <option value="te">తెలుగు (Telugu)</option>
+                <option value="mr">मराठी (Marathi)</option>
+                <option value="ta">தமிழ் (Tamil)</option>
+                <option value="bn">বাংলা (Bengali)</option>
+              </select>
+            </div>
+            <div class="save-bar">
+              <div class="save-txt" id="save-status-txt">Unsaved changes will be lost</div>
+              <button class="s-btn s-btn-primary" id="save-profile-btn" onclick="saveProfileChanges()">Save Changes</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- FARM DETAILS -->
+        <div class="s-section" id="s-farm">
+          <div class="s-section-title">Farm Details</div>
+          <div class="s-section-sub">Your farming information used for AI recommendations</div>
+          <!-- Farm loading skeleton -->
+          <div id="farm-loading" style="display:flex;flex-direction:column;gap:10px;padding:8px 0">
+            <div style="height:14px;background:rgba(255,255,255,.07);border-radius:6px;width:50%;animation:shimmer 1.5s ease-in-out infinite"></div>
+            <div style="height:14px;background:rgba(255,255,255,.07);border-radius:6px;width:65%;animation:shimmer 1.5s ease-in-out infinite .2s"></div>
+          </div>
+          <div id="farm-fields" style="display:none">
+            <div class="grid g2">
+              <div class="s-form-group">
+                <div class="s-form-label">Village / Town</div>
+                <input class="s-input" id="inp-village" type="text" placeholder="Village or town name">
+              </div>
+              <div class="s-form-group">
+                <div class="s-form-label">State</div>
+                <select class="s-select" id="inp-state">
+                  <option value="">Select state…</option>
+                  <option>Andhra Pradesh</option><option>Assam</option><option>Bihar</option><option>Chhattisgarh</option><option>Gujarat</option><option>Haryana</option><option>Himachal Pradesh</option><option>Jharkhand</option><option>Karnataka</option><option>Kerala</option><option>Madhya Pradesh</option><option>Maharashtra</option><option>Manipur</option><option>Meghalaya</option><option>Odisha</option><option>Punjab</option><option>Rajasthan</option><option>Tamil Nadu</option><option>Telangana</option><option>Uttar Pradesh</option><option>Uttarakhand</option><option>West Bengal</option><option>Delhi</option><option>Goa</option>
+                </select>
+              </div>
+              <div class="s-form-group">
+                <div class="s-form-label">Soil Type</div>
+                <select class="s-select" id="inp-soil">
+                  <option value="">Select soil type…</option>
+                  <option value="alluvial">Alluvial Soil</option>
+                  <option value="black_cotton">Black Cotton (Regur)</option>
+                  <option value="red_laterite">Red / Laterite Soil</option>
+                  <option value="loamy">Loamy Soil</option>
+                  <option value="sandy">Sandy Soil</option>
+                  <option value="clay">Clay Soil</option>
+                  <option value="silt">Silt Soil</option>
+                  <option value="peaty">Peaty / Organic Soil</option>
+                  <option value="saline">Saline / Alkaline Soil</option>
+                </select>
+              </div>
+              <div class="s-form-group">
+                <div class="s-form-label">Irrigation Type</div>
+                <select class="s-select" id="inp-irrigation">
+                  <option value="">Select irrigation…</option>
+                  <option value="drip">Drip Irrigation</option>
+                  <option value="sprinkler">Sprinkler System</option>
+                  <option value="flood">Flood / Surface</option>
+                  <option value="furrow">Furrow Irrigation</option>
+                  <option value="rainfed">Rainfed (No Irrigation)</option>
+                  <option value="canal">Canal Irrigation</option>
+                  <option value="borewell">Borewell / Tube Well</option>
+                  <option value="combo">Drip + Sprinkler Combo</option>
+                </select>
+              </div>
+              <div class="s-form-group">
+                <div class="s-form-label">Farm Size (Acres)</div>
+                <input class="s-input" id="inp-farm-size" type="number" placeholder="e.g. 4.5" min="0.1" step="0.1">
+              </div>
+              <div class="s-form-group">
+                <div class="s-form-label">Farm Name (Optional)</div>
+                <input class="s-input" id="inp-farm-name" type="text" placeholder="e.g. Ramesh Krishi Farm">
+              </div>
+            </div>
+            <div class="s-divider"></div>
+            <!-- Crops as chips (read-only, from registration) -->
+            <div class="s-form-group">
+              <div class="s-form-label">Registered Crops</div>
+              <div id="crops-chips-display" style="display:flex;flex-wrap:wrap;gap:8px;padding:10px 0;min-height:36px">
+                <span style="font-size:11px;color:rgba(255,255,255,.3)">Loading crops…</span>
+              </div>
+              <div style="font-size:10px;color:rgba(255,255,255,.25);margin-top:4px">Crops registered during sign-up. Contact support to update.</div>
+            </div>
+            <div class="save-bar">
+              <div class="save-txt">Changes affect AI irrigation & crop advice</div>
+              <button class="s-btn s-btn-primary" onclick="saveFarmDetails()">Save Farm Details</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- NOTIFICATIONS -->
+        <div class="s-section" id="s-notifications">
+          <div class="s-section-title">Notification Settings</div>
+          <div class="s-section-sub">Choose what alerts you receive</div>
+          <div class="s-row"><div><div class="s-label">Pest & Disease Alerts</div><div class="s-sub">Get warnings about pests in your district</div></div><label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label></div>
+          <div class="s-row"><div><div class="s-label">Weather Alerts</div><div class="s-sub">Rain, frost, or extreme temperature warnings</div></div><label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label></div>
+          <div class="s-row"><div><div class="s-label">Irrigation Reminders</div><div class="s-sub">Daily schedule reminders at set times</div></div><label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label></div>
+          <div class="s-row"><div><div class="s-label">Market Price Updates</div><div class="s-sub">Mandi prices for your registered crops</div></div><label class="toggle"><input type="checkbox"><span class="toggle-slider"></span></label></div>
+          <div class="s-row"><div><div class="s-label">Harvest Reminders</div><div class="s-sub">Alerts as crops approach harvest window</div></div><label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label></div>
+          <div class="s-row"><div><div class="s-label">Dealer Promotions</div><div class="s-sub">Offers from dealers near you</div></div><label class="toggle"><input type="checkbox"><span class="toggle-slider"></span></label></div>
+          <div class="s-divider"></div>
+          <div class="s-form-group"><div class="s-form-label">Notification Channel</div><select class="s-select"><option>App Notifications</option><option>SMS + App</option><option>WhatsApp + App</option></select></div>
+          <div class="save-bar"><div class="save-txt"></div><button class="s-btn s-btn-primary" onclick="showToast('✅ Notification preferences saved!')">Save</button></div>
+        </div>
+
+        <!-- PRIVACY -->
+        <div class="s-section" id="s-privacy">
+          <div class="s-section-title">Privacy & Security</div>
+          <div class="s-section-sub">Manage your data and account security</div>
+          <div class="s-row"><div><div class="s-label">Share Farm Data with AI</div><div class="s-sub">Allows AI to use your crop & soil data for personalised advice</div></div><label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label></div>
+          <div class="s-row"><div><div class="s-label">Show Profile to Dealers</div><div class="s-sub">Dealers can see your crop needs and contact you</div></div><label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label></div>
+          <div class="s-row"><div><div class="s-label">Location Services</div><div class="s-sub">Used for weather, dealer proximity and mandi prices</div></div><label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label></div>
+          <div class="s-divider"></div>
+          <div class="s-form-group"><div class="s-form-label">Change Password</div><input class="s-input" type="password" placeholder="Current password"></div>
+          <div class="grid g2">
+            <div class="s-form-group"><div class="s-form-label">New Password</div><input class="s-input" type="password" placeholder="New password (min 8 chars)"></div>
+            <div class="s-form-group"><div class="s-form-label">Confirm New Password</div><input class="s-input" type="password" placeholder="Repeat new password"></div>
+          </div>
+          <button class="s-btn s-btn-outline" onclick="showToast('🔑 Password changed successfully!')">Update Password</button>
+          <div class="s-divider"></div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:4px">
+            <button class="s-btn s-btn-outline" onclick="showToast('📦 Data export started — you will receive an email')">📦 Export My Data</button>
+          </div>
+        </div>
+
+        <!-- DATABASE -->
+        <div class="s-section" id="s-database">
+          <div class="s-section-title">Database & Sync Info</div>
+          <div class="s-section-sub">Status of your data stored in AgroLink servers</div>
+          <div class="db-status"><div class="db-dot"></div><div><div class="db-name">AgroLink PostgreSQL</div><div class="db-info">Primary database · Asia South region</div></div><div class="db-badge">Connected</div></div>
+          <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px">
+            <div style="display:flex;justify-content:space-between;padding:10px 14px;background:rgba(255,255,255,.03);border-radius:11px;border:1px solid rgba(255,255,255,.06)"><span style="font-size:12px;color:rgba(255,255,255,.5)">User ID</span><span style="font-size:12px;font-weight:700;color:rgba(86,194,57,.7);font-family:monospace" id="db-user-id">Loading…</span></div>
+            <div style="display:flex;justify-content:space-between;padding:10px 14px;background:rgba(255,255,255,.03);border-radius:11px;border:1px solid rgba(255,255,255,.06)"><span style="font-size:12px;color:rgba(255,255,255,.5)">Username</span><span style="font-size:12px;font-weight:700;color:white" id="db-username">Loading…</span></div>
+            <div style="display:flex;justify-content:space-between;padding:10px 14px;background:rgba(255,255,255,.03);border-radius:11px;border:1px solid rgba(255,255,255,.06)"><span style="font-size:12px;color:rgba(255,255,255,.5)">Role</span><span style="font-size:12px;font-weight:700;color:#56c239" id="db-role">farmer</span></div>
+            <div style="display:flex;justify-content:space-between;padding:10px 14px;background:rgba(255,255,255,.03);border-radius:11px;border:1px solid rgba(255,255,255,.06)"><span style="font-size:12px;color:rgba(255,255,255,.5)">Phone</span><span style="font-size:12px;font-weight:700;color:white" id="db-phone">Loading…</span></div>
+            <div style="display:flex;justify-content:space-between;padding:10px 14px;background:rgba(255,255,255,.03);border-radius:11px;border:1px solid rgba(255,255,255,.06)"><span style="font-size:12px;color:rgba(255,255,255,.5)">State</span><span style="font-size:12px;font-weight:700;color:white" id="db-state">Loading…</span></div>
+            <div style="display:flex;justify-content:space-between;padding:10px 14px;background:rgba(255,255,255,.03);border-radius:11px;border:1px solid rgba(255,255,255,.06)"><span style="font-size:12px;color:rgba(255,255,255,.5)">Soil Type</span><span style="font-size:12px;font-weight:700;color:white" id="db-soil">Loading…</span></div>
+            <div style="display:flex;justify-content:space-between;padding:10px 14px;background:rgba(255,255,255,.03);border-radius:11px;border:1px solid rgba(255,255,255,.06)"><span style="font-size:12px;color:rgba(255,255,255,.5)">Irrigation</span><span style="font-size:12px;font-weight:700;color:white" id="db-irrigation">Loading…</span></div>
+            <div style="display:flex;justify-content:space-between;padding:10px 14px;background:rgba(255,255,255,.03);border-radius:11px;border:1px solid rgba(255,255,255,.06)"><span style="font-size:12px;color:rgba(255,255,255,.5)">Crops Registered</span><span style="font-size:12px;font-weight:700;color:white" id="db-crops">Loading…</span></div>
+            <div style="display:flex;justify-content:space-between;padding:10px 14px;background:rgba(255,255,255,.03);border-radius:11px;border:1px solid rgba(255,255,255,.06)"><span style="font-size:12px;color:rgba(255,255,255,.5)">Farm Size</span><span style="font-size:12px;font-weight:700;color:white" id="db-farm-size">Loading…</span></div>
+            <div style="display:flex;justify-content:space-between;padding:10px 14px;background:rgba(255,255,255,.03);border-radius:11px;border:1px solid rgba(255,255,255,.06)"><span style="font-size:12px;color:rgba(255,255,255,.5)">Last Sync</span><span style="font-size:12px;font-weight:700;color:rgba(86,194,57,.7)" id="last-sync-time">Just now</span></div>
+            <div style="display:flex;justify-content:space-between;padding:10px 14px;background:rgba(255,255,255,.03);border-radius:11px;border:1px solid rgba(255,255,255,.06)"><span style="font-size:12px;color:rgba(255,255,255,.5)">Account Created</span><span style="font-size:12px;font-weight:700;color:rgba(255,255,255,.5)" id="acct-created">—</span></div>
+            <div style="display:flex;justify-content:space-between;padding:10px 14px;background:rgba(255,255,255,.03);border-radius:11px;border:1px solid rgba(255,255,255,.06)"><span style="font-size:12px;color:rgba(255,255,255,.5)">Verified</span><span style="font-size:12px;font-weight:700" id="db-verified">—</span></div>
+          </div>
+          <div class="s-section-title" style="font-size:14px;margin-bottom:8px">🗄️ Schema Tables</div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+            <div style="padding:8px 12px;background:rgba(86,194,57,.07);border-radius:9px;border:1px solid rgba(86,194,57,.15);font-size:11px;font-weight:700;color:rgba(86,194,57,.8)">users</div>
+            <div style="padding:8px 12px;background:rgba(86,194,57,.07);border-radius:9px;border:1px solid rgba(86,194,57,.15);font-size:11px;font-weight:700;color:rgba(86,194,57,.8)">farmers</div>
+            <div style="padding:8px 12px;background:rgba(86,194,57,.07);border-radius:9px;border:1px solid rgba(86,194,57,.15);font-size:11px;font-weight:700;color:rgba(86,194,57,.8)">farmer_crops</div>
+            <div style="padding:8px 12px;background:rgba(86,194,57,.07);border-radius:9px;border:1px solid rgba(86,194,57,.15);font-size:11px;font-weight:700;color:rgba(86,194,57,.8)">crop_queries</div>
+            <div style="padding:8px 12px;background:rgba(86,194,57,.07);border-radius:9px;border:1px solid rgba(86,194,57,.15);font-size:11px;font-weight:700;color:rgba(86,194,57,.8)">weather_cache</div>
+            <div style="padding:8px 12px;background:rgba(86,194,57,.07);border-radius:9px;border:1px solid rgba(86,194,57,.15);font-size:11px;font-weight:700;color:rgba(86,194,57,.8)">irrig_logs</div>
+          </div>
+        </div>
+
+        <!-- ACCOUNT -->
+        <div class="s-section" id="s-account">
+          <div class="s-section-title">Account Management</div>
+          <div class="s-section-sub">Danger zone — these actions cannot be undone</div>
+          <div class="alert-item ai-yellow" style="margin-bottom:16px"><div class="alert-ic">⚠️</div><div><div class="alert-t">Warning</div><div class="alert-m">Deleting your account will permanently remove all your data including crops, scans, and history.</div></div></div>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <button class="s-btn s-btn-outline" onclick="showToast('📴 Account deactivated. You can reactivate by logging in.')">Deactivate Account</button>
+            <button class="s-btn s-btn-danger" onclick="if(confirm('Delete account permanently?'))showToast('🗑️ Account deletion request submitted')">🗑️ Delete Account Permanently</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ══════════════════════════════════════════
+// AGROLINK FARMER DASHBOARD — Complete JS
+// API Base: http://localhost:5000
+// ══════════════════════════════════════════
+const API_BASE = 'http://localhost:5000';
+const token = localStorage.getItem('token');
+const userId = localStorage.getItem('user_id');
+let FARMER_DATA = null; // Global farmer profile cache
+
+document.getElementById('today-date').textContent = new Date().toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+
+// Wheat
+(function(){
+  const r=document.getElementById('wheat-row');
+  for(let i=0;i<180;i++){
+    const w=document.createElement('div');w.className='wstalk';
+    const h=15+Math.random()*35;w.style.cssText=`height:${h}px;--d:${2+Math.random()*2}s;--dl:${-(i*.04)%3.5}s`;
+    r.appendChild(w);
+  }
+})();
+
+// Rain chart
+(function(){
+  const vals=[2,0,8,14,3,0,5];const max=Math.max(...vals);
+  const c=document.getElementById('rain-chart');
+  if(!c)return;
+  vals.forEach(v=>{const b=document.createElement('div');b.className='bar';b.style.height=`${Math.max((v/max)*100,6)}%`;c.appendChild(b);});
+})();
+(function(){
+  const vals=[1200,0,2400,3100,800,0,1500];const max=Math.max(...vals);
+  const c=document.getElementById('water-chart');
+  if(!c)return;
+  vals.forEach(v=>{const b=document.createElement('div');b.className='bar';b.style.height=`${Math.max((v/max)*100,4)}%`;c.appendChild(b);});
+})();
+
+// ══════════════════════════════════════════
+// CORE: Load all farmer data from API
+// ══════════════════════════════════════════
+
+async function initializeFarmerDashboard() {
+  // 1. Auth check
+  const token = localStorage.getItem('agrolink_token');
+  const storedUser = JSON.parse(localStorage.getItem('agrolink_user') || '{}');
+  const userId = storedUser.user_id || localStorage.getItem('user_id');
+
+  if (!token || !userId) {
+    // No token or user_id — try demo mode (offline fallback with static data)
+    console.warn('No auth token or user_id found — running in demo mode');
+    loadDemoData();
+    return;
+  }
+
+  if (storedUser.role && storedUser.role !== 'farmer') {
+    window.location.href = 'agrolink-login.html';
+    return;
+  }
+
+  // 2. Show loading state in settings
+  showSettingsLoading(true);
+
+  try {
+    // Fetch user details by user_id (primary key)
+    const res = await fetch(`${API_BASE}/api/user/${userId}`, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' }
+    });
+
+    if (res.status === 404) {
+      // User not found — clear and redirect
+      localStorage.removeItem('agrolink_token');
+      localStorage.removeItem('agrolink_user');
+      window.location.href = 'agrolink-login.html';
+      return;
+    }
+
+    if (!res.ok) {
+      throw new Error(`HTTP ${res.status}`);
+    }
+
+    const json = await res.json();
+    if (!json.success || !json.profile) throw new Error(json.error || 'No profile data');
+
+    FARMER_DATA = json.profile;
+    populateDashboard(FARMER_DATA);
+    showSettingsLoading(false);
+    document.getElementById('last-sync-time').textContent = 'Just now';
+
+  } catch (err) {
+    console.error('API fetch failed:', err.message, '— using demo data');
+    loadDemoData();
+    showSettingsLoading(false);
+    showToast('⚠️ Offline mode — showing demo data');
+  }
+}
+
+function showSettingsLoading(show) {
+  ['profile-loading','farm-loading'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = show ? 'flex' : 'none';
+  });
+  ['profile-fields','farm-fields'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = show ? 'none' : 'block';
+  });
+}
+
+// ── DEMO DATA (offline fallback) ──
+function loadDemoData() {
+  const demo = {
+    user_id: 'demo-0000-0000-0000',
+    name: 'Ramesh Kumar',
+    username: 'ramesh_agro',
+    email: '',
+    phone: '+919876543210',
+    role: 'farmer',
+    location_text: 'Nanjangud',
+    state: 'Karnataka',
+    is_verified: false,
+    created_at: new Date(Date.now() - 86400000 * 45).toISOString(),
+    farm: {
+      farm_name: 'Ramesh Krishi Farm',
+      farm_size_acres: 5,
+      soil_type: 'black_cotton',
+      irrigation_type: 'drip',
+      village: 'Nanjangud',
+    },
+    crops: [
+      { crop_name:'Rice', crop_variety:'Sona Masoori', crop_category:'Grains' },
+      { crop_name:'Tomato', crop_variety:'Tamatar', crop_category:'Vegetables' },
+      { crop_name:'Wheat', crop_variety:'Sharbati', crop_category:'Grains' },
+    ]
+  };
+  FARMER_DATA = demo;
+  populateDashboard(demo);
+  showSettingsLoading(false);
+}
+
+// ── POPULATE ALL SECTIONS ──
+function populateDashboard(d) {
+  const firstName = (d.full_name || 'Farmer').split(' ')[0];
+
+  // ── Topbar greeting ──
+  const h = new Date().getHours();
+  const greeting = h < 12 ? 'Good Morning' : h < 17 ? 'Good Afternoon' : 'Good Evening';
+  document.getElementById('page-title-text').textContent = `${greeting}, ${firstName} 👋`;
+
+  // ── Sidebar profile name and role ──
+  const sbName = document.getElementById('sb-pname-display') || document.querySelector('.sb-pname');
+  const sbRole = document.getElementById('sb-prole-display') || document.querySelector('.sb-prole');
+  if (sbName) sbName.textContent = d.full_name || 'Farmer';
+  if (sbRole) sbRole.textContent = `Farmer · ${d.role ? d.role.charAt(0).toUpperCase() + d.role.slice(1) : 'Farmer'}`;
+
+  // ── Sidebar avatar with photo ──
+  const sbAvatar = document.getElementById('sb-avatar-display') || document.querySelector('.sb-avatar');
+  if (d.profile_photo_url && sbAvatar) {
+    sbAvatar.innerHTML = `<img src="${d.profile_photo_url}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`;
+  }
+
+  // ── Profile avatar in settings section ──
+  if (d.profile_photo_url) {
+    const img = document.getElementById('profile-avatar-img');
+    const emoji = document.getElementById('profile-avatar-emoji');
+    if (img && emoji) {
+      img.src = d.profile_photo_url;
+      img.style.display = 'block';
+      emoji.style.display = 'none';
+    }
+  }
+
+  // ── Profile fields ──
+  setVal('inp-name', d.full_name || '');
+  setVal('inp-uid', d.user_id || '');
+  setVal('inp-phone', d.phone || '');
+  setVal('inp-email', d.email || '');
+
+  // ── Read-only info row ──
+  setText('info-role', (d.role || 'farmer').charAt(0).toUpperCase() + (d.role || 'farmer').slice(1));
+  setText('info-state', d.state || d.role || '—');
+  setText('info-since', d.created_at
+    ? new Date(d.created_at).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})
+    : '—');
+
+  // ── Farm Details ──
+  const farm = d.farm || {};
+  setVal('inp-village', farm.village || d.location || '');
+  setVal('inp-farm-name', farm.farm_name || '');
+  setVal('inp-farm-size', farm.farm_size_acres || '');
+  setSelectByValue('inp-state', d.state || '');
+  setSelectByValue('inp-soil', farm.soil_type || '');
+  setSelectByValue('inp-irrigation', farm.irrigation_type || '');
+
+  // ── Crops chips ──
+  const crops = d.crops || [];
+  const chipsEl = document.getElementById('crops-chips-display');
+  if (chipsEl) {
+    if (crops.length) {
+      chipsEl.innerHTML = crops.map(c =>
+        `<span style="display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:50px;background:rgba(86,194,57,.1);border:1px solid rgba(86,194,57,.25);font-size:11px;font-weight:700;color:rgba(86,194,57,.9)">🌱 ${c.crop_name}${c.crop_variety?` <span style="color:rgba(255,255,255,.3);font-size:9px">${c.crop_variety}</span>`:''}</span>`
+      ).join('');
+    } else {
+      chipsEl.innerHTML = '<span style="font-size:11px;color:rgba(255,255,255,.25)">No crops registered</span>';
+    }
+  }
+
+  // ── Database / Sync Info ──
+  setText('db-user-id', (d.user_id || '').substring(0, 20) + '…');
+  setText('db-username', d.username || '—');
+  setText('db-role', d.role || 'farmer');
+  setText('db-phone', d.phone || '—');
+  setText('db-state', d.state || '—');
+  setText('db-soil', formatEnum(farm.soil_type));
+  setText('db-irrigation', formatEnum(farm.irrigation_type));
+  setText('db-crops', crops.length ? `${crops.length} crop${crops.length!==1?'s':''}` : '0 crops');
+  setText('db-farm-size', farm.farm_size_acres ? `${farm.farm_size_acres} acres` : '—');
+  setText('db-verified', d.is_verified ? '✅ Verified' : '⏳ Pending verification');
+  const dbVerEl = document.getElementById('db-verified');
+  if (dbVerEl) dbVerEl.style.color = d.is_verified ? '#56c239' : '#ffcc44';
+  setText('acct-created', d.created_at
+    ? new Date(d.created_at).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})
+    : '—');
+}
+
+// ── UTILITY HELPERS ──
+function setVal(id, v) { const el=document.getElementById(id); if(el) el.value=v; }
+function setText(id, v) { const el=document.getElementById(id); if(el) el.textContent=v; }
+function setSelectByValue(id, v) {
+  const sel=document.getElementById(id); if(!sel||!v) return;
+  for(const opt of sel.options) {
+    if(opt.value===v||opt.text.toLowerCase().includes(v.toLowerCase().replace(/_/g,' '))) {
+      sel.value=opt.value; break;
+    }
+  }
+}
+function formatEnum(v) {
+  if(!v) return '—';
+  return v.replace(/_/g,' ').replace(/\w/g, c=>c.toUpperCase());
+}
+
+// Initialize on page load
+// ── FIXED: Use /api/user/{user_id} endpoint with correct field names ──
+document.addEventListener('DOMContentLoaded', async () => {
+  const storedUser = JSON.parse(localStorage.getItem('agrolink_user') || '{}');
+  const userId = storedUser.user_id || localStorage.getItem('user_id');
+  
+  if (!userId) {
+    window.location.href = 'agrolink-login.html';
+    return;
+  }
+
+  try {
+    showSettingsLoading(true);
+    const res = await fetch(`${API_BASE}/api/user/${userId}`, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' }
+    });
+    
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    
+    if (data.success && data.profile) {
+      const user = data.profile;
+      FARMER_DATA = user;
+      populateDashboard(user);
+      loadFarmerCrops();  // Load crops from database
+      showSettingsLoading(false);
+
+      // Backward-friendly fields that may not be in `populateDashboard`
+      if(document.getElementById('db-user-id')) document.getElementById('db-user-id').textContent = user.user_id || '—';
+      if(document.getElementById('db-username')) document.getElementById('db-username').textContent = user.username || user.user_id || '—';
+      if(document.getElementById('db-state')) document.getElementById('db-state').textContent = user.state || user.location || '—';
+      if(document.getElementById('db-crops')) document.getElementById('db-crops').textContent = (user.crops ? user.crops.length : 0) ? `${user.crops.length} crop${user.crops.length!==1?'s':''}` : '0 crops';
+    }
+  } catch (e) {
+    console.error("Dashboard initialization failed:", e);
+    showSettingsLoading(false);
+  }
+});
+// ══ TAB SWITCHING ══
+
+function switchTab(tab, btn){
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.sb-item').forEach(b=>b.classList.remove('active'));
+  document.getElementById('panel-'+tab)?.classList.add('active');
+  document.getElementById('tab-'+tab)?.classList.add('active');
+  if(btn) btn.classList.add('active');
+  const titles={overview:'Good Morning, Ramesh 👋',crops:'My Crops 🌱',irrigation:'Irrigation Planner 💧',detection:'Disease Detection 🔬',assistant:'AI Assistant 🤖',market:'Market Prices 📊','dealer-shop':'Dealer Products 🏪',settings:'Settings ⚙️'};
+  document.getElementById('page-title-text').textContent=titles[tab]||'Dashboard';
+  window.scrollTo({top:0,behavior:'smooth'});
+  
+  // Load crops when crops tab is clicked
+  if(tab === 'crops') loadFarmerCrops();
+  // Load dealer products when dealer-shop tab is clicked
+  if(tab === 'dealer-shop') loadFarmerDealerProducts();
+}
+
+// ══ SETTINGS NAV ══
+function switchSettings(sec, el){
+  document.querySelectorAll('.s-section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.snav-item').forEach(s=>s.classList.remove('active'));
+  document.getElementById('s-'+sec)?.classList.add('active');
+  if(el) el.classList.add('active');
+}
+
+// ══ LOGOUT ══
+function doLogout(){
+  fetch('authlogout', {method: 'POST', headers: {'Content-Type': 'application/json'}})
+  .then(() => {
+    localStorage.removeItem('agrolink_token');
+    localStorage.removeItem('agrolink_user');
+    localStorage.removeItem('token');
+    localStorage.removeItem('user_id');
+    localStorage.removeItem('role');
+    localStorage.removeItem('username');
+    window.location.href = '/login';
+  })
+  .catch(err => {
+    console.error('Logout error:', err);
+    localStorage.clear();
+    window.location.href = '/login';
+  });
+}
+
+// ══ WEATHER ══
+async function loadWeather(){
+  try{
+    const pos=await new Promise((res,rej)=>navigator.geolocation.getCurrentPosition(res,rej,{timeout:8000}));
+    const {latitude:lat,longitude:lng}=pos.coords;
+    const geo=await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`);
+    const gd=await geo.json();
+    const city=gd.address?.city||gd.address?.town||gd.address?.village||'Your Location';
+    const state=gd.address?.state||'';
+    document.getElementById('w-loc-label').textContent=`${city}${state?', '+state:''}`;
+    document.getElementById('w-loc').textContent=`📍 ${city}${state?', '+state:''}`;
+    const wr=await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current=temperature_2m,relative_humidity_2m,wind_speed_10m,precipitation,weather_code&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,weather_code&timezone=auto&forecast_days=6`);
+    const w=await wr.json();const cur=w.current;const daily=w.daily;
+    const temp=Math.round(cur.temperature_2m);
+    document.getElementById('w-temp').innerHTML=`${temp}<sup>°C</sup>`;
+    document.getElementById('w-cond').textContent=wDesc(cur.weather_code);
+    document.getElementById('w-icon').textContent=wIcon(cur.weather_code);
+    document.getElementById('w-hum').textContent=cur.relative_humidity_2m+'%';
+    document.getElementById('w-wind').textContent=Math.round(cur.wind_speed_10m);
+    document.getElementById('w-rain').textContent=(cur.precipitation||0).toFixed(1)+'mm';
+    document.getElementById('stat-temp').textContent=temp+'°';
+    document.getElementById('stat-temp-d').textContent=wDesc(cur.weather_code);
+    document.getElementById('stat-temp-d').className='stat-d '+(temp>35?'down':temp<15?'neutral':'up');
+    const fr=document.getElementById('forecast-row');fr.innerHTML='';
+    const days=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+    for(let i=1;i<6;i++){const d=new Date(daily.time[i]+'T00:00');const fd=document.createElement('div');fd.className='fday';fd.innerHTML=`<div class="fday-n">${days[d.getDay()]}</div><div class="fday-i">${wIcon(daily.weather_code[i])}</div><div class="fday-h">${Math.round(daily.temperature_2m_max[i])}°</div><div class="fday-l">${Math.round(daily.temperature_2m_min[i])}°</div>`;fr.appendChild(fd);}
+  }catch(e){
+    document.getElementById('w-temp').innerHTML='28<sup>°C</sup>';document.getElementById('w-cond').textContent='Partly Cloudy';document.getElementById('w-icon').textContent='⛅';
+    document.getElementById('w-hum').textContent='68%';document.getElementById('w-wind').textContent='14';document.getElementById('w-rain').textContent='0mm';
+    document.getElementById('stat-temp').textContent='28°';document.getElementById('stat-temp-d').textContent='Partly Cloudy';document.getElementById('w-loc-label').textContent='Karnataka, India';
+    document.getElementById('w-loc').textContent='📍 Karnataka, India';
+    const fr=document.getElementById('forecast-row');fr.innerHTML='';
+    [{d:'Mon',i:'⛅',h:30,l:22},{d:'Tue',i:'🌧️',h:27,l:20},{d:'Wed',i:'🌩️',h:25,l:19},{d:'Thu',i:'☀️',h:32,l:23},{d:'Fri',i:'⛅',h:31,l:22}].forEach(x=>{const fd=document.createElement('div');fd.className='fday';fd.innerHTML=`<div class="fday-n">${x.d}</div><div class="fday-i">${x.i}</div><div class="fday-h">${x.h}°</div><div class="fday-l">${x.l}°</div>`;fr.appendChild(fd);});
+  }
+}
+function wDesc(c){if(c===0)return'Clear Sky';if(c<=2)return'Partly Cloudy';if(c===3)return'Overcast';if(c<=48)return'Foggy';if(c<=57)return'Drizzle';if(c<=67)return'Rainy';if(c<=77)return'Snowy';if(c<=82)return'Showers';if(c<=99)return'Thunderstorm';return'—';}
+function wIcon(c){if(c===0)return'☀️';if(c<=2)return'⛅';if(c===3)return'☁️';if(c<=48)return'🌫️';if(c<=57)return'🌦️';if(c<=67)return'🌧️';if(c<=77)return'❄️';if(c<=82)return'🌦️';if(c<=99)return'⛈️';return'🌡️';}
+loadWeather();
+
+// ══ DISEASE DETECTION ══
+const DISEASES=[
+  {name:'Late Blight',icon:'🦠',sev:'High',sevClass:'rh-red',conf:94,cause:'Caused by Phytophthora infestans fungus — thrives in humid, cool conditions (15–20°C). Spreads through infected water splashes and airborne spores.',treat:'<ul><li>Remove and burn all infected plant parts immediately</li><li>Apply <strong>Mancozeb 75 WP @ 2.5 g/litre</strong> every 7 days</li><li>Use <strong>Metalaxyl + Mancozeb</strong> for severe infections</li><li>Spray in early morning; ensure full leaf coverage</li></ul>',prev:'<ul><li>Plant resistant varieties (Arka Rakshak, Pusa Ruby)</li><li>Maintain 60cm+ spacing for air circulation</li><li>Avoid overhead irrigation; use drip</li><li>Rotate crops every season</li></ul>'},
+  {name:'Brown Planthopper',icon:'🐛',sev:'Medium',sevClass:'rh-yellow',conf:89,cause:'Nilaparvata lugens insect pest. Sucks phloem sap causing "hopper burn". Population explodes in wet conditions with excess nitrogen.',treat:'<ul><li>Drain field for 3–4 days to expose eggs</li><li>Apply <strong>Buprofezin 25 EC @ 1 ml/litre</strong></li><li>Or use <strong>Imidacloprid 17.8 SL @ 0.3 ml/litre</strong></li><li>Spray at base of plants where hoppers concentrate</li></ul>',prev:'<ul><li>Avoid excess nitrogen application</li><li>Install light traps for monitoring</li><li>Maintain field hygiene — remove weeds</li><li>Use resistant varieties like Jaya, IR 36</li></ul>'},
+  {name:'Iron Deficiency',icon:'💛',sev:'Low',sevClass:'rh-green',conf:92,cause:'Insufficient available iron (Fe²⁺) in soil. Common in black cotton and alkaline soils (pH > 7.5). Young leaves yellow between veins (interveinal chlorosis).',treat:'<ul><li>Soil application of <strong>Ferrous Sulphate @ 25 kg/acre</strong></li><li>Foliar spray of <strong>0.5% FeSO₄ solution</strong></li><li>Add chelated iron fertiliser for quick uptake</li></ul>',prev:'<ul><li>Maintain soil pH between 6.0–6.5 using sulphur</li><li>Add organic compost to improve iron availability</li><li>Avoid waterlogging which locks iron in unavailable form</li></ul>'},
+  {name:'Powdery Mildew',icon:'🌫️',sev:'Medium',sevClass:'rh-yellow',conf:88,cause:'Caused by Erysiphe cichoracearum fungi. Appears as white powdery patches on leaves. Favoured by dry conditions with high humidity and moderate temperature (20–30°C).',treat:'<ul><li>Spray <strong>Wettable Sulphur 80 WP @ 3 g/litre</strong></li><li>Or <strong>Hexaconazole 5 EC @ 1 ml/litre</strong></li><li>Apply every 10–14 days until symptoms stop</li></ul>',prev:'<ul><li>Maintain good plant spacing (50–60 cm)</li><li>Avoid overhead irrigation</li><li>Use resistant varieties where available</li></ul>'},
+];
+
+let scanHistory=[];
+
+function handleUpload(e){
+  const file=e.target.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    document.getElementById('preview-img').src=ev.target.result;
+    document.getElementById('preview-img').classList.add('show');
+    document.getElementById('preview-cap').classList.add('show');
+    document.getElementById('change-btn').classList.add('show');
+    document.getElementById('upload-zone').classList.add('has-img');
+    document.getElementById('detect-btn').disabled=false;
+    document.getElementById('result-panel').classList.remove('show');
+  };
+  reader.readAsDataURL(file);
+}
+
+// Drag-drop
+const uz=document.getElementById('upload-zone');
+uz.addEventListener('dragover',e=>{e.preventDefault();uz.classList.add('drag-over');});
+uz.addEventListener('dragleave',()=>uz.classList.remove('drag-over'));
+uz.addEventListener('drop',e=>{
+  e.preventDefault();uz.classList.remove('drag-over');
+  const f=e.dataTransfer.files[0];
+  if(f?.type.startsWith('image/')){
+    document.getElementById('crop-file').files=e.dataTransfer.files;
+    handleUpload({target:{files:[f]}});
+  }
+});
+
+const scanMsgs=['Initialising AI model…','Loading plant disease database…','Analysing leaf texture patterns…','Identifying pathogen signatures…','Cross-referencing symptom database…','Generating treatment plan…'];
+let scanInterval;
+
+function runDetection(){
+  const btn=document.getElementById('detect-btn');
+  const sa=document.getElementById('scan-anim');
+  const st=document.getElementById('scan-txt');
+  btn.disabled=true;btn.textContent='🔬 Analysing…';
+  sa.classList.add('show');
+  document.getElementById('result-panel').classList.remove('show');
+  let i=0;
+  st.textContent=scanMsgs[0];
+  scanInterval=setInterval(()=>{i++;if(i<scanMsgs.length)st.textContent=scanMsgs[i];},500);
+  setTimeout(()=>{
+    clearInterval(scanInterval);sa.classList.remove('show');
+    const d=DISEASES[Math.floor(Math.random()*DISEASES.length)];
+    const imgSrc=document.getElementById('preview-img').src;
+    const crop=document.getElementById('affected-crop').value||'Unknown Crop';
+    // result
+    document.getElementById('result-header').className='result-header '+d.sevClass;
+    document.getElementById('result-ic').textContent=d.icon;
+    document.getElementById('result-dis').textContent=d.name;
+    document.getElementById('result-conf').innerHTML=`Confidence: <strong>${d.conf}%</strong> &nbsp;·&nbsp; Severity: <strong>${d.sev}</strong>`;
+    document.getElementById('result-cause').textContent=d.cause;
+    document.getElementById('result-treat').innerHTML=d.treat;
+    document.getElementById('result-prev').innerHTML=d.prev;
+    document.getElementById('result-panel').classList.add('show');
+    btn.disabled=false;btn.textContent='🔬 Scan Again';
+    // Add to history
+    const now=new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+    const hrow=document.createElement('div');hrow.className='history-row';
+    hrow.innerHTML=`<div class="history-thumb" style="overflow:hidden"><img src="${imgSrc}" style="width:100%;height:100%;object-fit:cover;border-radius:9px"></div><div class="history-info"><div class="history-crop">${crop.replace(/[🌾🍅🥔🧅🌽🫘🥦]/g,'').trim()||'Crop'}</div><div class="history-dis">${d.name} — ${d.conf}% confidence</div></div><div><div class="history-sev ${d.sev==='High'?'sev-high':d.sev==='Low'?'sev-low':'sev-med'}">${d.sev}</div><div class="history-date" style="margin-top:4px">${now}</div></div>`;
+    document.getElementById('scan-history').prepend(hrow);
+    showToast(`🔬 ${d.name} detected with ${d.conf}% confidence`);
+    addChatMsg('ai',`🔬 <strong>Disease scan complete!</strong> Detected: <strong>${d.name}</strong> (${d.conf}% confidence, ${d.sev} severity). Treatment plan is ready in the Detection tab. Want me to explain any specific treatment?`);
+  },3200);
+}
+
+// ══ AI CHAT ══
+const AI_RESP={
+  fertilizer:['For rice in black cotton soil, use <strong>DAP (18-46-0) @ 50 kg/acre</strong> at basal. Top-dress with <strong>Urea @ 25 kg/acre</strong> at tillering and panicle initiation. Avoid excess nitrogen — increases lodging risk.','Consider mixing <strong>organic compost + DAP</strong>. Vermicompost at 1 tonne/acre before transplanting significantly improves yield and soil health.'],
+  water:['Tomato in flowering stage needs <strong>1.5–2 litres/plant/day</strong>. With drip, run <strong>30–40 min</strong> at 8 AM and 5 PM. Reduce by 30% 2 days before expected rain.','Current ET₀ at 28°C + 68% humidity ≈ 4.2mm/day. Total for your 0.75 acre tomato field: ~<strong>1,800 litres today</strong>.'],
+  harvest:['Your Sharbati wheat at 91% health is in <strong>late maturity</strong>. Optimal harvest is <strong>next 3–5 days</strong> before Thursday rain. Check grain moisture — should be below <strong>14%</strong>.','Harvest wheat in <strong>early morning</strong> to reduce shattering loss. Combine efficiency peaks between 8 AM–12 PM. Store immediately in dry, ventilated area.'],
+  pest:['Current district alerts: <strong>Brown Planthopper</strong> in rice (use Buprofezin 25 EC), <strong>Fruit Borer</strong> in tomato (use Spinosad 45 SC). Set yellow sticky traps for monitoring.','For IPM: start with <strong>neem oil spray @ 5 ml/litre</strong> as prevention. Move to chemical only if infestation crosses ETL threshold. Avoid spraying during flowering.'],
+  price:['Karnataka mandi prices today: Rice (Sona Masoori) <strong>₹2,180/q</strong> ↑2.3%, Wheat <strong>₹2,015/q</strong> ↑0.8%, Tomato <strong>₹1,240/q</strong> ↓5.1%, Onion <strong>₹2,400/q</strong> ↑8.2%.','Best time to sell wheat: prices typically peak in <strong>April–May</strong> post-Rabi harvest. Consider storing in a licensed warehouse with KCC credit if price is low now.'],
+  default:['Based on your farm profile (black cotton soil, drip irrigation, Kharif + Rabi crops), here is my advice: maintain consistent soil moisture and monitor for early pest signs. Check the Alerts panel for district-level warnings.','I\'ve reviewed your crop data. Rice and Wheat are performing well. Tomato needs immediate attention — moisture levels are below threshold. Check today\'s irrigation schedule.']
+};
+let aiTyping=false;
+
+function askQuick(q){document.getElementById('chat-inp').value=q;sendChat();}
+function chatKeydown(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendChat();}}
+
+function sendChat(){
+  if(aiTyping)return;
+  const inp=document.getElementById('chat-inp');
+  const txt=inp.value.trim();if(!txt)return;
+  inp.value='';
+  addChatMsg('user',txt);
+  showTyping();aiTyping=true;
+  setTimeout(()=>{
+    removeTyping();
+    const lower=txt.toLowerCase();
+    let arr=AI_RESP.default;
+    if(lower.includes('fertilizer')||lower.includes('npk')||lower.includes('manure'))arr=AI_RESP.fertilizer;
+    else if(lower.includes('water')||lower.includes('irrigat'))arr=AI_RESP.water;
+    else if(lower.includes('harvest')||lower.includes('ready')||lower.includes('when'))arr=AI_RESP.harvest;
+    else if(lower.includes('pest')||lower.includes('disease')||lower.includes('insect')||lower.includes('bug'))arr=AI_RESP.pest;
+    else if(lower.includes('price')||lower.includes('market')||lower.includes('sell')||lower.includes('mandi'))arr=AI_RESP.price;
+    addChatMsg('ai',arr[Math.floor(Math.random()*arr.length)]);
+    aiTyping=false;
+  },1200+Math.random()*700);
+}
+
+function addChatMsg(role,html){
+  const cb=document.getElementById('chat-body');
+  const d=document.createElement('div');d.className=`msg ${role}`;
+  d.innerHTML=`<div class="msg-av ${role==='ai'?'ai-av':'u-av'}">${role==='ai'?'🤖':'👤'}</div><div class="bubble">${html}</div>`;
+  cb.appendChild(d);cb.scrollTop=cb.scrollHeight;
+}
+function showTyping(){
+  const cb=document.getElementById('chat-body');
+  const d=document.createElement('div');d.className='msg ai';d.id='typing-msg';
+  d.innerHTML=`<div class="msg-av ai-av">🤖</div><div class="bubble"><div class="typing-dots"><span></span><span></span><span></span></div></div>`;
+  cb.appendChild(d);cb.scrollTop=cb.scrollHeight;
+}
+function removeTyping(){document.getElementById('typing-msg')?.remove();}
+
+// ══ TOAST ══
+function showToast(msg){
+  const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+// ══ PROFILE PHOTO UPLOAD ══
+function handleProfilePhotoChange(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  // Validate size (2MB)
+  if (file.size > 2 * 1024 * 1024) {
+    showToast('❌ Photo too large — max 2MB');
+    return;
+  }
+  if (!['image/jpeg','image/png','image/webp'].includes(file.type)) {
+    showToast('❌ Only JPG, PNG or WebP allowed');
+    return;
+  }
+
+  const statusEl = document.getElementById('photo-upload-status');
+  if (statusEl) { statusEl.textContent = '⏳ Processing photo…'; statusEl.style.display='block'; statusEl.style.color='rgba(255,255,255,.5)'; }
+
+  const reader = new FileReader();
+  reader.onload = async ev => {
+    // Show preview immediately
+    const img = document.getElementById('profile-avatar-img');
+    const emo = document.getElementById('profile-avatar-emoji');
+    if (img && emo) { img.src = ev.target.result; img.style.display='block'; emo.style.display='none'; }
+
+    // Upload to API
+    const token = localStorage.getItem('agrolink_token');
+    if (token) {
+      try {
+        const fd = new FormData();
+        fd.append('photo', file);
+        const res = await fetch(`${API_BASE}/api/user/photo`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${token}` },
+          body: fd
+        });
+        const json = await res.json();
+        if (json.success) {
+          if (statusEl) { statusEl.textContent = '✅ Photo updated successfully!'; statusEl.style.color='#56c239'; }
+          showToast('✅ Profile photo updated!');
+        } else {
+          if (statusEl) { statusEl.textContent = '⚠️ Photo saved locally only (server unavailable)'; statusEl.style.color='rgba(255,200,0,.7)'; }
+          showToast('📷 Photo preview updated (server offline — saved locally)');
+        }
+      } catch(e) {
+        if (statusEl) { statusEl.textContent = '📷 Preview updated (API offline)'; statusEl.style.color='rgba(255,200,0,.7)'; }
+        showToast('📷 Photo updated in preview (backend offline)');
+      }
+    } else {
+      if (statusEl) { statusEl.textContent = '📷 Preview updated (not logged in)'; statusEl.style.color='rgba(255,200,0,.7)'; }
+      showToast('📷 Photo updated in preview');
+    }
+    setTimeout(()=>{ if(statusEl) statusEl.style.display='none'; }, 4000);
+  };
+  reader.readAsDataURL(file);
+}
+
+// ══ SAVE PROFILE ══
+async function saveProfileChanges() {
+  const token = localStorage.getItem('agrolink_token');
+  const name  = (document.getElementById('inp-name')?.value || '').trim();
+  const email = (document.getElementById('inp-email')?.value || '').trim();
+
+  if (!name) { showToast('❌ Full name is required'); return; }
+
+  const btn = document.getElementById('save-profile-btn');
+  const statusTxt = document.getElementById('save-status-txt');
+  if (btn) { btn.textContent = '⏳ Saving…'; btn.disabled = true; }
+
+  try {
+    const res = await fetch(`${API_BASE}/api/user/profile`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ name, email })
+    });
+    const json = await res.json();
+    if (json.success) {
+      showToast('✅ Profile saved successfully!');
+      if (statusTxt) { statusTxt.textContent = `Last saved: ${new Date().toLocaleTimeString('en-IN')}`; statusTxt.style.color = '#56c239'; }
+      // Update sidebar
+      const sbName = document.querySelector('.sb-pname');
+      if (sbName) sbName.textContent = name;
+      // Update cached data
+      if (FARMER_DATA) { FARMER_DATA.name = name; FARMER_DATA.email = email; }
+    } else {
+      showToast('❌ Save failed: ' + (json.error || 'Unknown error'));
+    }
+  } catch(e) {
+    // Offline fallback — update locally
+    const sbName = document.querySelector('.sb-pname');
+    if (sbName) sbName.textContent = name;
+    if (FARMER_DATA) { FARMER_DATA.name = name; FARMER_DATA.email = email; }
+    showToast('✅ Profile saved locally (backend offline)');
+    if (statusTxt) { statusTxt.textContent = 'Saved locally · Will sync when online'; statusTxt.style.color = '#ffcc44'; }
+  } finally {
+    if (btn) { btn.textContent = 'Save Changes'; btn.disabled = false; }
+  }
+}
+
+// ══ SAVE FARM DETAILS ══
+async function saveFarmDetails() {
+  const token = localStorage.getItem('agrolink_token');
+  const payload = {
+    village:         document.getElementById('inp-village')?.value.trim(),
+    state:           document.getElementById('inp-state')?.value,
+    soil_type:       document.getElementById('inp-soil')?.value,
+    irrigation_type: document.getElementById('inp-irrigation')?.value,
+    farm_size_acres: parseFloat(document.getElementById('inp-farm-size')?.value) || null,
+    farm_name:       document.getElementById('inp-farm-name')?.value.trim(),
+  };
+
+  try {
+    const res = await fetch(`${API_BASE}/api/farmer/farm`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    });
+    const json = await res.json();
+    if (json.success) {
+      showToast('✅ Farm details updated!');
+      // Refresh DB panel
+      setText('db-state', payload.state || '—');
+      setText('db-soil', formatEnum(payload.soil_type));
+      setText('db-irrigation', formatEnum(payload.irrigation_type));
+      setText('db-farm-size', payload.farm_size_acres ? `${payload.farm_size_acres} acres` : '—');
+    } else {
+      showToast('❌ Failed to save: ' + (json.error || 'Unknown error'));
+    }
+  } catch(e) {
+    showToast('✅ Farm details saved locally (backend offline)');
+    // Update DB panel locally
+    setText('db-state', payload.state || '—');
+    setText('db-soil', formatEnum(payload.soil_type));
+    setText('db-irrigation', formatEnum(payload.irrigation_type));
+  }
+}
+
+// ══ DISPLAY CROPS / STATS (legacy stubs, now handled by populateDashboard) ══
+function displayCrops() { /* handled by populateDashboard */ }
+function displayStats()  { /* handled by populateDashboard */ }
+// ── SETTINGS: ALTER USER DETAILS ──
+async function saveUserSettings() {
+  const token = localStorage.getItem('agrolink_token');
+  const payload = {
+    name: document.getElementById('inp-name').value,
+    location_text: document.getElementById('inp-location').value,
+    profile_photo_url: document.getElementById('inp-photo-url').value
+  };
+
+  try {
+    const res = await fetch(`${API_BASE}/api/user/update`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    });
+    
+    const json = await res.json();
+    if (json.success) {
+      alert('✅ Profile updated successfully!');
+      location.reload(); // Refresh to show the new photo and name immediately
+    } else {
+      alert('❌ Update failed: ' + json.error);
+    }
+  } catch(e) {
+    alert('❌ Server error during update');
+  }
+}
+
+// ══ LOAD & DISPLAY CROPS ══
+async function  loadFarmerCrops() {
+const res = await fetch('...');
+const data = await res.json();
+  const storedUser = JSON.parse(localStorage.getItem('agrolink_user') || '{}');
+  const userId = storedUser.user_id || localStorage.getItem('user_id');
+ // document.getElementById('loading-screen').style.display = 'none';
+
+  if (!userId) return;
+  
+  try {
+    const res = await fetch(`${API_BASE}/api/farmer/crops?user_id=${userId}`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    
+    if (data.success && data.crops && data.crops.length > 0) {
+      renderCrops(data.crops);
+      document.getElementById('crops-count-label').textContent = `${data.crops.length} crop${data.crops.length !== 1 ? 's' : ''} registered`;
+    } else {
+      document.getElementById('crops-grid').innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:rgba(255,255,255,.3)">No crops added yet. Click "+ Add Crop" to get started!</div>';
+      document.getElementById('crops-count-label').textContent = '0 crops';
+    }
+  } catch (e) {
+    console.error('Failed to load crops:', e);
+    document.getElementById('crops-grid').innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:#ff6b6b">Failed to load crops</div>';
+  }
+}
+
+function renderCrops(crops) {
+  const grid = document.getElementById('crops-grid');
+  grid.innerHTML = '';
+  
+  crops.forEach(crop => {
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.style.position = 'relative';
+    card.innerHTML = `
+      <div class="card-title">${crop.crop_name}</div>
+      <div style="font-size:48px;text-align:center;margin:10px 0">🌾</div>
+      <div style="font-size:12px;color:rgba(255,255,255,.5);text-align:center;margin-bottom:14px">${crop.season || '—'} · ${crop.category || '—'}</div>
+      <div style="margin-top:14px;display:flex;flex-direction:column;gap:6px">
+        <div style="font-size:11px;color:rgba(255,255,255,.4)">🌱 Variety: ${crop.crop_variety || '—'}</div>
+        <div style="font-size:11px;color:rgba(255,255,255,.4)">🌿 Area: ${crop.area_acres || '—'} acres</div>
+        <div style="font-size:11px;color:rgba(255,255,255,.4)">📊 Yield: ${crop.yield_tons || '—'} tons</div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:12px">
+        <button class="s-btn s-btn-outline" onclick="editCrop('${crop.crop_id}')">✏️ Edit</button>
+        <button class="s-btn s-btn-danger" onclick="deleteCrop('${crop.crop_id}')">🗑️ Delete</button>
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+// ══ ADD/EDIT CROP ══
+function openAddCropModal() {
+  const cropName = prompt('Crop Name (e.g., Rice, Wheat):');
+  if (!cropName) return;
+  
+  const variety = prompt('Variety (e.g., Sona Masoori):');
+  const category = prompt('Category (e.g., Cereals, Vegetables):');
+  const areaStr = prompt('Area in Acres:');
+  const season = prompt('Season (e.g., Kharif, Rabi):');
+  const yieldStr = prompt('Expected Yield in Tons:');
+  
+  addCrop({
+    crop_name: cropName,
+    crop_variety: variety,
+    category: category,
+    area_acres: parseFloat(areaStr) || null,
+    season: season,
+    yield_tons: parseFloat(yieldStr) || null
+  });
+}
+
+async function addCrop() {
+  // 1. Snatch the data from the modal's input fields
+  const name = document.getElementById('new-crop-name').value;
+  const qty = document.getElementById('new-crop-quantity').value;
+
+  // 2. Safety check: Don't send empty data
+  if (!name || !qty) {
+    showToast('⚠️ Please enter both name and quantity');
+    return;
+  }
+
+  // 3. Combine the details with the User ID we saved in Part 2
+  const payload = { 
+    crop_name: name, 
+    quantity: qty, 
+    user_id: userId 
+  };
+
+  try {
+    const res = await fetch(`${API_BASE}/api/farmer/crops`, {
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}` 
+      },
+      body: JSON.stringify(payload)
+    });
+    
+    // Check if the server actually received it
+    if (!res.ok) throw new Error(`Server returned ${res.status}`);
+    
+    const data = await res.json();
+
+    if (data.success) {
+      showToast('✅ Crop added successfully!');
+      
+      // 1. Refresh the list so the new crop appears
+      if (typeof loadFarmerCrops === 'function') {
+          loadFarmerCrops();
+      }
+
+      // 2. Clear the modal input boxes for next time
+      document.getElementById('new-crop-name').value = '';
+      document.getElementById('new-crop-quantity').value = '';
+
+      // 3. Close the modal (Replace 'addCropModal' with your actual Modal ID)
+      const modal = document.getElementById('addCropModal');
+      if (modal) modal.style.display = 'none';
+
+    } else {
+      showToast('❌ ' + (data.error || 'Failed to add crop'));
+    }
+  } catch (e) {
+    console.error('Error adding crop:', e);
+    showToast('❌ Error: ' + e.message);
+  }
+
+}
+
+async function editCrop(cropId) {
+  const cropName = prompt('Update Crop Name:');
+  if (!cropName) return;
+  
+  try {
+    const res = await fetch(`${API_BASE}/api/farmer/crops/${cropId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ crop_name: cropName })
+    });
+    
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    showToast('✅ Crop updated!');
+    loadFarmerCrops();
+  } catch (e) {
+    showToast('❌ Error: ' + e.message);
+  }
+}
+
+async function deleteCrop(cropId) {
+  if (!confirm('Delete this crop?')) return;
+  
+  try {
+    const res = await fetch(`${API_BASE}/api/farmer/crops/${cropId}`, {
+      method: 'DELETE'
+    });
+    
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    showToast('✅ Crop deleted!');
+    loadFarmerCrops();
+  } catch (e) {
+    showToast('❌ Error: ' + e.message);
+  }
+}
+
+</script>
+</body>
+</html>

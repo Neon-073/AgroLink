@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AgroLink – Dealer Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Raleway:wght@300;400;600;700;800&family=Caveat:wght@600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Raleway',sans-serif;background:#060e1a;color:white;min-height:100vh;overflow-x:hidden}
+::-webkit-scrollbar{width:5px;height:5px}::-webkit-scrollbar-track{background:rgba(255,255,255,.03)}::-webkit-scrollbar-thumb{background:rgba(0,180,216,.3);border-radius:3px}
+
+/* BG */
+.bg{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.bg-grad{position:absolute;inset:0;background:radial-gradient(ellipse at 10% 15%,rgba(0,60,100,.5),transparent 55%),radial-gradient(ellipse at 90% 80%,rgba(0,30,80,.4),transparent 55%),linear-gradient(160deg,#040d1a,#060e1a)}
+.bg-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(0,180,216,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,180,216,.03) 1px,transparent 1px);background-size:44px 44px;animation:gridDrift 50s linear infinite}
+@keyframes gridDrift{to{background-position:44px 44px}}
+.bg-orb{position:absolute;border-radius:50%;filter:blur(100px);animation:orbFloat ease-in-out infinite}
+@keyframes orbFloat{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(12px,-12px) scale(1.08)}}
+.particle{position:absolute;width:3px;height:3px;border-radius:50%;background:rgba(0,180,216,.4);animation:particleDrift linear infinite;pointer-events:none}
+@keyframes particleDrift{0%{transform:translateY(100vh);opacity:0}10%{opacity:.6}90%{opacity:.2}100%{transform:translateY(-10vh);opacity:0}}
+
+/* SIDEBAR */
+.sidebar{width:230px;flex-shrink:0;background:rgba(4,13,26,.95);border-right:1px solid rgba(0,180,216,.12);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100;backdrop-filter:blur(20px)}
+.sb-logo{display:flex;align-items:center;gap:10px;padding:22px 20px 20px;border-bottom:1px solid rgba(0,180,216,.1)}
+.sb-logo-icon{font-size:26px;filter:drop-shadow(0 0 10px rgba(0,180,216,.7))}
+.sb-logo-text{font-family:'Playfair Display',serif;font-size:19px;font-weight:900;letter-spacing:2px;color:#00b4d8;text-shadow:0 0 20px rgba(0,180,216,.4)}
+.sb-nav{flex:1;padding:16px 12px;display:flex;flex-direction:column;gap:3px;overflow-y:auto}
+.sb-sec{font-size:9px;font-weight:800;letter-spacing:2.5px;text-transform:uppercase;color:rgba(255,255,255,.18);padding:12px 10px 5px}
+.sb-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:11px;cursor:pointer;transition:all .25s;font-size:12.5px;font-weight:700;color:rgba(255,255,255,.4);border:1px solid transparent;text-decoration:none}
+.sb-item:hover{background:rgba(0,180,216,.07);color:rgba(255,255,255,.75);border-color:rgba(0,180,216,.12)}
+.sb-item.active{background:rgba(0,180,216,.14);color:#00b4d8;border-color:rgba(0,180,216,.28);box-shadow:0 3px 12px rgba(0,180,216,.1)}
+.sb-icon{font-size:16px;width:20px;text-align:center;flex-shrink:0}
+.sb-badge{margin-left:auto;background:rgba(255,80,80,.2);color:#ff6b6b;font-size:9px;font-weight:800;padding:2px 7px;border-radius:50px}
+.sb-badge.blue{background:rgba(0,180,216,.2);color:#00b4d8}
+.sb-bottom{padding:14px 12px;border-top:1px solid rgba(0,180,216,.1)}
+.sb-profile:hover{background:rgba(255,255,255,.05)}
+.sb-profile{padding:14px;background:rgba(0,180,216,.05);border:1px solid rgba(0,180,216,.15);border-radius:14px;margin-bottom:24px;text-align:center}
+.sb-avatar{width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#0077a8,#00b4d8);display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto 10px;border:2px solid rgba(0,180,216,.3)}
+.sb-pname{font-size:12px;font-weight:700;color:rgba(255,255,255,.75)}
+.sb-prole{font-size:9px;color:rgba(0,180,216,.7);letter-spacing:.5px;text-transform:uppercase}
+
+/* MAIN */
+.main{margin-left:230px;flex:1;min-height:100vh;position:relative;z-index:10}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:20px 28px 0;margin-bottom:24px}
+.page-title{font-family:'Playfair Display',serif;font-size:26px;font-weight:700;color:white}
+.page-sub{font-size:12px;color:rgba(255,255,255,.35);margin-top:3px}
+.topbar-actions{display:flex;align-items:center;gap:10px}
+.tbtn{padding:9px 16px;border-radius:11px;border:1.5px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:rgba(255,255,255,.55);font-family:'Raleway',sans-serif;font-size:12px;font-weight:700;cursor:pointer;transition:all .25s;letter-spacing:.4px;display:flex;align-items:center;gap:6px}
+.tbtn:hover{background:rgba(255,255,255,.08);color:white}
+.tbtn.primary{background:linear-gradient(135deg,#006d8a,#00b4d8);border-color:transparent;color:white;box-shadow:0 4px 14px rgba(0,180,216,.3)}
+.tbtn.primary:hover{box-shadow:0 6px 20px rgba(0,180,216,.5);transform:translateY(-1px)}
+
+/* TABS */
+.tab-bar{display:flex;gap:4px;padding:0 28px;margin-bottom:24px;border-bottom:1px solid rgba(0,180,216,.1);overflow-x:auto}
+.tab-btn{padding:11px 18px;border:none;background:none;color:rgba(255,255,255,.35);font-family:'Raleway',sans-serif;font-size:12px;font-weight:700;cursor:pointer;border-bottom:2.5px solid transparent;transition:all .25s;letter-spacing:.5px;text-transform:uppercase;white-space:nowrap;display:flex;align-items:center;gap:7px;margin-bottom:-1px}
+.tab-btn:hover{color:rgba(255,255,255,.7)}
+.tab-btn.active{color:#00b4d8;border-bottom-color:#00b4d8}
+.tab-panel{display:none;padding:0 28px 100px;animation:tabIn .3s ease both}
+.tab-panel.active{display:block}
+@keyframes tabIn{0%{opacity:0;transform:translateY(8px)}100%{opacity:1;transform:translateY(0)}}
+
+/* CARD */
+.card{background:rgba(4,13,26,.85);border:1px solid rgba(0,180,216,.13);border-radius:18px;padding:22px;position:relative;overflow:hidden;transition:border-color .3s,box-shadow .3s}
+.card:hover{border-color:rgba(0,180,216,.25);box-shadow:0 6px 32px rgba(0,0,0,.4)}
+.card-title{font-size:10px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:rgba(0,180,216,.7);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.card-title::after{content:'';flex:1;height:1px;background:rgba(0,180,216,.1)}
+.grid{display:grid;gap:18px}
+.g2{grid-template-columns:1fr 1fr}
+.g3{grid-template-columns:1fr 1fr 1fr}
+.g4{grid-template-columns:repeat(4,1fr)}
+.g-7-5{grid-template-columns:7fr 5fr}
+
+/* STATS */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
+.stat{background:rgba(4,13,26,.85);border:1px solid rgba(0,180,216,.12);border-radius:16px;padding:18px 20px;transition:all .25s;cursor:default}
+.stat:hover{border-color:rgba(0,180,216,.3);transform:translateY(-2px)}
+.stat-ic{font-size:26px;margin-bottom:6px}
+.stat-v{font-family:'Playfair Display',serif;font-size:26px;font-weight:700;color:white;line-height:1}
+.stat-l{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:rgba(255,255,255,.3);margin-top:4px}
+.stat-d{font-size:10px;font-weight:700;margin-top:3px}
+.up{color:#00b4d8}.down{color:#ff6b6b}.neutral{color:rgba(255,255,255,.3)}
+
+/* ORDERS */
+.order-card{background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:16px 18px;margin-bottom:10px;transition:all .25s;cursor:pointer}
+.order-card:last-child{margin-bottom:0}
+.order-card:hover{background:rgba(0,180,216,.06);border-color:rgba(0,180,216,.2)}
+.order-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.order-id{font-size:11px;font-weight:800;color:rgba(0,180,216,.8);letter-spacing:.5px}
+.order-time{font-size:10px;color:rgba(255,255,255,.25)}
+.order-badge{font-size:10px;font-weight:800;padding:3px 10px;border-radius:50px}
+.badge-pending{background:rgba(255,180,0,.15);color:#ffcc44;border:1px solid rgba(255,180,0,.25)}
+.badge-confirmed{background:rgba(0,180,216,.15);color:#00b4d8;border:1px solid rgba(0,180,216,.25)}
+.badge-delivered{background:rgba(86,194,57,.15);color:#56c239;border:1px solid rgba(86,194,57,.25)}
+.badge-cancelled{background:rgba(255,60,60,.12);color:#ff6b6b;border:1px solid rgba(255,60,60,.2)}
+.order-farmer{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.farmer-av{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#1a5c1e,#56c239);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.farmer-name{font-size:13px;font-weight:700;color:white}
+.farmer-loc{font-size:10px;color:rgba(255,255,255,.35)}
+.order-items{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:10px}
+.order-item-chip{display:inline-flex;align-items:center;gap:5px;padding:5px 11px;border-radius:9px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);font-size:11px;font-weight:700;color:rgba(255,255,255,.6)}
+.order-footer{display:flex;align-items:center;justify-content:space-between}
+.order-total{font-size:15px;font-weight:800;color:white}
+.order-actions{display:flex;gap:7px}
+.order-btn{padding:7px 14px;border-radius:9px;font-family:'Raleway',sans-serif;font-size:11px;font-weight:700;cursor:pointer;transition:all .25s;border:none;letter-spacing:.3px}
+.obtn-confirm{background:rgba(0,180,216,.15);color:#00b4d8;border:1px solid rgba(0,180,216,.3)}
+.obtn-confirm:hover{background:rgba(0,180,216,.25)}
+.obtn-deliver{background:linear-gradient(135deg,#006d8a,#00b4d8);color:white;border:none}
+.obtn-deliver:hover{transform:translateY(-1px)}
+.obtn-cancel{background:rgba(255,60,60,.08);color:#ff6b6b;border:1px solid rgba(255,60,60,.2)}
+.obtn-cancel:hover{background:rgba(255,60,60,.15)}
+
+/* ORDER FILTER TABS */
+.order-filters{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap}
+.ofilter{padding:7px 16px;border-radius:50px;border:1px solid rgba(255,255,255,.1);background:transparent;color:rgba(255,255,255,.4);font-family:'Raleway',sans-serif;font-size:11px;font-weight:700;cursor:pointer;transition:all .25s;letter-spacing:.4px}
+.ofilter:hover{border-color:rgba(0,180,216,.4);color:rgba(255,255,255,.7)}
+.ofilter.active{border-color:#00b4d8;background:rgba(0,180,216,.12);color:#00b4d8}
+
+/* PRODUCTS */
+.product-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px}
+.product-card{background:rgba(4,13,26,.85);border:1px solid rgba(0,180,216,.13);border-radius:16px;overflow:hidden;transition:all .25s;cursor:pointer;position:relative}
+.product-card:hover{border-color:rgba(0,180,216,.3);transform:translateY(-3px);box-shadow:0 8px 32px rgba(0,0,0,.5)}
+.product-img{width:100%;height:160px;object-fit:cover;background:rgba(0,180,216,.06);display:flex;align-items:center;justify-content:center;font-size:48px;transition:transform .3s}
+.product-card:hover .product-img{transform:scale(1.04)}
+.product-img img{width:100%;height:100%;object-fit:cover}
+.product-img.no-img{display:flex;align-items:center;justify-content:center;font-size:48px;background:rgba(0,180,216,.06)}
+.product-body{padding:14px 16px}
+.product-cat{font-size:9px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:rgba(0,180,216,.7);margin-bottom:4px}
+.product-name{font-size:13px;font-weight:700;color:white;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.product-brand{font-size:10px;color:rgba(255,255,255,.35);margin-bottom:8px}
+.product-footer{display:flex;align-items:center;justify-content:space-between}
+.product-price{font-size:16px;font-weight:800;color:white}
+.product-price span{font-size:10px;color:rgba(255,255,255,.3);font-weight:600}
+.product-stock{font-size:10px;font-weight:700;padding:3px 9px;border-radius:50px}
+.stock-ok{background:rgba(86,194,57,.12);color:#56c239;border:1px solid rgba(86,194,57,.25)}
+.stock-low{background:rgba(255,180,0,.12);color:#ffcc44;border:1px solid rgba(255,180,0,.25)}
+.stock-out{background:rgba(255,60,60,.1);color:#ff6b6b;border:1px solid rgba(255,60,60,.2)}
+.product-edit-btn{position:absolute;top:10px;right:10px;width:30px;height:30px;border-radius:50%;background:rgba(4,13,26,.8);border:1px solid rgba(0,180,216,.3);color:#00b4d8;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .25s;opacity:0}
+.product-card:hover .product-edit-btn{opacity:1}
+.product-edit-btn:hover{background:rgba(0,180,216,.2);transform:scale(1.1)}
+
+/* ADD PRODUCT MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(8px);opacity:0;pointer-events:none;transition:opacity .3s}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal{background:rgba(4,13,26,.97);border:1px solid rgba(0,180,216,.2);border-radius:22px;padding:32px;width:100%;max-width:600px;max-height:90vh;overflow-y:auto;position:relative;transform:translateY(20px) scale(.97);transition:all .3s}
+.modal-overlay.open .modal{transform:translateY(0) scale(1)}
+.modal-title{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:white;margin-bottom:4px}
+.modal-sub{font-size:12px;color:rgba(255,255,255,.35);margin-bottom:24px}
+.modal-close{position:absolute;top:18px;right:18px;width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.5);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .25s}
+.modal-close:hover{background:rgba(255,60,60,.15);color:#ff6b6b;border-color:rgba(255,60,60,.3)}
+
+/* FORM ELEMENTS */
+.fg{display:flex;flex-direction:column;gap:7px;margin-bottom:16px}
+.fl{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.4)}
+.fi{padding:12px 14px;background:rgba(255,255,255,.04);border:1.5px solid rgba(255,255,255,.1);border-radius:12px;color:white;font-family:'Raleway',sans-serif;font-size:13px;outline:none;transition:all .3s;width:100%}
+.fi::placeholder{color:rgba(255,255,255,.22)}
+.fi:focus{background:rgba(0,180,216,.06);border-color:rgba(0,180,216,.4);box-shadow:0 0 0 3px rgba(0,180,216,.1)}
+.fi.ta{resize:vertical;min-height:80px}
+select.fi{appearance:none;cursor:pointer}
+select.fi option{background:#06182a}
+.fi-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+
+/* PHOTO UPLOAD in modal */
+.photo-upload{border:2px dashed rgba(0,180,216,.3);border-radius:16px;padding:24px;text-align:center;cursor:pointer;transition:all .3s;background:rgba(0,180,216,.03);position:relative;overflow:hidden;margin-bottom:16px}
+.photo-upload:hover,.photo-upload.drag-over{border-color:rgba(0,180,216,.7);background:rgba(0,180,216,.08)}
+.photo-upload input{position:absolute;inset:0;opacity:0;cursor:pointer;z-index:2}
+.pu-icon{font-size:36px;margin-bottom:8px;transition:transform .3s}
+.photo-upload:hover .pu-icon{transform:scale(1.1)}
+.pu-title{font-size:13px;font-weight:700;color:rgba(255,255,255,.65);margin-bottom:3px}
+.pu-sub{font-size:10px;color:rgba(255,255,255,.28)}
+.photo-preview-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px;display:none}
+.photo-preview-grid.show{display:grid}
+.photo-thumb{position:relative;border-radius:12px;overflow:hidden;aspect-ratio:1;border:1px solid rgba(0,180,216,.2)}
+.photo-thumb img{width:100%;height:100%;object-fit:cover}
+.photo-remove{position:absolute;top:5px;right:5px;width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,.7);border:none;color:#ff6b6b;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .25s}
+.photo-remove:hover{background:rgba(255,60,60,.5)}
+.add-more-photos{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;padding:10px;border-radius:12px;border:1.5px dashed rgba(0,180,216,.3);background:rgba(0,180,216,.03);color:rgba(0,180,216,.6);font-family:'Raleway',sans-serif;font-size:12px;font-weight:700;cursor:pointer;transition:all .25s;margin-bottom:16px;display:none}
+.add-more-photos.show{display:flex}
+.add-more-photos:hover{background:rgba(0,180,216,.08);border-color:rgba(0,180,216,.6)}
+
+/* CATEGORY PICKER */
+.cat-picker{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px}
+.cat-opt{padding:8px 6px;border-radius:11px;border:1.5px solid rgba(255,255,255,.1);background:rgba(255,255,255,.03);text-align:center;cursor:pointer;transition:all .25s;font-size:11px;font-weight:700;color:rgba(255,255,255,.4)}
+.cat-opt:hover{border-color:rgba(0,180,216,.4);color:rgba(255,255,255,.75)}
+.cat-opt.active{border-color:#00b4d8;background:rgba(0,180,216,.12);color:#00b4d8}
+.cat-opt-ic{font-size:20px;display:block;margin-bottom:4px}
+
+/* SUBMIT BTN */
+.modal-submit{width:100%;padding:14px;border-radius:14px;border:none;background:linear-gradient(135deg,#006d8a,#00b4d8);color:white;font-family:'Raleway',sans-serif;font-size:14px;font-weight:800;cursor:pointer;transition:all .3s;letter-spacing:1.5px;text-transform:uppercase;box-shadow:0 6px 20px rgba(0,180,216,.3);margin-top:6px}
+.modal-submit:hover{transform:translateY(-2px);box-shadow:0 10px 28px rgba(0,180,216,.45)}
+.modal-divider{height:1px;background:rgba(0,180,216,.08);margin:16px 0}
+
+/* TOAST */
+.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-80px);background:rgba(4,13,26,.97);border:1px solid rgba(0,180,216,.35);color:#00b4d8;padding:12px 24px;border-radius:12px;font-family:'Raleway',sans-serif;font-size:13px;font-weight:700;z-index:9999;box-shadow:0 8px 32px rgba(0,0,0,.5);letter-spacing:.4px;transition:transform .35s cubic-bezier(.34,1.56,.64,1)}
+.toast.show{transform:translateX(-50%) translateY(0)}
+
+/* SETTINGS */
+.s-row{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding:12px 0;border-top:1px solid rgba(255,255,255,.04)}
+.s-row:first-child{border-top:none}
+.s-label{font-size:13px;font-weight:700;color:rgba(255,255,255,.75)}
+.s-sub{font-size:11px;color:rgba(255,255,255,.3);margin-top:2px;line-height:1.5}
+.toggle{position:relative;width:44px;height:24px;flex-shrink:0}
+.toggle input{opacity:0;width:0;height:0}
+.toggle-slider{position:absolute;inset:0;background:rgba(255,255,255,.1);border-radius:50px;cursor:pointer;transition:.3s;border:1px solid rgba(255,255,255,.1)}
+.toggle-slider::before{content:'';position:absolute;width:18px;height:18px;border-radius:50%;background:rgba(255,255,255,.4);bottom:2px;left:2px;transition:.3s}
+.toggle input:checked+.toggle-slider{background:rgba(0,180,216,.3);border-color:rgba(0,180,216,.5)}
+.toggle input:checked+.toggle-slider::before{transform:translateX(20px);background:#00b4d8;box-shadow:0 0 8px rgba(0,180,216,.5)}
+.s-input{padding:10px 14px;background:rgba(255,255,255,.04);border:1.5px solid rgba(255,255,255,.1);border-radius:12px;color:white;font-family:'Raleway',sans-serif;font-size:13px;outline:none;transition:all .3s;width:100%}
+.s-input:focus{background:rgba(0,180,216,.06);border-color:rgba(0,180,216,.4)}
+.s-input::placeholder{color:rgba(255,255,255,.22)}
+.s-select{padding:10px 14px;background:rgba(255,255,255,.04);border:1.5px solid rgba(255,255,255,.1);border-radius:12px;color:white;font-family:'Raleway',sans-serif;font-size:13px;outline:none;transition:all .3s;width:100%;appearance:none;cursor:pointer}
+.s-select:focus{background:rgba(0,180,216,.06);border-color:rgba(0,180,216,.4)}
+.s-select option{background:#06182a}
+.s-form-group{display:flex;flex-direction:column;gap:7px;margin-bottom:14px}
+.s-form-label{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.4)}
+.s-section-title{font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:white;margin-bottom:4px}
+.s-section-sub{font-size:12px;color:rgba(255,255,255,.35);margin-bottom:20px}
+.s-divider{height:1px;background:rgba(0,180,216,.08);margin:16px 0}
+.s-btn{padding:10px 20px;border-radius:12px;font-family:'Raleway',sans-serif;font-size:12px;font-weight:700;cursor:pointer;transition:all .25s;letter-spacing:.4px;border:none}
+.s-btn-primary{background:linear-gradient(135deg,#006d8a,#00b4d8);color:white;box-shadow:0 4px 14px rgba(0,180,216,.3)}
+.s-btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(0,180,216,.45)}
+.s-btn-outline{background:transparent;border:1.5px solid rgba(0,180,216,.4);color:#00b4d8}
+.s-btn-outline:hover{background:rgba(0,180,216,.1)}
+.s-btn-danger{background:rgba(255,60,60,.08);border:1.5px solid rgba(255,60,60,.25);color:#ff6b6b}
+.s-btn-danger:hover{background:rgba(255,60,60,.15)}
+.save-bar{padding:14px 20px;background:rgba(4,13,26,.95);border:1px solid rgba(0,180,216,.2);border-radius:14px;display:flex;align-items:center;justify-content:space-between;backdrop-filter:blur(12px);box-shadow:0 8px 32px rgba(0,0,0,.5);margin-top:20px}
+.db-status{display:flex;align-items:center;gap:8px;padding:12px 16px;border-radius:12px;border:1px solid rgba(0,180,216,.2);background:rgba(0,180,216,.06);margin-bottom:12px}
+.db-dot{width:8px;height:8px;border-radius:50%;background:#00b4d8;flex-shrink:0;box-shadow:0 0 8px rgba(0,180,216,.6)}
+.db-name{font-size:12px;font-weight:700;color:white;margin-bottom:1px}
+.db-info{font-size:10px;color:rgba(255,255,255,.35)}
+.db-badge{margin-left:auto;font-size:10px;font-weight:800;padding:3px 10px;border-radius:50px;background:rgba(0,180,216,.15);color:#00b4d8}
+.settings-layout{display:grid;grid-template-columns:210px 1fr;gap:20px;align-items:start}
+.settings-nav{background:rgba(4,13,26,.85);border:1px solid rgba(0,180,216,.14);border-radius:16px;padding:12px;display:flex;flex-direction:column;gap:3px;position:sticky;top:20px}
+.snav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:11px;cursor:pointer;font-size:12px;font-weight:700;color:rgba(255,255,255,.4);transition:all .25s;border:1px solid transparent}
+.snav-item:hover{background:rgba(0,180,216,.07);color:rgba(255,255,255,.75)}
+.snav-item.active{background:rgba(0,180,216,.13);color:#00b4d8;border-color:rgba(0,180,216,.25)}
+.snav-ic{font-size:16px;width:20px;text-align:center}
+.s-section{display:none}
+.s-section.active{display:block}
+
+@media(max-width:900px){
+  .sidebar{transform:translateX(-100%);transition:transform .3s}
+  .main{margin-left:0}
+  .stats-row,.g2,.g3,.g4,.g-7-5,.fi-grid,.cat-picker,.product-grid{grid-template-columns:1fr}
+  .tab-panel,.tab-bar{padding-left:16px;padding-right:16px}
+  .settings-layout{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<div class="bg">
+  <div class="bg-grad"></div>
+  <div class="bg-grid"></div>
+  <div class="bg-orb" style="width:500px;height:500px;background:rgba(0,60,110,.12);top:-140px;left:-80px;animation-duration:14s"></div>
+  <div class="bg-orb" style="width:380px;height:380px;background:rgba(0,30,80,.1);bottom:5%;right:-60px;animation-duration:11s;animation-delay:-5s"></div>
+</div>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sb-logo">
+    <div class="sb-logo-icon">📦</div>
+    <div class="sb-logo-text">AGROLINK</div>
+  </div>
+  <nav class="sb-nav">
+    <div class="sb-sec">Dashboard</div>
+    <a class="sb-item active" onclick="switchTab('overview',this)"><span class="sb-icon">🏪</span>Home</a>
+    <a class="sb-item" onclick="switchTab('orders',this)"><span class="sb-icon">📋</span>Orders <span class="sb-badge">4</span></a>
+    <a class="sb-item" onclick="switchTab('products',this)"><span class="sb-icon">📦</span>My Products <span class="sb-badge blue">12</span></a>
+    <a class="sb-item" onclick="switchTab('marketplace',this)"><span class="sb-icon">🛍️</span>Marketplace</a>
+    <a class="sb-item" onclick="switchTab('customers',this)"><span class="sb-icon">👨‍🌾</span>Customers</a>
+    <div class="sb-sec">More</div>
+    <a class="sb-item" onclick="switchTab('analytics',this)"><span class="sb-icon">📊</span>Analytics</a>
+    <a class="sb-item" onclick="switchTab('settings',this)"><span class="sb-icon">⚙️</span>Settings</a>
+    <a class="sb-item" onclick="doLogout()"><span class="sb-icon">🚪</span>Logout</a>
+  </nav>
+  <div class="sb-bottom">
+    <div class="sb-profile">
+      <div class="sb-avatar" id="sb-avatar-display">🏪</div>
+      <div><div class="sb-pname" id="sb-pname-display">Sharma Agro Inputs</div><div class="sb-prole" id="sb-prole-display">Dealer · Pune, Maharashtra</div></div>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+  <div class="topbar">
+    <div>
+      <div class="page-title" id="page-title-text">Dealer Dashboard 🏪</div>
+      <div class="page-sub" id="page-sub-text">Pune, Maharashtra · Seeds & Fertilizers</div>
+    </div>
+    <div class="topbar-actions">
+      <button class="tbtn" onclick="switchTab('orders',null)">📋 View Orders</button>
+      <button class="tbtn primary" onclick="openAddProduct()">+ Add Product</button>
+    </div>
+  </div>
+
+  <div class="tab-bar">
+    <button class="tab-btn active" id="tab-overview" onclick="switchTab('overview',this)">🏪 Home</button>
+    <button class="tab-btn" id="tab-orders" onclick="switchTab('orders',this)">📋 Orders <span id="order-count-tab" style="background:rgba(255,80,80,.2);color:#ff6b6b;font-size:9px;font-weight:800;padding:2px 7px;border-radius:50px;margin-left:2px">4</span></button>
+    <button class="tab-btn" id="tab-products" onclick="switchTab('products',this)">📦 My Products</button>
+    <button class="tab-btn" id="tab-marketplace" onclick="switchTab('marketplace',this)">🛍️ Marketplace</button>
+    <button class="tab-btn" id="tab-customers" onclick="switchTab('customers',this)">👨‍🌾 Customers</button>
+    <button class="tab-btn" id="tab-analytics" onclick="switchTab('analytics',this)">📊 Analytics</button>
+    <button class="tab-btn" id="tab-settings" onclick="switchTab('settings',this)">⚙️ Settings</button>
+  </div>
+
+  <!-- ══ OVERVIEW ══ -->
+  <div class="tab-panel active" id="panel-overview">
+    <div class="stats-row">
+      <div class="stat"><div class="stat-ic">📋</div><div class="stat-v">4</div><div class="stat-l">Pending Orders</div><div class="stat-d down">↑ 2 new today</div></div>
+      <div class="stat"><div class="stat-ic">💰</div><div class="stat-v">₹48K</div><div class="stat-l">This Month</div><div class="stat-d up">↑ 12% vs last month</div></div>
+      <div class="stat"><div class="stat-ic">📦</div><div class="stat-v">12</div><div class="stat-l">Active Products</div><div class="stat-d neutral">3 low stock</div></div>
+      <div class="stat"><div class="stat-ic">⭐</div><div class="stat-v">4.7</div><div class="stat-l">Avg Rating</div><div class="stat-d up">↑ 48 reviews</div></div>
+    </div>
+    <div class="grid g-7-5" style="margin-bottom:18px">
+      <div class="card">
+        <div class="card-title">📋 Waiting Orders</div>
+        <div id="overview-orders"></div>
+        <button class="tbtn" style="width:100%;justify-content:center;margin-top:10px" onclick="switchTab('orders',null)">View All Orders →</button>
+      </div>
+      <div class="card">
+        <div class="card-title">📊 Order Summary</div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:rgba(255,180,0,.06);border-radius:11px;border:1px solid rgba(255,180,0,.15)"><span style="font-size:12px;font-weight:700;color:#ffcc44">⏳ Pending</span><span style="font-size:16px;font-weight:800;color:white">4</span></div>
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:rgba(0,180,216,.06);border-radius:11px;border:1px solid rgba(0,180,216,.15)"><span style="font-size:12px;font-weight:700;color:#00b4d8">✅ Confirmed</span><span style="font-size:16px;font-weight:800;color:white">7</span></div>
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:rgba(86,194,57,.06);border-radius:11px;border:1px solid rgba(86,194,57,.15)"><span style="font-size:12px;font-weight:700;color:#56c239">🚚 Delivered</span><span style="font-size:16px;font-weight:800;color:white">23</span></div>
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:rgba(255,60,60,.05);border-radius:11px;border:1px solid rgba(255,60,60,.12)"><span style="font-size:12px;font-weight:700;color:#ff6b6b">❌ Cancelled</span><span style="font-size:16px;font-weight:800;color:white">2</span></div>
+        </div>
+        <div class="card-title" style="margin-top:16px">🏆 Top Products</div>
+        <div style="display:flex;flex-direction:column;gap:7px">
+          <div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:12px;color:rgba(255,255,255,.55)">🌱 PM-69 Hybrid Seeds</span><span style="font-size:12px;font-weight:700;color:#00b4d8">38 sold</span></div>
+          <div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:12px;color:rgba(255,255,255,.55)">🧪 NPK 19-19-19</span><span style="font-size:12px;font-weight:700;color:#00b4d8">29 sold</span></div>
+          <div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:12px;color:rgba(255,255,255,.55)">🌿 Neem Cake</span><span style="font-size:12px;font-weight:700;color:#00b4d8">21 sold</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ ORDERS ══ -->
+  <div class="tab-panel" id="panel-orders">
+    <div class="order-filters">
+      <button class="ofilter active" onclick="filterOrders('all',this)">All Orders</button>
+      <button class="ofilter" onclick="filterOrders('pending',this)">⏳ Pending (4)</button>
+      <button class="ofilter" onclick="filterOrders('confirmed',this)">✅ Confirmed</button>
+      <button class="ofilter" onclick="filterOrders('delivered',this)">🚚 Delivered</button>
+      <button class="ofilter" onclick="filterOrders('cancelled',this)">❌ Cancelled</button>
+    </div>
+    <div id="orders-list"></div>
+  </div>
+
+  <!-- ══ PRODUCTS ══ -->
+  <div class="tab-panel" id="panel-products">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
+      <div style="font-size:12px;color:rgba(255,255,255,.4)" id="product-count-label">12 products listed</div>
+      <div style="display:flex;gap:8px">
+        <select id="prod-cat-filter" onchange="filterProducts()" style="padding:8px 14px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:10px;color:rgba(255,255,255,.6);font-family:'Raleway',sans-serif;font-size:11px;font-weight:700;outline:none;cursor:pointer;appearance:none">
+          <option value="all">All Categories</option>
+          <option value="Seeds">🌱 Seeds</option>
+          <option value="Fertilizer">🧪 Fertilizer</option>
+          <option value="Pesticide">🧴 Pesticide</option>
+          <option value="Organic">🌿 Organic</option>
+          <option value="Irrigation">💧 Irrigation</option>
+          <option value="Machinery">🚜 Machinery</option>
+        </select>
+        <button class="tbtn primary" onclick="openAddProduct()">+ Add Product</button>
+      </div>
+    </div>
+    <div class="product-grid" id="product-grid"></div>
+  </div>
+
+  <!-- ══ MARKETPLACE ══ -->
+  <div class="tab-panel" id="panel-marketplace">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
+      <div style="font-size:12px;color:rgba(255,255,255,.4)" id="marketplace-count-label">Loading products...</div>
+      <div style="display:flex;gap:8px">
+        <select id="market-cat-filter" onchange="filterMarketplaceProducts()" style="padding:8px 14px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:10px;color:rgba(255,255,255,.6);font-family:'Raleway',sans-serif;font-size:11px;font-weight:700;outline:none;cursor:pointer;appearance:none">
+          <option value="all">All Categories</option>
+          <option value="Fruits">🥭 Fruits</option>
+          <option value="Vegetables">🥒 Vegetables</option>
+          <option value="Grains">🌾 Grains</option>
+          <option value="Organic">🥬 Organic</option>
+          <option value="Spices">🌶️ Spices</option>
+          <option value="Agri Products">🧪 Agri Products</option>
+        </select>
+      </div>
+    </div>
+    <div class="product-grid" id="marketplace-grid"></div>
+  </div>
+
+  <!-- ══ CUSTOMERS ══ -->
+  <div class="tab-panel" id="panel-customers">
+    <div class="card">
+      <div class="card-title">👨‍🌾 Recent Customers</div>
+      <div style="display:flex;flex-direction:column;gap:10px" id="customers-list"></div>
+    </div>
+  </div>
+
+  <!-- ══ ANALYTICS ══ -->
+  <div class="tab-panel" id="panel-analytics">
+    <div class="grid g2">
+      <div class="card"><div class="card-title">📊 Monthly Revenue (₹)</div>
+        <div style="display:flex;align-items:flex-end;gap:6px;height:100px;margin-top:8px" id="rev-chart"></div>
+        <div style="display:flex;justify-content:space-between;margin-top:6px"><span style="font-size:9px;color:rgba(255,255,255,.2);font-weight:700">OCT</span><span style="font-size:9px;color:rgba(255,255,255,.2);font-weight:700">NOV</span><span style="font-size:9px;color:rgba(255,255,255,.2);font-weight:700">DEC</span><span style="font-size:9px;color:rgba(255,255,255,.2);font-weight:700">JAN</span><span style="font-size:9px;color:rgba(255,255,255,.2);font-weight:700">FEB</span><span style="font-size:9px;color:rgba(255,255,255,.2);font-weight:700">MAR</span></div>
+      </div>
+      <div class="card"><div class="card-title">🏆 Category Breakdown</div>
+        <div style="display:flex;flex-direction:column;gap:10px;margin-top:8px">
+          <div><div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font-size:11px;font-weight:700;color:rgba(255,255,255,.6)">🌱 Seeds</span><span style="font-size:11px;font-weight:700;color:#00b4d8">42%</span></div><div style="height:6px;background:rgba(255,255,255,.07);border-radius:3px;overflow:hidden"><div style="width:42%;height:100%;background:linear-gradient(90deg,#006d8a,#00b4d8);border-radius:3px"></div></div></div>
+          <div><div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font-size:11px;font-weight:700;color:rgba(255,255,255,.6)">🧪 Fertilizer</span><span style="font-size:11px;font-weight:700;color:#00b4d8">31%</span></div><div style="height:6px;background:rgba(255,255,255,.07);border-radius:3px;overflow:hidden"><div style="width:31%;height:100%;background:linear-gradient(90deg,#006d8a,#00b4d8);border-radius:3px"></div></div></div>
+          <div><div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font-size:11px;font-weight:700;color:rgba(255,255,255,.6)">🌿 Organic</span><span style="font-size:11px;font-weight:700;color:#00b4d8">18%</span></div><div style="height:6px;background:rgba(255,255,255,.07);border-radius:3px;overflow:hidden"><div style="width:18%;height:100%;background:linear-gradient(90deg,#006d8a,#00b4d8);border-radius:3px"></div></div></div>
+          <div><div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font-size:11px;font-weight:700;color:rgba(255,255,255,.6)">🧴 Pesticide</span><span style="font-size:11px;font-weight:700;color:#00b4d8">9%</span></div><div style="height:6px;background:rgba(255,255,255,.07);border-radius:3px;overflow:hidden"><div style="width:9%;height:100%;background:linear-gradient(90deg,#006d8a,#00b4d8);border-radius:3px"></div></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ SETTINGS ══ -->
+  <div class="tab-panel" id="panel-settings">
+    <div class="settings-layout">
+      <div class="settings-nav">
+        <div class="snav-item active" onclick="switchSettings('shop',this)"><span class="snav-ic">🏪</span>Shop Profile</div>
+        <div class="snav-item" onclick="switchSettings('notifications',this)"><span class="snav-ic">🔔</span>Notifications</div>
+        <div class="snav-item" onclick="switchSettings('database',this)"><span class="snav-ic">🗄️</span>Database Info</div>
+        <div class="snav-item" onclick="switchSettings('account',this)"><span class="snav-ic">⚠️</span>Account</div>
+      </div>
+      <div>
+        <div class="s-section active" id="s-shop">
+          <div class="s-section-title">Shop Profile</div>
+          <div class="s-section-sub">Update your dealership information</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+            <div class="s-form-group"><div class="s-form-label">Shop Name</div><input class="s-input" type="text" value="Sharma Agro Inputs"></div>
+            <div class="s-form-group"><div class="s-form-label">Owner Name</div><input class="s-input" type="text" value="Rajesh Sharma"></div>
+            <div class="s-form-group"><div class="s-form-label">Phone</div><input class="s-input" type="tel" value="+91 94729 11234"></div>
+            <div class="s-form-group"><div class="s-form-label">GSTIN</div><input class="s-input" type="text" value="27ABCDE1234F1Z5" placeholder="GST number"></div>
+            <div class="s-form-group"><div class="s-form-label">City / Town</div><input class="s-input" type="text" value="Pune"></div>
+            <div class="s-form-group"><div class="s-form-label">State</div><select class="s-select"><option>Maharashtra</option><option>Karnataka</option><option>Gujarat</option><option>Rajasthan</option></select></div>
+          </div>
+          <div class="s-form-group"><div class="s-form-label">Full Address</div><textarea class="s-input" style="resize:vertical;min-height:70px">Shop No. 14, Agri Complex, Hadapsar, Pune - 411028</textarea></div>
+          <div class="save-bar"><div style="font-size:12px;color:rgba(255,255,255,.4)">Changes affect your public dealer profile</div><button class="s-btn s-btn-primary" onclick="showToast('✅ Shop profile saved!')">Save Changes</button></div>
+        </div>
+        <div class="s-section" id="s-notifications">
+          <div class="s-section-title">Notification Settings</div>
+          <div class="s-section-sub">Choose which alerts to receive</div>
+          <div class="s-row"><div><div class="s-label">New Order Alerts</div><div class="s-sub">Notify immediately when a new order arrives</div></div><label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label></div>
+          <div class="s-row"><div><div class="s-label">Low Stock Warnings</div><div class="s-sub">Alert when product stock falls below 10 units</div></div><label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label></div>
+          <div class="s-row"><div><div class="s-label">Customer Reviews</div><div class="s-sub">Get notified of new ratings and feedback</div></div><label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label></div>
+          <div class="s-row"><div><div class="s-label">Weekly Sales Report</div><div class="s-sub">Summary email every Monday</div></div><label class="toggle"><input type="checkbox"><span class="toggle-slider"></span></label></div>
+          <div class="save-bar"><div></div><button class="s-btn s-btn-primary" onclick="showToast('✅ Notification settings saved!')">Save</button></div>
+        </div>
+        <div class="s-section" id="s-database">
+          <div class="s-section-title">Database & Sync Info</div>
+          <div class="s-section-sub">Status of your dealer data on AgroLink servers</div>
+          <div class="db-status"><div class="db-dot"></div><div><div class="db-name">AgroLink PostgreSQL</div><div class="db-info">dealers + dealer_products + orders tables</div></div><div class="db-badge">Connected</div></div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div style="display:flex;justify-content:space-between;padding:10px 14px;background:rgba(255,255,255,.03);border-radius:11px;border:1px solid rgba(255,255,255,.06)"><span style="font-size:12px;color:rgba(255,255,255,.5)">Dealer ID</span><span style="font-size:12px;font-weight:700;color:rgba(0,180,216,.7);font-family:monospace">b7e4a2c1-9d3f-4b1e…</span></div>
+            <div style="display:flex;justify-content:space-between;padding:10px 14px;background:rgba(255,255,255,.03);border-radius:11px;border:1px solid rgba(255,255,255,.06)"><span style="font-size:12px;color:rgba(255,255,255,.5)">Products Listed</span><span style="font-size:12px;font-weight:700;color:white">12 products</span></div>
+            <div style="display:flex;justify-content:space-between;padding:10px 14px;background:rgba(255,255,255,.03);border-radius:11px;border:1px solid rgba(255,255,255,.06)"><span style="font-size:12px;color:rgba(255,255,255,.5)">Total Orders</span><span style="font-size:12px;font-weight:700;color:white">36 orders</span></div>
+            <div style="display:flex;justify-content:space-between;padding:10px 14px;background:rgba(255,255,255,.03);border-radius:11px;border:1px solid rgba(255,255,255,.06)"><span style="font-size:12px;color:rgba(255,255,255,.5)">Schema Tables Used</span><span style="font-size:12px;font-weight:700;color:rgba(0,180,216,.7)">dealers, dealer_products, users</span></div>
+          </div>
+        </div>
+        <div class="s-section" id="s-account">
+          <div class="s-section-title">Account Management</div>
+          <div class="s-section-sub">Danger zone — irreversible actions</div>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <button class="s-btn s-btn-outline" onclick="showToast('📴 Account deactivated temporarily')">Pause Dealership</button>
+            <button class="s-btn s-btn-danger" onclick="if(confirm('Delete account permanently?'))showToast('🗑️ Account deletion requested')">🗑️ Delete Dealer Account</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- ADD PRODUCT MODAL -->
+<div class="modal-overlay" id="add-product-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeAddProduct()">✕</button>
+    <div class="modal-title">Add New Product</div>
+    <div class="modal-sub">List a product for farmers in your area to discover and order</div>
+
+    <!-- Photo upload -->
+    <div class="fl" style="margin-bottom:8px">Product Photos</div>
+    <div class="photo-upload" id="photo-upload-zone">
+      <input type="file" id="product-photos" accept="image/*" multiple onchange="handleProductPhotos(event)">
+      <div class="pu-icon">🖼️</div>
+      <div class="pu-title">Upload product photos</div>
+      <div class="pu-sub">PNG, JPG — up to 5 photos, max 5MB each</div>
+    </div>
+    <div class="photo-preview-grid" id="photo-preview-grid"></div>
+    <button class="add-more-photos" id="add-more-btn" onclick="document.getElementById('product-photos').click()">📷 Add More Photos</button>
+
+    <!-- Category -->
+    <div class="fl" style="margin-bottom:8px">Category <span style="color:#ff6b6b">*</span></div>
+    <div class="cat-picker" id="cat-picker">
+      <div class="cat-opt" onclick="selectCat(this,'Seeds')"><span class="cat-opt-ic">🌱</span>Seeds</div>
+      <div class="cat-opt" onclick="selectCat(this,'Fertilizer')"><span class="cat-opt-ic">🧪</span>Fertilizer</div>
+      <div class="cat-opt" onclick="selectCat(this,'Pesticide')"><span class="cat-opt-ic">🧴</span>Pesticide</div>
+      <div class="cat-opt" onclick="selectCat(this,'Organic')"><span class="cat-opt-ic">🌿</span>Organic</div>
+      <div class="cat-opt" onclick="selectCat(this,'Irrigation')"><span class="cat-opt-ic">💧</span>Irrigation</div>
+      <div class="cat-opt" onclick="selectCat(this,'Machinery')"><span class="cat-opt-ic">🚜</span>Machinery</div>
+      <div class="cat-opt" onclick="selectCat(this,'Storage')"><span class="cat-opt-ic">🏭</span>Storage</div>
+      <div class="cat-opt" onclick="selectCat(this,'Finance')"><span class="cat-opt-ic">💰</span>Finance</div>
+    </div>
+    <input type="hidden" id="selected-cat" value="">
+    <div style="font-size:11px;color:#ff6b6b;display:none" id="cat-error">Please select a category</div>
+
+    <div class="modal-divider"></div>
+
+    <div class="fi-grid">
+      <div class="fg"><div class="fl">Product Name <span style="color:#ff6b6b">*</span></div><input class="fi" id="prod-name" type="text" placeholder="e.g. PM-69 Hybrid Rice Seeds"></div>
+      <div class="fg"><div class="fl">Brand / Company</div><input class="fi" id="prod-brand" type="text" placeholder="e.g. Pioneer, Bayer, IFFCO"></div>
+    </div>
+    <div class="fg"><div class="fl">Description <span style="color:#ff6b6b">*</span></div><textarea class="fi ta" id="prod-desc" placeholder="Describe the product — uses, benefits, dosage instructions…"></textarea></div>
+    <div class="fi-grid">
+      <div class="fg"><div class="fl">Price (₹) <span style="color:#ff6b6b">*</span></div><input class="fi" id="prod-price" type="number" placeholder="e.g. 450" min="0" step="0.5"></div>
+      <div class="fg"><div class="fl">Unit</div><select class="fi" id="prod-unit"><option value="kg">per kg</option><option value="litre">per litre</option><option value="bag">per bag</option><option value="piece">per piece</option><option value="set">per set</option><option value="acre_dose">per acre dose</option></select></div>
+      <div class="fg"><div class="fl">Stock Quantity</div><input class="fi" id="prod-stock" type="number" placeholder="e.g. 100" min="0"></div>
+      <div class="fg"><div class="fl">Availability</div><select class="fi" id="prod-avail"><option value="1">Available</option><option value="0">Out of Stock</option></select></div>
+    </div>
+
+    <button class="modal-submit" onclick="submitProduct()">📦 List Product</button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ══ ORDERS DATA ══
+const ORDERS=[
+  {id:'ORD-2847',farmer:'Ramesh Kumar',loc:'Nanjangud, Karnataka',avatar:'👨‍🌾',items:[{n:'PM-69 Seeds',q:'5 kg',p:2250},{n:'NPK 19-19-19',q:'25 kg',p:1875}],total:4125,status:'pending',time:'2 hrs ago'},
+  {id:'ORD-2846',farmer:'Suresh Patil',loc:'Solapur, Maharashtra',avatar:'👨‍🌾',items:[{n:'Mancozeb 75 WP',q:'10 kg',p:1900}],total:1900,status:'pending',time:'4 hrs ago'},
+  {id:'ORD-2845',farmer:'Anita Devi',loc:'Amravati, Maharashtra',avatar:'👩‍🌾',items:[{n:'Neem Cake',q:'50 kg',p:1500},{n:'Trichoderma',q:'5 kg',p:750}],total:2250,status:'pending',time:'6 hrs ago'},
+  {id:'ORD-2844',farmer:'Mohan Reddy',loc:'Kurnool, Andhra Pradesh',avatar:'👨‍🌾',items:[{n:'Drip Emitters Set',q:'1 set',p:3500}],total:3500,status:'pending',time:'8 hrs ago'},
+  {id:'ORD-2843',farmer:'Geeta Singh',loc:'Varanasi, Uttar Pradesh',avatar:'👩‍🌾',items:[{n:'Urea Fertilizer',q:'50 kg',p:1200}],total:1200,status:'confirmed',time:'Yesterday'},
+  {id:'ORD-2842',farmer:'Ravi Kumar',loc:'Hassan, Karnataka',avatar:'👨‍🌾',items:[{n:'Imidacloprid 17.8 SL',q:'1 litre',p:850}],total:850,status:'delivered',time:'2 days ago'},
+  {id:'ORD-2841',farmer:'Priya Nair',loc:'Thrissur, Kerala',avatar:'👩‍🌾',items:[{n:'Vermicompost',q:'100 kg',p:2000}],total:2000,status:'delivered',time:'3 days ago'},
+  {id:'ORD-2840',farmer:'Arun Sharma',loc:'Jaipur, Rajasthan',avatar:'👨‍🌾',items:[{n:'Sprinkler Kit',q:'1 set',p:4200}],total:4200,status:'cancelled',time:'4 days ago'},
+];
+
+// ══ PRODUCTS DATA ══
+const CAT_ICONS={'Seeds':'🌱','Fertilizer':'🧪','Pesticide':'🧴','Organic':'🌿','Irrigation':'💧','Machinery':'🚜','Storage':'🏭','Finance':'💰'};
+let PRODUCTS=[
+  {id:1,name:'PM-69 Hybrid Rice Seeds',brand:'Pioneer',cat:'Seeds',desc:'High-yielding hybrid rice for Kharif season. Resistant to bacterial leaf blight. Suitable for black cotton and alluvial soil.',price:450,unit:'kg',stock:120,img:null,avail:true},
+  {id:2,name:'NPK 19-19-19 Water Soluble',brand:'Coromandel',cat:'Fertilizer',desc:'Balanced water-soluble fertilizer for fertigation and foliar spray. Ideal for all crops at vegetative stage.',price:75,unit:'kg',stock:340,img:null,avail:true},
+  {id:3,name:'Mancozeb 75 WP Fungicide',brand:'Dhanuka Agritech',cat:'Pesticide',desc:'Broad spectrum contact fungicide. Controls late blight, downy mildew and alternaria in vegetables and cereals.',price:190,unit:'kg',stock:8,img:null,avail:true},
+  {id:4,name:'Neem Cake Organic Fertilizer',brand:'Agro Organic',cat:'Organic',desc:'Cold-pressed neem cake. Controls soil nematodes and acts as slow-release nitrogen source. NPOP certified.',price:30,unit:'kg',stock:0,img:null,avail:false},
+  {id:5,name:'Drip Irrigation Starter Kit',brand:'Netafim',cat:'Irrigation',desc:'Complete drip system for 0.5 acre plot. Includes inline drip tape, filters, connectors and manual.',price:4800,unit:'set',stock:15,img:null,avail:true},
+  {id:6,name:'Imidacloprid 17.8 SL',brand:'Bayer CropScience',cat:'Pesticide',desc:'Systemic insecticide for sucking pests — aphids, whitefly, thrips, jassids. 0.3 ml/litre dilution.',price:850,unit:'litre',stock:6,img:null,avail:true},
+];
+
+// ══ CUSTOMERS ══
+const CUSTOMERS=[
+  {name:'Ramesh Kumar',loc:'Nanjangud, Karnataka',orders:3,total:'₹8,250',crop:'Rice, Wheat'},
+  {name:'Suresh Patil',loc:'Solapur, Maharashtra',orders:5,total:'₹12,400',crop:'Soybean, Cotton'},
+  {name:'Anita Devi',loc:'Amravati, Maharashtra',orders:2,total:'₹3,900',crop:'Tomato, Onion'},
+  {name:'Mohan Reddy',loc:'Kurnool, Andhra Pradesh',orders:4,total:'₹9,100',crop:'Groundnut, Chilli'},
+  {name:'Geeta Singh',loc:'Varanasi, UP',orders:1,total:'₹1,200',crop:'Wheat'},
+];
+
+let currentOrderFilter='all';
+let productImages=[];
+let selectedCategory='';
+
+// ══ INIT ══
+function init(){
+  renderOverviewOrders();
+  renderOrders('all');
+  renderProducts();
+  renderCustomers();
+  buildRevChart();
+}
+
+function renderOverviewOrders(){
+  const c=document.getElementById('overview-orders');
+  const pending=ORDERS.filter(o=>o.status==='pending').slice(0,3);
+  c.innerHTML='';
+  pending.forEach(o=>c.appendChild(buildOrderCard(o,true)));
+}
+
+function renderOrders(filter){
+  const c=document.getElementById('orders-list');c.innerHTML='';
+  const list=filter==='all'?ORDERS:ORDERS.filter(o=>o.status===filter);
+  if(!list.length){c.innerHTML='<div style="text-align:center;padding:40px;color:rgba(255,255,255,.3);font-size:13px;font-weight:700">No orders found</div>';return;}
+  list.forEach(o=>c.appendChild(buildOrderCard(o,false)));
+}
+
+function buildOrderCard(o,compact){
+  const div=document.createElement('div');div.className='order-card';div.dataset.status=o.status;
+  const badges={'pending':'badge-pending','confirmed':'badge-confirmed','delivered':'badge-delivered','cancelled':'badge-cancelled'};
+  const badgeTxt={'pending':'⏳ Pending','confirmed':'✅ Confirmed','delivered':'🚚 Delivered','cancelled':'❌ Cancelled'};
+  const itemsHtml=o.items.map(i=>`<div class="order-item-chip">${i.n} · ${i.q} <span style="color:#00b4d8;margin-left:4px">₹${i.p.toLocaleString()}</span></div>`).join('');
+  const actionsHtml = o.status==='pending'
+    ? `<button class="order-btn obtn-confirm" onclick="updateOrderStatus('${o.id}','confirmed')">✅ Confirm</button><button class="order-btn obtn-cancel" onclick="updateOrderStatus('${o.id}','cancelled')">✕ Cancel</button>`
+    : o.status==='confirmed'
+    ? `<button class="order-btn obtn-deliver" onclick="updateOrderStatus('${o.id}','delivered')">🚚 Mark Delivered</button>`
+    : '';
+  div.innerHTML=`<div class="order-header"><span class="order-id">${o.id}</span><div style="display:flex;gap:8px;align-items:center"><span class="order-badge ${badges[o.status]}">${badgeTxt[o.status]}</span><span class="order-time">${o.time}</span></div></div><div class="order-farmer"><div class="farmer-av">${o.avatar}</div><div><div class="farmer-name">${o.farmer}</div><div class="farmer-loc">📍 ${o.loc}</div></div></div><div class="order-items">${itemsHtml}</div><div class="order-footer"><div class="order-total">₹${o.total.toLocaleString()}</div><div class="order-actions">${actionsHtml}</div></div>`;
+  return div;
+}
+
+function updateOrderStatus(id,newStatus){
+  const o=ORDERS.find(x=>x.id===id);if(!o)return;
+  o.status=newStatus;
+  renderOrders(currentOrderFilter);
+  renderOverviewOrders();
+  const msgs={confirmed:`✅ Order ${id} confirmed!`,delivered:`🚚 Order ${id} marked as delivered!`,cancelled:`❌ Order ${id} cancelled`};
+  showToast(msgs[newStatus]);
+}
+
+function filterOrders(f,btn){
+  currentOrderFilter=f;
+  document.querySelectorAll('.ofilter').forEach(b=>b.classList.remove('active'));
+  if(btn)btn.classList.add('active');
+  renderOrders(f);
+}
+
+function renderProducts(){
+  const g=document.getElementById('product-grid');g.innerHTML='';
+  const filt=document.getElementById('prod-cat-filter')?.value||'all';
+  const list=filt==='all'?PRODUCTS:PRODUCTS.filter(p=>p.cat===filt);
+  document.getElementById('product-count-label').textContent=`${list.length} products listed`;
+  list.forEach(p=>{
+    const card=document.createElement('div');card.className='product-card';
+    const stockClass=p.stock===0?'stock-out':p.stock<15?'stock-low':'stock-ok';
+    const stockTxt=p.stock===0?'Out of Stock':p.stock<15?`Low: ${p.stock} left`:`${p.stock} in stock`;
+    const imgHtml=p.img
+      ?`<div class="product-img" style="height:160px;overflow:hidden"><img src="${p.img}" alt="${p.name}" style="width:100%;height:100%;object-fit:cover"></div>`
+      :`<div class="product-img no-img" style="height:160px">${CAT_ICONS[p.cat]||'📦'}</div>`;
+    card.innerHTML=`${imgHtml}<button class="product-edit-btn" onclick="editProduct(${p.id},event)">✏️</button><div class="product-body"><div class="product-cat">${CAT_ICONS[p.cat]||'📦'} ${p.cat}</div><div class="product-name">${p.name}</div><div class="product-brand">${p.brand||'—'}</div><div class="product-desc">${p.desc}</div><div class="product-footer"><div class="product-price">₹${p.price.toLocaleString()}<span>/${p.unit}</span></div><div class="product-stock ${stockClass}">${stockTxt}</div></div></div>`;
+    g.appendChild(card);
+  });
+}
+
+function filterProducts(){renderProducts();}
+
+// ══ MARKETPLACE MANAGEMENT ══
+let allMarketplaceProducts = [];
+
+async function loadMarketplace() {
+  try {
+    const res = await fetch(`${API_BASE}/api/products`);
+    const data = await res.json();
+    if(data.success && data.products){
+      allMarketplaceProducts = data.products;
+      renderMarketplace('all');
+      document.getElementById('marketplace-count-label').textContent = `${data.products.length} products available from farmers`;
+    }
+  } catch (e) {
+    console.error('Failed to load marketplace:', e);
+    showToast('❌ Error loading marketplace');
+  }
+}
+
+function renderMarketplace(filter='all'){
+  const grid = document.getElementById('marketplace-grid');
+  if (!grid) return;
+  grid.innerHTML = '';
+  
+  const list = filter === 'all' || filter === null ? allMarketplaceProducts : allMarketplaceProducts.filter(p => p.category === filter);
+  document.getElementById('marketplace-count-label').textContent = `${list.length} product${list.length !== 1 ? 's' : ''} available`;
+  
+  if(list.length === 0){
+    grid.innerHTML = '<div style="grid-column: 1/-1; text-align:center;padding:40px;color:rgba(255,255,255,.3);font-size:13px;font-weight:700">No products in this category</div>';
+    return;
+  }
+
+  list.forEach(p=>{
+    const card = document.createElement('div');
+    card.className = 'product-card';
+    const emoji = {Fruits:'🥭',Vegetables:'🥒',Grains:'🌾',Organic:'🥬',Spices:'🌶️','Agri Products':'🧪'}[p.category] || '🛍️';
+    card.innerHTML = `
+      <div class="product-img no-img" style="height:160px;background:rgba(0,180,216,.06)">${emoji}</div>
+      <div class="product-body">
+        <div class="product-cat">${emoji} ${p.category || 'Product'}</div>
+        <div class="product-name">${p.product_name}</div>
+        <div class="product-brand">👨‍🌾 Farmer #${p.product_owner_id}</div>
+        <div style="font-size:11px;color:rgba(255,255,255,.4);margin-bottom:8px;line-height:1.4">${p.product_description || 'No description'}</div>
+        <div class="product-footer">
+          <div class="product-price">₹${p.product_price}<span>/${p.unit || 'unit'}</span></div>
+          <div class="product-stock stock-ok">⭐ 4.5</div>
+        </div>
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+function filterMarketplaceProducts(){
+  const filter = document.getElementById('market-cat-filter')?.value || 'all';
+  renderMarketplace(filter);
+}
+
+function editProduct(id,e){
+  e.stopPropagation();
+  showToast(`✏️ Edit product ${id} — coming soon`);
+}
+
+function renderCustomers(){
+  const c=document.getElementById('customers-list');c.innerHTML='';
+  CUSTOMERS.forEach(cu=>{
+    const d=document.createElement('div');d.style.cssText='display:flex;align-items:center;gap:14px;padding:12px 14px;background:rgba(255,255,255,.025);border-radius:13px;border:1px solid rgba(255,255,255,.06)';
+    d.innerHTML=`<div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#1a5c1e,#56c239);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">👨‍🌾</div><div style="flex:1"><div style="font-size:13px;font-weight:700;color:white;margin-bottom:2px">${cu.name}</div><div style="font-size:10px;color:rgba(255,255,255,.35)">📍 ${cu.loc} · 🌱 ${cu.crop}</div></div><div style="text-align:right;flex-shrink:0"><div style="font-size:13px;font-weight:800;color:#00b4d8">${cu.total}</div><div style="font-size:10px;color:rgba(255,255,255,.3)">${cu.orders} order${cu.orders>1?'s':''}</div></div>`;
+    c.appendChild(d);
+  });
+}
+
+function buildRevChart(){
+  const vals=[28000,35000,42000,38000,45000,48000];const max=Math.max(...vals);
+  const c=document.getElementById('rev-chart');if(!c)return;
+  vals.forEach(v=>{const b=document.createElement('div');b.style.cssText=`flex:1;height:${(v/max)*100}%;background:linear-gradient(to top,rgba(0,180,216,.3),rgba(0,180,216,.7));border-radius:3px 3px 0 0;min-height:4px`;c.appendChild(b);});
+}
+
+// ══ ADD PRODUCT ══
+function openAddProduct(){
+  document.getElementById('add-product-modal').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeAddProduct(){
+  document.getElementById('add-product-modal').classList.remove('open');
+  document.body.style.overflow='';
+}
+document.getElementById('add-product-modal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeAddProduct();});
+
+function selectCat(el,cat){
+  document.querySelectorAll('.cat-opt').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  selectedCategory=cat;
+  document.getElementById('selected-cat').value=cat;
+  document.getElementById('cat-error').style.display='none';
+}
+
+function handleProductPhotos(e){
+  const files=Array.from(e.target.files);
+  files.forEach(f=>{
+    if(productImages.length>=5)return;
+    const reader=new FileReader();
+    reader.onload=ev=>{
+      productImages.push(ev.target.result);
+      renderPhotoPreviews();
+    };reader.readAsDataURL(f);
+  });
+}
+
+function renderPhotoPreviews(){
+  const grid=document.getElementById('photo-preview-grid');
+  const addBtn=document.getElementById('add-more-btn');
+  const uploadZone=document.getElementById('photo-upload-zone');
+  grid.innerHTML='';
+  productImages.forEach((src,i)=>{
+    const d=document.createElement('div');d.className='photo-thumb';
+    d.innerHTML=`<img src="${src}" alt="product photo"><button class="photo-remove" onclick="removePhoto(${i})">×</button>`;
+    grid.appendChild(d);
+  });
+  const hasPhotos=productImages.length>0;
+  grid.classList.toggle('show',hasPhotos);
+  addBtn.classList.toggle('show',hasPhotos&&productImages.length<5);
+  uploadZone.style.display=hasPhotos?'none':'flex';
+}
+
+function removePhoto(idx){
+  productImages.splice(idx,1);
+  renderPhotoPreviews();
+}
+
+function submitProduct(){
+  const name=document.getElementById('prod-name').value.trim();
+  const price=document.getElementById('prod-price').value;
+  const desc=document.getElementById('prod-desc').value.trim();
+  const cat=selectedCategory;
+  if(!cat){document.getElementById('cat-error').style.display='block';return;}
+  if(!name){showToast('⚠️ Please enter a product name');return;}
+  if(!price||price<=0){showToast('⚠️ Please enter a valid price');return;}
+  if(!desc){showToast('⚠️ Please add a description');return;}
+  const newProduct={
+    id:PRODUCTS.length+1,
+    name,
+    brand:document.getElementById('prod-brand').value.trim(),
+    cat,
+    desc,
+    price:parseFloat(price),
+    unit:document.getElementById('prod-unit').value,
+    stock:parseInt(document.getElementById('prod-stock').value)||0,
+    img:productImages[0]||null,
+    avail:document.getElementById('prod-avail').value==='1'
+  };
+  PRODUCTS.unshift(newProduct);
+  closeAddProduct();
+  // Reset form
+  document.getElementById('prod-name').value='';document.getElementById('prod-brand').value='';
+  document.getElementById('prod-desc').value='';document.getElementById('prod-price').value='';
+  document.getElementById('prod-stock').value='';
+  selectedCategory='';productImages=[];
+  document.querySelectorAll('.cat-opt').forEach(c=>c.classList.remove('active'));
+  renderPhotoPreviews();
+  document.getElementById('photo-upload-zone').style.display='flex';
+  renderProducts();
+  switchTab('products',null);
+  showToast(`✅ "${newProduct.name}" listed successfully!`);
+  document.getElementById('order-count-tab').textContent=PRODUCTS.length;
+}
+
+// ══ TAB + SETTINGS ══
+function switchTab(tab,btn){
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn,.sb-item').forEach(b=>b.classList.remove('active'));
+  document.getElementById('panel-'+tab)?.classList.add('active');
+  document.getElementById('tab-'+tab)?.classList.add('active');
+  if(btn)btn.classList.add('active');
+  const titles={overview:'Dealer Dashboard 🏪',orders:'Orders 📋',products:'My Products 📦',marketplace:'Farmer Marketplace 🛍️',customers:'Customers 👨‍🌾',analytics:'Analytics 📊',settings:'Settings ⚙️'};
+  document.getElementById('page-title-text').textContent=titles[tab]||'Dashboard';
+  window.scrollTo({top:0,behavior:'smooth'});
+  
+  // Load products when products tab is clicked
+  if(tab === 'products') loadDealerProducts();
+  // Load marketplace when marketplace tab is clicked
+  if(tab === 'marketplace') loadMarketplace();
+}
+function switchSettings(sec,el){
+  document.querySelectorAll('.s-section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.snav-item').forEach(s=>s.classList.remove('active'));
+  document.getElementById('s-'+sec)?.classList.add('active');
+  if(el)el.classList.add('active');
+}
+
+// ══ LOGOUT ══
+function doLogout(){
+  fetch('/auth/logout', {method: 'POST', headers: {'Content-Type': 'application/json'}})
+  .then(() => {
+    localStorage.removeItem('agrolink_token');
+    localStorage.removeItem('agrolink_user');
+    localStorage.removeItem('token');
+    localStorage.removeItem('user_id');
+    localStorage.removeItem('role');
+    localStorage.removeItem('username');
+    window.location.href = '/login';
+  })
+  .catch(err => {
+    console.error('Logout error:', err);
+    localStorage.clear();
+    window.location.href = '/login';
+  });
+}
+
+// ══ TOAST ══
+function showToast(msg){
+  const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+// ══ API BASE ══
+const API_BASE = 'http://localhost:5000';
+
+// ══ LOAD USER DATA ══
+document.addEventListener('DOMContentLoaded', async () => {
+  const storedUser = JSON.parse(localStorage.getItem('agrolink_user') || '{}');
+  const userId = storedUser.user_id || localStorage.getItem('user_id');
+  
+  if (!userId) {
+    window.location.href = 'agrolink-login.html';
+    return;
+  }
+
+  try {
+    const res = await fetch(`${API_BASE}/api/user/${userId}`, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' }
+    });
+    
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    
+    if (data.success && data.profile) {
+      const user = data.profile;
+      // Update sidebar with user data
+      const nameEl = document.getElementById('sb-pname-display');
+      const roleEl = document.getElementById('sb-prole-display');
+      const avatarEl = document.getElementById('sb-avatar-display');
+      
+      if (nameEl) nameEl.textContent = user.full_name || 'Dealer';
+      if (roleEl) roleEl.textContent = `Dealer ${user.location ? '· ' + user.location : ''}`;
+      if (avatarEl) avatarEl.textContent = user.shop_photo_url ? '🏪' : '🏪';
+      
+      // Update page title and subtitle
+      const titleEl = document.getElementById('page-title-text');
+      const subEl = document.getElementById('page-sub-text');
+      if (titleEl) titleEl.textContent = `${user.full_name || 'Dealer'} Dashboard 🏪`;
+      if (subEl) subEl.textContent = `${user.location || 'Location'} ${user.dealer_category ? '· ' + user.dealer_category : ''}`;
+      
+      // Load products from database
+      loadDealerProducts();
+    }
+  } catch (e) {
+    console.error('Failed to load user profile:', e);
+  }
+});
+
+init();
+
+// ══ DEALER PRODUCTS MANAGEMENT ══
+async function loadDealerProducts() {
+  const storedUser = JSON.parse(localStorage.getItem('agrolink_user') || '{}');
+  const userId = storedUser.user_id || localStorage.getItem('user_id');
+  try {
+    const res = await fetch(`${API_BASE}/api/dealer/products?user_id=${userId}`);
+    const data = await res.json();
+    if (data.success && data.products) {
+      renderProducts(data.products);
+      document.getElementById('product-count-label').textContent = `${data.products.length} product${data.products.length!==1?'s':''} listed`;
+    }
+  } catch (e) {
+    console.error('Failed to load products:', e);
+    showToast('❌ Error loading products');
+  }
+}
+
+function renderProducts(products) {
+  const grid = document.getElementById('product-grid');
+  if (!grid) return;
+  grid.innerHTML = '';
+  products.forEach(p => {
+    const card = document.createElement('div');
+    card.style.cssText = 'background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:10px';
+    card.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div><div style="font-size:13px;font-weight:700;color:rgba(255,255,255,.9)">${p.product_name || 'Product'}</div>
+        <div style="font-size:10px;color:rgba(255,255,255,.4);margin-top:2px">${p.category || 'General'}</div></div>
+        <div style="text-align:right"><div style="font-size:14px;font-weight:800;color:#00b4d8">₹${p.price || '0'}</div>
+        <div style="font-size:10px;color:rgba(255,255,255,.4)">Stock: ${p.stock || 0}</div></div>
+      </div>
+      ${p.description ? `<div style="font-size:11px;color:rgba(255,255,255,.5);line-height:1.4">${p.description}</div>` : ''}
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <button onclick="editProduct('${p.product_id}')" style="flex:1;padding:6px;background:rgba(0,180,216,.1);border:1px solid rgba(0,180,216,.2);color:#00b4d8;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;transition:.2s">✏️ Edit</button>
+        <button onclick="deleteProduct('${p.product_id}')" style="flex:1;padding:6px;background:rgba(255,80,80,.1);border:1px solid rgba(255,80,80,.2);color:#ff6b6b;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;transition:.2s">🗑️ Delete</button>
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+function openAddProduct() {
+  const productName = prompt('Product Name:');
+  if (!productName) return;
+  const category = prompt('Category (Seeds/Fertilizer/Pesticide/Organic/Irrigation/Machinery):') || 'General';
+  const price = parseFloat(prompt('Price (₹):')) || 0;
+  const stock = parseInt(prompt('Stock Quantity:')) || 0;
+  const description = prompt('Description (optional):') || '';
+  const brand = prompt('Brand (optional):') || '';
+  addProduct({product_name:productName, category, price, stock, description, brand, unit:'unit', image_url:''});
+}
+
+async function addProduct(productData) {
+  const storedUser = JSON.parse(localStorage.getItem('agrolink_user') || '{}');
+  const userId = storedUser.user_id || localStorage.getItem('user_id');
+  try {
+    const res = await fetch(`${API_BASE}/api/dealer/products`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({...productData, user_id: userId})
+    });
+    const data = await res.json();
+    if (data.success) {
+      showToast('✅ Product added!');
+      loadDealerProducts();
+    } else {
+      showToast('❌ Failed to add product');
+    }
+  } catch (e) {
+    console.error('Error adding product:', e);
+    showToast('❌ Error adding product');
+  }
+}
+
+async function editProduct(productId) {
+  const newName = prompt('New product name:');
+  if (!newName) return;
+  const newStock = parseInt(prompt('New stock:')) || 0;
+  const newPrice = parseFloat(prompt('New price:')) || 0;
+  try {
+    const res = await fetch(`${API_BASE}/api/dealer/products/${productId}`, {
+      method: 'PUT',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({product_name: newName, stock: newStock, price: newPrice})
+    });
+    const data = await res.json();
+    if (data.success) {
+      showToast('✅ Product updated!');
+      loadDealerProducts();
+    } else {
+      showToast('❌ Failed to update product');
+    }
+  } catch (e) {
+    console.error('Error updating product:', e);
+    showToast('❌ Error updating product');
+  }
+}
+
+async function deleteProduct(productId) {
+  if (!confirm('Delete this product?')) return;
+  try {
+    const res = await fetch(`${API_BASE}/api/dealer/products/${productId}`, {method: 'DELETE'});
+    const data = await res.json();
+    if (data.success) {
+      showToast('✅ Product deleted!');
+      loadDealerProducts();
+    } else {
+      showToast('❌ Failed to delete product');
+    }
+  } catch (e) {
+    console.error('Error deleting product:', e);
+    showToast('❌ Error deleting product');
+  }
+}
+
+function filterProducts() {
+  const filter = document.getElementById('prod-cat-filter')?.value;
+  if (!filter || filter === 'all') loadDealerProducts();
+  // TODO: Implement filtering by category
+}
+
+</script>
+</body>
+</html>

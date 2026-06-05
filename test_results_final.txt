@@ -1,0 +1,46 @@
+﻿
+[96m======================================================================[0m
+[1m[96m                 ≡ƒî╛ AgroLink Backend - Test Suite v2.0                 [0m
+[96m======================================================================[0m
+
+[1mBase URL: http://localhost:5000[0m
+[1mTime: 2026-04-04 14:09:41[0m
+
+[93mΓÅ│ Waiting for backend to be ready...[0m
+[92mΓ£à Starting tests[0m
+
+[94mTest 1: Database Connection[0m
+  [92mΓ£à PASSED[0m - DB connected: user (7 tables)
+[94mTest 2: User Registration - Farmer[0m
+  [92mΓ£à PASSED[0m - Farmer registered (ID: 53)
+[94mTest 3: User Registration - Dealer[0m
+  [92mΓ£à PASSED[0m - Dealer registered (ID: 54)
+[94mTest 4: User Registration - Consumer[0m
+  [92mΓ£à PASSED[0m - Consumer registered (ID: 55)
+[94mTest 5: User Login & JWT Token[0m
+  [92mΓ£à PASSED[0m - Login successful, token received (expires in 24h)
+[94mTest 6: Product Creation (with JWT token)[0m
+  [92mΓ£à PASSED[0m - Product created (ID: 9)
+[94mTest 7: Product Listing & Filtering[0m
+  [92mΓ£à PASSED[0m - Found 9 product(s)
+[94mTest 8: Get Product Details[0m
+  [92mΓ£à PASSED[0m - Endpoint working (product not found)
+[94mTest 9: Add Product Review (with JWT token)[0m
+  [92mΓ£à PASSED[0m - Review added (ID: 6)
+[94mTest 10: Get User Profile[0m
+  [92mΓ£à PASSED[0m - Profile endpoint working
+[94mTest 11: API Info Endpoint[0m
+  [92mΓ£à PASSED[0m - API running with 5 endpoints
+
+[96m======================================================================[0m
+[1m[96m                        ≡ƒôè Test Results Summary                        [0m
+[96m======================================================================[0m
+
+[1mTotal Tests: 11[0m
+[92m[1mPassed: 11 Γ£à[0m
+[91m[1mFailed: 0 Γ¥î[0m
+
+[92m[1m======================================================================
+≡ƒÄë ALL TESTS PASSED! System is ready for deployment ≡ƒÄë
+======================================================================[0m
+

@@ -1,0 +1,1262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AgroLink – Create Account</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Raleway:wght@300;400;600;700;800&family=Caveat:wght@600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Raleway',sans-serif;background:#071a08;min-height:100vh;overflow-x:hidden;color:white}
+
+/* ═══════════════════════════════════════
+   ANIMATED BACKGROUND
+═══════════════════════════════════════ */
+.bg-layer{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+.bg-gradient{
+  position:absolute;inset:0;
+  background:
+    radial-gradient(ellipse at 15% 20%,rgba(34,100,24,.55) 0%,transparent 50%),
+    radial-gradient(ellipse at 85% 70%,rgba(22,70,15,.5) 0%,transparent 50%),
+    radial-gradient(ellipse at 50% 100%,rgba(10,40,8,.8) 0%,transparent 60%),
+    linear-gradient(160deg,#041206 0%,#0a1f07 40%,#071a08 100%);
+}
+.bg-grid{
+  position:absolute;inset:0;
+  background-image:
+    linear-gradient(rgba(86,194,57,.04) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(86,194,57,.04) 1px,transparent 1px);
+  background-size:50px 50px;
+  animation:gridDrift 40s linear infinite;
+}
+@keyframes gridDrift{0%{transform:translate(0,0)}100%{transform:translate(50px,50px)}}
+.bg-orb{position:absolute;border-radius:50%;filter:blur(80px);animation:orbDrift ease-in-out infinite}
+@keyframes orbDrift{0%,100%{transform:scale(1) translate(0,0)}50%{transform:scale(1.15) translate(20px,-20px)}}
+
+/* Floating leaves */
+.bg-leaf{position:absolute;border-radius:0 50% 0 50%;animation:leafDrift linear infinite;opacity:0}
+@keyframes leafDrift{0%{transform:translateY(100vh) rotate(0) translateX(0);opacity:0}5%{opacity:.6}90%{opacity:.3}100%{transform:translateY(-10vh) rotate(540deg) translateX(60px);opacity:0}}
+
+/* Wheat row at bottom */
+.bg-wheat-row{position:fixed;bottom:0;left:0;right:0;height:90px;display:flex;gap:4px;align-items:flex-end;padding:0 8px;pointer-events:none;z-index:1;overflow:hidden}
+.bg-stalk{width:2px;background:linear-gradient(to top,#8b6914,#c8a832);border-radius:1px;transform-origin:bottom;animation:bgSway var(--d,3s) ease-in-out infinite var(--dl,0s);position:relative;flex-shrink:0}
+@keyframes bgSway{0%,100%{transform:rotate(-7deg)}50%{transform:rotate(7deg)}}
+.bg-stalk::after{content:'';position:absolute;top:-10px;left:-4px;width:10px;height:14px;background:linear-gradient(135deg,#7a5a0e,#c8a832);border-radius:3px 3px 0 0}
+
+/* ═══════════════════════════════════════
+   LAYOUT
+═══════════════════════════════════════ */
+.page{position:relative;z-index:10;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:32px 20px 120px}
+
+/* Header */
+.site-header{display:flex;align-items:center;gap:12px;margin-bottom:36px;animation:dropIn .8s cubic-bezier(.34,1.56,.64,1) both}
+@keyframes dropIn{0%{transform:translateY(-30px);opacity:0}100%{transform:translateY(0);opacity:1}}
+.header-logo-icon{font-size:36px;filter:drop-shadow(0 4px 16px rgba(86,194,57,.7))}
+.header-brand{font-family:'Playfair Display',serif;font-size:30px;font-weight:900;letter-spacing:3px;color:#56c239;text-shadow:0 0 30px rgba(86,194,57,.5)}
+.header-sep{width:1px;height:36px;background:rgba(255,255,255,.12);margin:0 4px}
+.header-page-title{font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.4)}
+
+/* Back link */
+.back-to-login{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:rgba(255,255,255,.35);text-decoration:none;margin-bottom:28px;transition:color .3s;animation:dropIn .8s .1s both}
+.back-to-login:hover{color:#56c239}
+.back-to-login svg{transition:transform .3s}
+.back-to-login:hover svg{transform:translateX(-3px)}
+
+/* Progress bar */
+.progress-wrap{width:100%;max-width:680px;margin-bottom:32px;animation:fadeUp .7s .2s both}
+@keyframes fadeUp{0%{transform:translateY(16px);opacity:0}100%{transform:translateY(0);opacity:1}}
+.progress-steps{display:flex;align-items:center;gap:0;position:relative}
+.p-step{display:flex;flex-direction:column;align-items:center;gap:6px;flex:1;position:relative;z-index:2}
+.p-dot{width:36px;height:36px;border-radius:50%;border:2px solid rgba(255,255,255,.15);background:rgba(0,0,0,.3);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:rgba(255,255,255,.3);transition:all .5s;position:relative}
+.p-dot.active{border-color:#56c239;background:rgba(86,194,57,.15);color:#56c239;box-shadow:0 0 20px rgba(86,194,57,.4)}
+.p-dot.done{border-color:#2a7a2e;background:#2a7a2e;color:white}
+.p-dot.done::after{content:'✓';position:absolute;font-size:14px}
+.p-dot.done .p-num{display:none}
+.p-label{font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:rgba(255,255,255,.3);transition:color .5s;text-align:center;white-space:nowrap}
+.p-step.active .p-label{color:#56c239}
+.p-step.done .p-label{color:rgba(255,255,255,.5)}
+.p-line{flex:1;height:2px;background:rgba(255,255,255,.08);position:relative;z-index:1;margin-top:-22px;transition:background .5s}
+.p-line.done{background:linear-gradient(90deg,#2a7a2e,#56c239)}
+
+/* Card */
+.reg-card{width:100%;max-width:680px;border-radius:28px;backdrop-filter:blur(24px);background:rgba(7,26,8,.82);border:1px solid rgba(86,194,57,.18);box-shadow:0 32px 100px rgba(0,0,0,.7),0 0 0 1px rgba(86,194,57,.08),inset 0 1px 0 rgba(86,194,57,.08);padding:40px 44px 36px;position:relative;overflow:hidden;animation:cardUp .9s .3s cubic-bezier(.34,1.56,.64,1) both}
+@keyframes cardUp{0%{transform:translateY(40px) scale(.97);opacity:0}100%{transform:translateY(0) scale(1);opacity:1}}
+.reg-card::before{content:'';position:absolute;top:0;left:-80%;width:50%;height:100%;background:linear-gradient(90deg,transparent,rgba(86,194,57,.03),transparent);animation:cardGleam 7s ease-in-out infinite;pointer-events:none}
+@keyframes cardGleam{0%{left:-80%}60%,100%{left:180%}}
+
+/* Step panels */
+.step-panel{display:none;animation:stepIn .45s cubic-bezier(.25,1,.5,1) both}
+.step-panel.active{display:block}
+@keyframes stepIn{0%{transform:translateX(20px);opacity:0}100%{transform:translateX(0);opacity:1}}
+@keyframes stepBack{0%{transform:translateX(-20px);opacity:0}100%{transform:translateX(0);opacity:1}}
+.step-panel.back{animation:stepBack .45s cubic-bezier(.25,1,.5,1) both}
+
+.step-heading{margin-bottom:28px}
+.step-eyebrow{font-size:11px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:#56c239;margin-bottom:6px;display:flex;align-items:center;gap:8px}
+.step-eyebrow::before{content:'';width:20px;height:2px;background:#56c239;border-radius:1px}
+.step-title{font-family:'Playfair Display',serif;font-size:26px;font-weight:700;color:white;margin-bottom:6px}
+.step-sub{font-size:13px;color:rgba(255,255,255,.4);line-height:1.6}
+.step-sub .req{color:#ff6b6b;font-weight:700}
+
+/* ═════ FORM ELEMENTS ═════ */
+.form-grid{display:grid;gap:18px}
+.form-grid.cols-2{grid-template-columns:1fr 1fr}
+.form-group{display:flex;flex-direction:column;gap:7px}
+.form-label{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.5);display:flex;align-items:center;gap:6px}
+.form-label .req-star{color:#ff6b6b;font-size:13px;line-height:1}
+.input-wrap{position:relative;display:flex;align-items:center}
+.i-icon{position:absolute;left:14px;font-size:16px;pointer-events:none;z-index:1}
+.form-input{width:100%;padding:13px 14px 13px 46px;background:rgba(255,255,255,.04);border:1.5px solid rgba(255,255,255,.1);border-radius:14px;color:white;font-family:'Raleway',sans-serif;font-size:14px;font-weight:500;outline:none;transition:all .3s}
+.form-input::placeholder{color:rgba(255,255,255,.22)}
+.form-input:focus{background:rgba(86,194,57,.06);border-color:rgba(86,194,57,.5);box-shadow:0 0 0 3px rgba(86,194,57,.1);transform:translateY(-1px)}
+.form-input.error{border-color:rgba(255,80,80,.6) !important;box-shadow:0 0 0 3px rgba(255,80,80,.1) !important}
+.form-input.valid{border-color:rgba(86,194,57,.5)}
+.eye-btn{position:absolute;right:14px;background:none;border:none;cursor:pointer;color:rgba(255,255,255,.3);font-size:15px;transition:color .3s;z-index:1}
+.eye-btn:hover{color:rgba(255,255,255,.7)}
+.field-hint{font-size:11px;color:rgba(255,255,255,.28);letter-spacing:.3px;padding-left:2px}
+.field-error{font-size:11px;color:#ff6b6b;padding-left:2px;display:none;animation:errPop .3s ease}
+@keyframes errPop{0%{transform:translateX(-4px);opacity:0}100%{transform:translateX(0);opacity:1}}
+.form-group.has-error .field-error{display:block}
+.form-group.has-error .field-hint{display:none}
+
+/* Select */
+.form-select{width:100%;padding:13px 14px 13px 46px;background:rgba(255,255,255,.04);border:1.5px solid rgba(255,255,255,.1);border-radius:14px;color:white;font-family:'Raleway',sans-serif;font-size:14px;font-weight:500;outline:none;transition:all .3s;appearance:none;cursor:pointer}
+.form-select:focus{background:rgba(86,194,57,.06);border-color:rgba(86,194,57,.5);box-shadow:0 0 0 3px rgba(86,194,57,.1)}
+.form-select option{background:#0d2b0e;color:white}
+.select-arrow{position:absolute;right:14px;font-size:12px;color:rgba(255,255,255,.35);pointer-events:none}
+
+/* Phone prefix */
+.phone-wrap{display:flex;gap:8px}
+.phone-prefix{padding:13px 14px;background:rgba(255,255,255,.04);border:1.5px solid rgba(255,255,255,.1);border-radius:14px;color:rgba(255,255,255,.6);font-family:'Raleway',sans-serif;font-size:14px;font-weight:600;min-width:70px;text-align:center}
+.phone-input{flex:1;padding:13px 14px;background:rgba(255,255,255,.04);border:1.5px solid rgba(255,255,255,.1);border-radius:14px;color:white;font-family:'Raleway',sans-serif;font-size:14px;font-weight:500;outline:none;transition:all .3s}
+.phone-input::placeholder{color:rgba(255,255,255,.22)}
+.phone-input:focus{background:rgba(86,194,57,.06);border-color:rgba(86,194,57,.5);box-shadow:0 0 0 3px rgba(86,194,57,.1)}
+.phone-input.error{border-color:rgba(255,80,80,.6) !important}
+.phone-input.valid{border-color:rgba(86,194,57,.5)}
+
+/* Password strength */
+.pwd-bar{height:4px;border-radius:2px;background:rgba(255,255,255,.07);margin-top:6px;overflow:hidden}
+.pwd-fill{height:100%;border-radius:2px;width:0;transition:width .4s,background .4s}
+.pwd-txt{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-top:5px;min-height:14px;transition:color .3s;color:rgba(255,255,255,.3)}
+
+/* Photo Upload */
+.photo-upload-wrap{margin-top:12px}
+.photo-input{display:none}
+.photo-preview{width:100%;min-height:140px;border:2px dashed rgba(86,194,57,.35);border-radius:16px;background:rgba(86,194,57,.04);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .3s;position:relative;overflow:hidden}
+.photo-preview:hover{border-color:rgba(86,194,57,.6);background:rgba(86,194,57,.1)}
+.photo-placeholder{text-align:center;width:100%;padding:20px}
+.photo-placeholder p{color:rgba(255,255,255,.5);margin:8px 0 0 0;font-size:12px}
+.photo-preview.has-image{border-color:rgba(86,194,57,.5);background:rgba(86,194,57,.08)}
+.photo-preview.has-image .photo-placeholder{display:none}
+.photo-preview img{width:100%;height:140px;object-fit:cover;border-radius:14px}
+.btn-remove-photo{padding:8px 14px;border:1px solid rgba(255,255,255,.2);border-radius:8px;background:rgba(255,100,100,.1);color:#ff6b6b;font-size:11px;font-weight:700;cursor:pointer;transition:all .3s}
+.btn-remove-photo:hover{background:rgba(255,100,100,.2);border-color:rgba(255,100,100,.4)}
+
+/* ═════ ROLE SELECTOR ═════ */
+.role-selector{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:4px}
+.role-card{border-radius:18px;border:2px solid rgba(255,255,255,.1);background:rgba(255,255,255,.03);padding:20px 14px;text-align:center;cursor:pointer;transition:all .35s;position:relative;overflow:hidden}
+.role-card::before{content:'';position:absolute;inset:0;opacity:0;transition:opacity .35s;border-radius:16px}
+.role-card:hover{border-color:rgba(86,194,57,.35);transform:translateY(-3px)}
+.role-card.selected{border-color:#56c239;background:rgba(86,194,57,.1);box-shadow:0 8px 30px rgba(86,194,57,.2)}
+.role-card.selected::before{opacity:1}
+.role-emoji{font-size:36px;display:block;margin-bottom:10px;transition:transform .35s}
+.role-card:hover .role-emoji,.role-card.selected .role-emoji{transform:scale(1.15)}
+.role-name{font-family:'Playfair Display',serif;font-size:15px;font-weight:700;color:white;margin-bottom:4px}
+.role-desc{font-size:10px;color:rgba(255,255,255,.4);letter-spacing:.5px;line-height:1.5}
+.role-check{position:absolute;top:10px;right:10px;width:20px;height:20px;border-radius:50%;background:#56c239;display:flex;align-items:center;justify-content:center;font-size:11px;opacity:0;transform:scale(0);transition:all .3s}
+.role-card.selected .role-check{opacity:1;transform:scale(1)}
+
+/* ═════ DEALER TYPE ═════ */
+.dealer-types{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:4px}
+.dtype-card{border-radius:14px;border:1.5px solid rgba(255,255,255,.1);background:rgba(255,255,255,.03);padding:14px 16px;cursor:pointer;transition:all .3s;display:flex;align-items:center;gap:12px}
+.dtype-card:hover{border-color:rgba(86,194,57,.35);background:rgba(86,194,57,.05)}
+.dtype-card.selected{border-color:#56c239;background:rgba(86,194,57,.1);box-shadow:0 4px 20px rgba(86,194,57,.15)}
+.dtype-emoji{font-size:24px;flex-shrink:0}
+.dtype-info .dtype-name{font-size:13px;font-weight:700;color:white;margin-bottom:2px}
+.dtype-info .dtype-sub{font-size:10px;color:rgba(255,255,255,.35);letter-spacing:.3px}
+.dtype-tick{margin-left:auto;width:18px;height:18px;border-radius:50%;background:#56c239;display:flex;align-items:center;justify-content:center;font-size:10px;opacity:0;transform:scale(0);transition:all .3s;flex-shrink:0}
+.dtype-card.selected .dtype-tick{opacity:1;transform:scale(1)}
+
+/* ═════ CROP SELECTION ═════ */
+.crop-search-wrap{position:relative;margin-bottom:16px}
+.crop-search{width:100%;padding:12px 14px 12px 44px;background:rgba(255, 192, 192, 0.05);border:1.5px solid rgba(255,255,255,.1);border-radius:14px;color:white;font-family:'Raleway',sans-serif;font-size:13px;outline:none;transition:all .3s}
+.crop-search::placeholder{color:rgba(255,255,255,.25)}
+.crop-search:focus{background:rgba(86,194,57,.06);border-color:rgba(86,194,57,.45)}
+.crop-search-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:16px;pointer-events:none}
+
+.crop-categories{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+.cat-btn{padding:6px 14px;border-radius:50px;border:1px solid rgba(255,255,255,.12);background:transparent;color:rgba(255,255,255,.4);font-family:'Raleway',sans-serif;font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;cursor:pointer;transition:all .3s}
+.cat-btn:hover{border-color:rgba(86,194,57,.4);color:rgba(255,255,255,.7)}
+.cat-btn.active{border-color:#56c239;background:rgba(86,194,57,.12);color:#56c239}
+
+.crop-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:10px;max-height:320px;overflow-y:auto;padding-right:4px}
+.crop-grid::-webkit-scrollbar{width:4px}
+.crop-grid::-webkit-scrollbar-track{background:rgba(255,255,255,.04);border-radius:2px}
+.crop-grid::-webkit-scrollbar-thumb{background:rgba(86,194,57,.3);border-radius:2px}
+
+.crop-card{border-radius:14px;border:1.5px solid rgba(255,255,255,.09);background:rgba(255,255,255,.03);padding:12px 8px 10px;text-align:center;cursor:pointer;transition:all .3s;position:relative;overflow:hidden}
+.crop-card:hover{border-color:rgba(86,194,57,.4);background:rgba(86,194,57,.07);transform:translateY(-2px)}
+.crop-card.selected{border-color:#56c239;background:rgba(86,194,57,.15);box-shadow:0 6px 20px rgba(86,194,57,.2)}
+.crop-card.hidden{display:none}
+.crop-img{font-size:36px;display:block;margin-bottom:6px;transition:transform .3s;line-height:1}
+.crop-card:hover .crop-img,.crop-card.selected .crop-img{transform:scale(1.2)}
+.crop-name{font-size:10px;font-weight:700;color:rgba(255,255,255,.7);letter-spacing:.3px;line-height:1.3}
+.crop-variety{font-size:9px;color:rgba(255,255,255,.35);margin-top:2px;font-style:italic}
+.crop-badge{position:absolute;top:5px;right:5px;width:16px;height:16px;border-radius:50%;background:#56c239;display:flex;align-items:center;justify-content:center;font-size:9px;opacity:0;transform:scale(0);transition:all .3s}
+.crop-card.selected .crop-badge{opacity:1;transform:scale(1)}
+
+.selected-crops-bar{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;min-height:32px;padding:4px 0}
+.crop-tag{display:inline-flex;align-items:center;gap:6px;padding:5px 12px 5px 8px;border-radius:50px;background:rgba(86,194,57,.15);border:1px solid rgba(86,194,57,.3);font-size:11px;font-weight:700;color:#7ddd5c;animation:tagPop .3s cubic-bezier(.34,1.56,.64,1) both}
+@keyframes tagPop{0%{transform:scale(0);opacity:0}100%{transform:scale(1);opacity:1}}
+.crop-tag-remove{background:none;border:none;color:rgba(86,194,57,.6);cursor:pointer;font-size:14px;line-height:1;padding:0;transition:color .2s}
+.crop-tag-remove:hover{color:#ff6b6b}
+.crop-selection-hint{font-size:11px;color:rgba(255,255,255,.3);margin-top:8px;font-style:italic}
+
+/* ═════ SOCIAL LOGIN ═════ */
+.or-divider{display:flex;align-items:center;gap:14px;margin:24px 0;color:rgba(255,255,255,.2);font-size:11px;letter-spacing:2px;text-transform:uppercase}
+.or-line{flex:1;height:1px;background:rgba(255,255,255,.07)}
+.social-signup-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px}
+.social-signup-btn{padding:13px 16px;border-radius:14px;border:1.5px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:rgba(255,255,255,.6);font-family:'Raleway',sans-serif;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;transition:all .3s;letter-spacing:.5px}
+.social-signup-btn:hover{background:rgba(255,255,255,.09);border-color:rgba(255,255,255,.22);color:white;transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.4)}
+.social-signup-btn.google-btn:hover{border-color:rgba(66,133,244,.4);box-shadow:0 8px 24px rgba(66,133,244,.15)}
+.social-signup-btn.apple-btn:hover{border-color:rgba(255,255,255,.3)}
+.social-divider-text{text-align:center;font-size:12px;color:rgba(255,255,255,.35);margin-bottom:24px;font-weight:600}
+
+/* ═════ BUTTONS ═════ */
+.btn-row{display:flex;gap:12px;margin-top:28px}
+.btn-back{flex:0 0 auto;padding:14px 22px;border-radius:14px;border:1.5px solid rgba(255,255,255,.12);background:transparent;color:rgba(255,255,255,.5);font-family:'Raleway',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .3s;letter-spacing:1px;text-transform:uppercase}
+.btn-back:hover{border-color:rgba(255,255,255,.25);color:white}
+.btn-next{flex:1;padding:15px;border-radius:14px;border:none;background:linear-gradient(135deg,#1a5c1e,#56c239);color:white;font-family:'Raleway',sans-serif;font-size:14px;font-weight:800;cursor:pointer;transition:all .3s;letter-spacing:2px;text-transform:uppercase;box-shadow:0 8px 30px rgba(86,194,57,.3);position:relative;overflow:hidden}
+.btn-next:hover{transform:translateY(-2px);box-shadow:0 12px 40px rgba(86,194,57,.45)}
+.btn-next:active{transform:translateY(0)}
+.btn-next:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.btn-next::after{content:'';position:absolute;inset:0;background:rgba(255,255,255,0);transition:background .3s}
+.btn-next:hover::after{background:rgba(255,255,255,.06)}
+
+/* ═════ SUCCESS ═════ */
+.success-panel{text-align:center;padding:20px 0}
+.success-big-icon{font-size:80px;display:block;margin-bottom:20px;animation:successBounce .8s cubic-bezier(.34,1.56,.64,1) both}
+@keyframes successBounce{0%{transform:scale(0) rotate(-30deg);opacity:0}70%{transform:scale(1.15) rotate(5deg)}100%{transform:scale(1) rotate(0);opacity:1}}
+.success-h{font-family:'Playfair Display',serif;font-size:30px;color:white;margin-bottom:10px}
+.success-p{font-size:14px;color:rgba(255,255,255,.45);line-height:1.7;margin-bottom:28px;max-width:380px;margin-left:auto;margin-right:auto}
+.success-tag{display:inline-flex;align-items:center;gap:8px;padding:8px 20px;border-radius:50px;background:rgba(86,194,57,.15);border:1px solid rgba(86,194,57,.3);color:#56c239;font-size:12px;font-weight:700;letter-spacing:1px;margin-bottom:28px}
+.btn-go-login{display:inline-block;padding:15px 40px;border-radius:14px;border:none;background:linear-gradient(135deg,#1a5c1e,#56c239);color:white;font-family:'Raleway',sans-serif;font-size:14px;font-weight:800;cursor:pointer;transition:all .3s;letter-spacing:2px;text-transform:uppercase;box-shadow:0 8px 30px rgba(86,194,57,.3);text-decoration:none}
+.btn-go-login:hover{transform:translateY(-2px);box-shadow:0 12px 40px rgba(86,194,57,.45)}
+
+/* ═════ MISC ═════ */
+.login-link-row{text-align:center;margin-top:20px;font-size:13px;color:rgba(255,255,255,.35)}
+.login-link-row a{color:#56c239;font-weight:700;text-decoration:none;transition:color .3s}
+.login-link-row a:hover{color:#7ddd5c}
+.mandatory-note{font-size:11px;color:rgba(255,255,255,.3);margin-top:4px;display:flex;align-items:center;gap:4px}
+.mandatory-note span{color:#ff6b6b;font-weight:700;font-size:13px}
+
+.section-divider{height:1px;background:rgba(255,255,255,.06);margin:24px 0}
+.section-label{font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(86,194,57,.6);margin-bottom:16px;display:flex;align-items:center;gap:10px}
+.section-label::after{content:'';flex:1;height:1px;background:rgba(86,194,57,.15)}
+
+/* GPS Button */
+.gps-btn{display:flex;align-items:center;gap:10px;padding:12px 20px;border-radius:14px;border:1.5px dashed rgba(86,194,57,.4);background:rgba(86,194,57,.06);color:#7ddd5c;font-family:'Raleway',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .3s;letter-spacing:.5px;width:100%}
+.gps-btn:hover{border-color:rgba(86,194,57,.7);background:rgba(86,194,57,.12);transform:translateY(-1px)}
+.gps-btn.locating{border-color:rgba(255,180,0,.5);color:#ffcc44;background:rgba(255,180,0,.06);animation:gpsWave 1.2s ease-in-out infinite}
+.gps-btn.located{border-color:rgba(86,194,57,.7);border-style:solid;background:rgba(86,194,57,.12);color:#56c239}
+@keyframes gpsWave{0%,100%{opacity:1}50%{opacity:.6}}
+  .reg-card{padding:28px 22px 24px}
+  .form-grid.cols-2{grid-template-columns:1fr}
+  .role-selector{grid-template-columns:repeat(3,1fr)}
+  .dealer-types{grid-template-columns:1fr}
+  .crop-grid{grid-template-columns:repeat(auto-fill,minmax(85px,1fr))}
+  .social-signup-row{grid-template-columns:1fr}
+  .header-brand{font-size:24px}
+</style>
+</head>
+<body>
+
+<!-- ── ANIMATED BACKGROUND ── -->
+<div class="bg-layer">
+  <div class="bg-gradient"></div>
+  <div class="bg-grid"></div>
+  <div class="bg-orb" style="width:400px;height:400px;background:rgba(34,100,24,.18);top:-100px;left:-80px;animation-duration:12s"></div>
+  <div class="bg-orb" style="width:300px;height:300px;background:rgba(22,70,15,.14);bottom:10%;right:-60px;animation-duration:9s;animation-delay:-4s"></div>
+  <div id="leaf-container"></div>
+  <div class="bg-wheat-row" id="bg-wheat"></div>
+</div>
+
+<!-- ── PAGE ── -->
+<div class="page">
+
+  <!-- Header -->
+  <div class="site-header">
+    <div class="header-logo-icon">🌾</div>
+    <div class="header-brand">AGROLINK</div>
+    <div class="header-sep"></div>
+    <div class="header-page-title">Create Account</div>
+  </div>
+
+  <a href="/login" class="back-to-login">
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M9 2L4 7L9 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    Back to Login
+  </a>
+
+  <!-- Progress -->
+  <div class="progress-wrap">
+    <div class="progress-steps">
+      <div class="p-step active" id="ps-1">
+        <div class="p-dot active" id="pd-1"><span class="p-num">1</span></div>
+        <div class="p-label">Role</div>
+      </div>
+      <div class="p-line" id="pl-1"></div>
+      <div class="p-step" id="ps-2">
+        <div class="p-dot" id="pd-2"><span class="p-num">2</span></div>
+        <div class="p-label">Account</div>
+      </div>
+      <div class="p-line" id="pl-2"></div>
+      <div class="p-step" id="ps-3">
+        <div class="p-dot" id="pd-3"><span class="p-num">3</span></div>
+        <div class="p-label">Profile</div>
+      </div>
+      <div class="p-line" id="pl-3"></div>
+      <div class="p-step" id="ps-4">
+        <div class="p-dot" id="pd-4"><span class="p-num">4</span></div>
+        <div class="p-label">Done</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Registration Card -->
+  <div class="reg-card">
+
+    <!-- ═══ STEP 1: Role Selection ═══ -->
+    <div class="step-panel active" id="step-1">
+      <div class="step-heading">
+        <div class="step-eyebrow">Step 1 of 3</div>
+        <div class="step-title">Who are you?</div>
+        <div class="step-sub">Select your role to personalise your AgroLink experience. <span class="req">* Required</span></div>
+      </div>
+
+      <div class="social-signup-row">
+        <button class="social-signup-btn google-btn" onclick="socialSignup('google')">
+          <svg width="18" height="18" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+          Sign up with Google
+        </button>
+        <button class="social-signup-btn apple-btn" onclick="socialSignup('apple')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.7 9.05 7.4c1.42.07 2.41.74 3.24.8 1.23-.24 2.41-.94 3.72-.84 1.58.13 2.77.76 3.55 1.92-3.26 1.95-2.49 6.2.5 7.4-.58 1.49-1.35 2.97-3.01 3.6zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/></svg>
+          Sign up with Apple
+        </button>
+      </div>
+
+      <div class="or-divider"><div class="or-line"></div><span>or fill in details</span><div class="or-line"></div></div>
+
+      <div class="section-label">Select Your Role <span class="req-star" style="color:#ff6b6b;margin-left:2px">*</span></div>
+      <div class="role-selector">
+        <div class="role-card" data-role="farmer" onclick="selectRole(this)">
+          <div class="role-check">✓</div>
+          <span class="role-emoji">👨‍🌾</span>
+          <div class="role-name">Farmer</div>
+          <div class="role-desc">Grow & sell your harvest directly</div>
+        </div>
+        <div class="role-card" data-role="dealer" onclick="selectRole(this)">
+          <div class="role-check">✓</div>
+          <span class="role-emoji">🏪</span>
+          <div class="role-name">Dealer</div>
+          <div class="role-desc">Supply agri products & inputs</div>
+        </div>
+        <div class="role-card" data-role="consumer" onclick="selectRole(this)">
+          <div class="role-check">✓</div>
+          <span class="role-emoji">🛒</span>
+          <div class="role-name">Consumer</div>
+          <div class="role-desc">Buy fresh farm produce</div>
+        </div>
+      </div>
+      <div id="role-error" class="field-error" style="display:none;margin-top:10px;font-size:12px;color:#ff6b6b">⚠ Please select a role to continue.</div>
+
+      <div class="btn-row">
+        <button class="btn-next" onclick="step1Next()">Continue → <span id="role-label-btn"></span></button>
+      </div>
+      <div class="login-link-row">Already have an account? <a href="/login">Sign in here</a></div>
+    </div>
+
+    <!-- ═══ STEP 2: Account Details ═══ -->
+    <div class="step-panel" id="step-2">
+      <div class="step-heading">
+        <div class="step-eyebrow">Step 2 of 3</div>
+        <div class="step-title">Account Details</div>
+        <div class="step-sub">Set up your login credentials. <span class="req">Fields marked * are mandatory.</span></div>
+      </div>
+
+      <div class="mandatory-note"><span>*</span> All fields in this section are mandatory</div>
+      <div style="margin-bottom:20px"></div>
+
+      <div class="form-grid">
+        <!-- Full Name -->
+        <div class="form-group" id="fg-name">
+          <label class="form-label">Full Name <span class="req-star">*</span></label>
+          <div class="input-wrap">
+            <span class="i-icon">👤</span>
+            <input type="text" class="form-input" id="inp-name" placeholder="e.g. Ramesh Kumar" oninput="validateName()">
+          </div>
+          <span class="field-hint">Enter your full legal name</span>
+          <span class="field-error">Name must be at least 2 characters</span>
+        </div>
+
+        <!-- User ID -->
+        <div class="form-group" id="fg-uid">
+          <label class="form-label">User ID <span class="req-star">*</span></label>
+          <div class="input-wrap">
+            <span class="i-icon">🆔</span>
+            <input type="text" class="form-input" id="inp-uid" placeholder="e.g. ramesh_agro23" oninput="validateUID()">
+          </div>
+          <span class="field-hint">Unique ID — letters, numbers & underscores only</span>
+          <span class="field-error">User ID must be 4–20 chars, no spaces</span>
+        </div>
+      </div>
+
+      <!-- Phone -->
+      <div class="form-group" id="fg-phone" style="margin-top:18px">
+        <label class="form-label">Phone Number <span class="req-star">*</span></label>
+        <div class="phone-wrap">
+          <div class="phone-prefix">🇮🇳 +91</div>
+          <input type="tel" class="phone-input" id="inp-phone" placeholder="98765 43210" maxlength="10" oninput="validatePhone()">
+        </div>
+        <span class="field-hint">10-digit Indian mobile number</span>
+        <span class="field-error" id="phone-err">Enter a valid 10-digit mobile number</span>
+      </div>
+
+      <!-- Email -->
+      <div class="form-group" id="fg-email" style="margin-top:18px">
+        <label class="form-label">Email Address <span class="req-star" style="color:rgba(255,255,255,.3);font-size:10px">Optional</span></label>
+        <div class="input-wrap">
+          <span class="i-icon">✉️</span>
+          <input type="email" class="form-input" id="inp-email" placeholder="you@example.com" oninput="validateEmail()">
+        </div>
+        <span class="field-hint">We'll send confirmations here</span>
+        <span class="field-error">Please enter a valid email address</span>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <!-- Password -->
+      <div class="form-group" id="fg-pwd">
+        <label class="form-label">Password <span class="req-star">*</span></label>
+        <div class="input-wrap">
+          <span class="i-icon">🔒</span>
+          <input type="password" class="form-input" id="inp-pwd" placeholder="Minimum 8 characters" oninput="checkPwdStrength(this.value);validatePwd()">
+          <button class="eye-btn" onclick="togglePwd('inp-pwd',this)">👁</button>
+        </div>
+        <div class="pwd-bar"><div class="pwd-fill" id="pwd-fill"></div></div>
+        <div class="pwd-txt" id="pwd-txt"></div>
+        <span class="field-error">Password must be at least 8 characters</span>
+      </div>
+
+      <!-- Confirm Password -->
+      <div class="form-group" id="fg-cpwd" style="margin-top:18px">
+        <label class="form-label">Confirm Password <span class="req-star">*</span></label>
+        <div class="input-wrap">
+          <span class="i-icon">🔒</span>
+          <input type="password" class="form-input" id="inp-cpwd" placeholder="Re-enter your password" oninput="validateCPwd()">
+          <button class="eye-btn" onclick="togglePwd('inp-cpwd',this)">👁</button>
+        </div>
+        <span class="field-hint">Must match the password above</span>
+        <span class="field-error">Passwords do not match</span>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn-back" onclick="goStep(1,true)">← Back</button>
+        <button class="btn-next" onclick="step2Next()">Continue →</button>
+      </div>
+    </div>
+
+    <!-- ═══ STEP 3: Profile (role-specific) ═══ -->
+    <div class="step-panel" id="step-3">
+      <div class="step-heading">
+        <div class="step-eyebrow">Step 3 of 3</div>
+        <div class="step-title" id="s3-title">Your Profile</div>
+        <div class="step-sub" id="s3-sub">Tell us more about yourself.</div>
+      </div>
+
+      <!-- Profile Photo (common - optional for farmer/consumer, mandatory for dealer) -->
+      <div class="form-group" id="fg-profile-photo" style="margin-bottom:20px">
+        <label class="form-label" id="profile-photo-label">Profile Photo <span class="req-star" id="profile-photo-req" style="color:rgba(255,255,255,.3);font-size:10px">Optional</span></label>
+        <div class="photo-upload-wrap">
+          <input type="file" class="photo-input" id="inp-profile-photo" accept="image/*">
+          <div class="photo-preview" id="profile-photo-preview" onclick="document.getElementById('inp-profile-photo').click()" style="cursor:pointer">
+            <div class="photo-placeholder">
+              <span style="font-size:40px">📷</span>
+              <p>Click to upload photo</p>
+              <p style="font-size:11px;color:rgba(255,255,255,.4)">JPG, PNG (Max 5MB)</p>
+            </div>
+          </div>
+          <button type="button" class="btn-remove-photo" id="btn-remove-photo" onclick="removeProfilePhoto()" style="display:none;margin-top:8px">Remove Photo</button>
+        </div>
+        <span class="field-hint">Add a profile picture for your account</span>
+        <span class="field-error" id="profile-photo-err">Profile photo is required for dealers</span>
+      </div>
+
+      <!-- GPS Location Button -->
+      <div style="margin-bottom:16px">
+        <button type="button" class="gps-btn" id="gps-btn" onclick="useCurrentLocation()">
+          <span id="gps-icon">📡</span>
+          <span id="gps-label">Use My Current Location</span>
+        </button>
+        <div id="gps-status" style="font-size:11px;color:rgba(255,255,255,.35);margin-top:6px;padding-left:2px;display:none"></div>
+      </div>
+
+      <!-- Location (common — all mandatory) -->
+      <div class="form-grid cols-2" style="margin-bottom:18px">
+        <div class="form-group" id="fg-loc">
+          <label class="form-label">Village / Town <span class="req-star">*</span></label>
+          <div class="input-wrap">
+            <span class="i-icon">📍</span>
+            <input type="text" class="form-input" id="inp-loc" placeholder="e.g. Nanjangud" oninput="validateLoc()">
+          </div>
+          <span class="field-hint">Enter your village or town name</span>
+          <span class="field-error">Location is required</span>
+        </div>
+        <div class="form-group" id="fg-state">
+          <label class="form-label">State <span class="req-star">*</span></label>
+          <div class="input-wrap">
+            <span class="i-icon">🗺️</span>
+            <select class="form-select" id="inp-state" onchange="validateState()">
+              <option value="">Select state…</option>
+              <option>Andhra Pradesh</option><option>Assam</option><option>Bihar</option><option>Chhattisgarh</option><option>Gujarat</option><option>Haryana</option><option>Himachal Pradesh</option><option>Jharkhand</option><option>Karnataka</option><option>Kerala</option><option>Madhya Pradesh</option><option>Maharashtra</option><option>Manipur</option><option>Meghalaya</option><option>Nagaland</option><option>Odisha</option><option>Punjab</option><option>Rajasthan</option><option>Tamil Nadu</option><option>Telangana</option><option>Uttar Pradesh</option><option>Uttarakhand</option><option>West Bengal</option><option>Delhi</option><option>Goa</option><option>Jammu & Kashmir</option><option>Tripura</option><option>Sikkim</option>
+            </select>
+            <span class="select-arrow">▼</span>
+          </div>
+          <span class="field-error" id="state-err">Please select your state</span>
+        </div>
+      </div>
+
+      <!-- ── FARMER: Soil & Irrigation + Crop Selection ── -->
+      <div id="farmer-section" style="display:none">
+
+        <!-- Soil & Irrigation row -->
+        <div class="form-grid cols-2" style="margin-bottom:20px">
+          <div class="form-group" id="fg-soil">
+            <label class="form-label">Soil Type <span class="req-star">*</span></label>
+            <div class="input-wrap">
+              <span class="i-icon">🪨</span>
+              <select class="form-select" id="inp-soil" onchange="validateSoil()">
+                <option value="">Select soil type…</option>
+                <option value="alluvial">🟤 Alluvial Soil</option>
+                <option value="black_cotton">⚫ Black Cotton (Regur)</option>
+                <option value="red_laterite">🔴 Red / Laterite Soil</option>
+                <option value="loamy">🟫 Loamy Soil</option>
+                <option value="sandy">🟡 Sandy Soil</option>
+                <option value="clay">🟤 Clay Soil</option>
+                <option value="silt">⬜ Silt Soil</option>
+                <option value="peaty">🟢 Peaty / Organic Soil</option>
+                <option value="saline">🧂 Saline / Alkaline Soil</option>
+              </select>
+              <span class="select-arrow">▼</span>
+            </div>
+            <span class="field-error" id="soil-err">Please select your soil type</span>
+          </div>
+          <div class="form-group" id="fg-irrigation">
+            <label class="form-label">Irrigation Type <span class="req-star">*</span></label>
+            <div class="input-wrap">
+              <span class="i-icon">💧</span>
+              <select class="form-select" id="inp-irrigation" onchange="validateIrrigation()">
+                <option value="">Select irrigation…</option>
+                <option value="drip">💧 Drip Irrigation</option>
+                <option value="sprinkler">🌦️ Sprinkler System</option>
+                <option value="flood">🌊 Flood / Surface</option>
+                <option value="furrow">🌾 Furrow Irrigation</option>
+                <option value="rainfed">🌧️ Rainfed (No Irrigation)</option>
+                <option value="canal">🏞️ Canal Irrigation</option>
+                <option value="borewell">🔩 Borewell / Tube Well</option>
+                <option value="combo">✨ Drip + Sprinkler Combo</option>
+              </select>
+              <span class="select-arrow">▼</span>
+            </div>
+            <span class="field-error" id="irrigation-err">Please select irrigation type</span>
+          </div>
+        </div>
+
+        <!-- Farm size optional -->
+        <div class="form-group" style="margin-bottom:22px">
+          <label class="form-label">Farm Size (Acres) <span style="font-size:10px;color:rgba(255,255,255,.3);font-weight:500;letter-spacing:0;text-transform:none">— Optional</span></label>
+          <div class="input-wrap">
+            <span class="i-icon">🌿</span>
+            <input type="number" class="form-input" id="inp-farmsize" placeholder="e.g. 4.5" min="0.1" step="0.1">
+          </div>
+        </div>
+
+        <div class="section-label">Select Your Crops <span class="req-star" style="color:#ff6b6b;margin-left:4px;font-size:13px">*</span></div>
+        <div style="font-size:12px;color:rgba(255,255,255,.35);margin-bottom:14px">Select one or more crops you grow. Minimum 1 required.</div>
+
+        <div class="crop-search-wrap">
+          <span class="crop-search-icon">🔍</span>
+          <input type="text" class="crop-search" id="crop-search" placeholder="Search crops…" oninput="filterCrops(this.value)">
+        </div>
+
+        <div class="crop-categories" id="crop-cats"></div>
+        <div class="crop-grid" id="crop-grid"></div>
+
+        <div class="selected-crops-bar" id="selected-crops-bar"></div>
+        <div class="crop-selection-hint" id="crop-hint">✨ Tap a crop to select it. Select all that apply.</div>
+        <div class="field-error" id="crop-error" style="margin-top:8px">⚠ Please select at least one crop</div>
+      </div>
+
+      <!-- ── DEALER: Type Selection ── -->
+      <div id="dealer-section" style="display:none">
+        <div class="section-label">What do you deal in? <span class="req-star" style="color:#ff6b6b;margin-left:4px;font-size:13px">*</span></div>
+        <div class="dealer-types" id="dealer-types-grid"></div>
+        <div class="field-error" id="dealer-type-error" style="margin-top:8px">⚠ Please select your dealer type</div>
+      </div>
+
+      <!-- ── CONSUMER: Preferences ── -->
+      <div id="consumer-section" style="display:none">
+        <div class="section-label">Your Preferences</div>
+        <div class="form-group">
+          <label class="form-label">What do you usually buy?</label>
+          <div class="input-wrap">
+            <span class="i-icon">🛍️</span>
+            <select class="form-select" id="inp-buy-pref">
+              <option value="">Select preference…</option>
+              <option>Fresh Vegetables</option>
+              <option>Fresh Fruits</option>
+              <option>Grains & Pulses</option>
+              <option>Dairy Products</option>
+              <option>Organic Produce</option>
+              <option>All of the above</option>
+            </select>
+            <span class="select-arrow">▼</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="btn-row" style="margin-top:28px">
+        <button class="btn-back" onclick="goStep(2,true)">← Back</button>
+        <button class="btn-next" onclick="step3Next()">Create Account 🌱</button>
+      </div>
+    </div>
+
+    <!-- ═══ STEP 4: Success ═══ -->
+    <div class="step-panel" id="step-4">
+      <div class="success-panel">
+        <span class="success-big-icon">🌾</span>
+        <div class="success-h">Welcome to AgroLink!</div>
+        <div class="success-tag">
+          <span id="success-role-emoji">🌱</span>
+          <span id="success-role-text">Farmer Account Created</span>
+        </div>
+        <div class="success-p">Your account has been created successfully, <strong id="success-name"></strong>!<br>You're now part of a growing community of farmers, dealers and consumers across India 🇮🇳</div>
+        <a href="/login" class="btn-go-login">Go to Sign In →</a>
+      </div>
+    </div>
+
+  </div><!-- /reg-card -->
+</div><!-- /page -->
+
+<script>
+// ══════════════════════════════════════════════════
+// CROP DATABASE — Indian variety, fruits, veggies
+// ══════════════════════════════════════════════════
+const CROPS = [
+  // Grains & Cereals
+  {id:'rice',   name:'Rice',      variety:'Paddy / Dhan',   emoji:'🌾', cat:'Grains'},
+  {id:'wheat',  name:'Wheat',     variety:'Gehun',          emoji:'🌾', cat:'Grains'},
+  {id:'maize',  name:'Maize',     variety:'Makka / Corn',   emoji:'🌽', cat:'Grains'},
+  {id:'millet', name:'Millet',    variety:'Bajra / Jowar',  emoji:'🌾', cat:'Grains'},
+  {id:'sorghum',name:'Sorghum',   variety:'Jowar',          emoji:'🌾', cat:'Grains'},
+  {id:'barley', name:'Barley',    variety:'Jau',            emoji:'🌾', cat:'Grains'},
+  {id:'oats',   name:'Oats',      variety:'Jai',            emoji:'🌾', cat:'Grains'},
+  {id:'ragi',   name:'Finger Millet',variety:'Ragi / Nachni',emoji:'🌾',cat:'Grains'},
+
+  // Pulses & Legumes
+  {id:'tur',    name:'Pigeon Pea',variety:'Tur / Arhar Dal', emoji:'🫘', cat:'Pulses'},
+  {id:'chana',  name:'Chickpea',  variety:'Chana / Gram',   emoji:'🫘', cat:'Pulses'},
+  {id:'urad',   name:'Black Gram',variety:'Urad Dal',       emoji:'🫘', cat:'Pulses'},
+  {id:'moong',  name:'Green Gram',variety:'Moong Dal',      emoji:'🫘', cat:'Pulses'},
+  {id:'lentil', name:'Lentil',    variety:'Masoor Dal',     emoji:'🫘', cat:'Pulses'},
+  {id:'soybean',name:'Soybean',   variety:'Soya',           emoji:'🫘', cat:'Pulses'},
+  {id:'rajma',  name:'Kidney Bean',variety:'Rajma',         emoji:'🫘', cat:'Pulses'},
+  {id:'cowpea', name:'Cowpea',    variety:'Lobia / Chavli', emoji:'🫘', cat:'Pulses'},
+
+  // Vegetables
+  {id:'tomato', name:'Tomato',    variety:'Tamatar',        emoji:'🍅', cat:'Vegetables'},
+  {id:'potato', name:'Potato',    variety:'Aloo',           emoji:'🥔', cat:'Vegetables'},
+  {id:'onion',  name:'Onion',     variety:'Pyaz / Kanda',   emoji:'🧅', cat:'Vegetables'},
+  {id:'garlic', name:'Garlic',    variety:'Lahsun',         emoji:'🧄', cat:'Vegetables'},
+  {id:'brinjal',name:'Brinjal',   variety:'Baingan',        emoji:'🍆', cat:'Vegetables'},
+  {id:'okra',   name:'Okra',      variety:'Bhindi',         emoji:'🥦', cat:'Vegetables'},
+  {id:'spinach',name:'Spinach',   variety:'Palak',          emoji:'🥬', cat:'Vegetables'},
+  {id:'cabbage',name:'Cabbage',   variety:'Patta Gobhi',    emoji:'🥬', cat:'Vegetables'},
+  {id:'cauliflower',name:'Cauliflower',variety:'Phool Gobhi',emoji:'🥦',cat:'Vegetables'},
+  {id:'peas',   name:'Peas',      variety:'Matar',          emoji:'🫛', cat:'Vegetables'},
+  {id:'capsicum',name:'Capsicum', variety:'Shimla Mirch',   emoji:'🫑', cat:'Vegetables'},
+  {id:'chilli', name:'Chilli',    variety:'Mirch',          emoji:'🌶️', cat:'Vegetables'},
+  {id:'ginger', name:'Ginger',    variety:'Adrak',          emoji:'🫚', cat:'Vegetables'},
+  {id:'carrot', name:'Carrot',    variety:'Gajar',          emoji:'🥕', cat:'Vegetables'},
+  {id:'radish', name:'Radish',    variety:'Mooli',          emoji:'🫚', cat:'Vegetables'},
+  {id:'cucumber',name:'Cucumber', variety:'Kheera',         emoji:'🥒', cat:'Vegetables'},
+  {id:'gourd',  name:'Bottle Gourd',variety:'Lauki',        emoji:'🥒', cat:'Vegetables'},
+  {id:'bittergourd',name:'Bitter Gourd',variety:'Karela',   emoji:'🥒', cat:'Vegetables'},
+  {id:'drumstick',name:'Drumstick',variety:'Moringa / Sahjan',emoji:'🌿',cat:'Vegetables'},
+  {id:'fenugreek',name:'Fenugreek',variety:'Methi',         emoji:'🌿', cat:'Vegetables'},
+
+  // Fruits
+  {id:'mango',  name:'Mango',     variety:'Aam — Alphonso, Kesar, Dasheri',emoji:'🥭',cat:'Fruits'},
+  {id:'banana', name:'Banana',    variety:'Kela — Cavendish, Poovan',emoji:'🍌',cat:'Fruits'},
+  {id:'papaya', name:'Papaya',    variety:'Papita',         emoji:'🍑', cat:'Fruits'},
+  {id:'guava',  name:'Guava',     variety:'Amrood',         emoji:'🍐', cat:'Fruits'},
+  {id:'pomegranate',name:'Pomegranate',variety:'Anar — Bhagwa',emoji:'🔴',cat:'Fruits'},
+  {id:'grapes', name:'Grapes',    variety:'Angoor — Thompson, Sharad',emoji:'🍇',cat:'Fruits'},
+  {id:'orange', name:'Orange',    variety:'Santra / Narangi',emoji:'🍊',cat:'Fruits'},
+  {id:'lemon',  name:'Lemon',     variety:'Nimbu',          emoji:'🍋', cat:'Fruits'},
+  {id:'watermelon',name:'Watermelon',variety:'Tarbooz',     emoji:'🍉', cat:'Fruits'},
+  {id:'melon',  name:'Musk Melon',variety:'Kharbooja',      emoji:'🍈', cat:'Fruits'},
+  {id:'pineapple',name:'Pineapple',variety:'Ananas',        emoji:'🍍', cat:'Fruits'},
+  {id:'coconut',name:'Coconut',   variety:'Nariyal',        emoji:'🥥', cat:'Fruits'},
+  {id:'jackfruit',name:'Jackfruit',variety:'Kathal',        emoji:'🟡', cat:'Fruits'},
+  {id:'sapota', name:'Sapota',    variety:'Chikoo',         emoji:'🟤', cat:'Fruits'},
+  {id:'custardapple',name:'Custard Apple',variety:'Sitaphal',emoji:'💚',cat:'Fruits'},
+  {id:'tamarind',name:'Tamarind', variety:'Imli',           emoji:'🟤', cat:'Fruits'},
+
+  // Cash Crops
+  {id:'cotton', name:'Cotton',    variety:'Kapas / Bt Cotton',emoji:'☁️',cat:'Cash Crops'},
+  {id:'sugarcane',name:'Sugarcane',variety:'Ganna',         emoji:'🎋', cat:'Cash Crops'},
+  {id:'jute',   name:'Jute',      variety:'Pat',            emoji:'🌿', cat:'Cash Crops'},
+  {id:'tobacco',name:'Tobacco',   variety:'Tambaku',        emoji:'🌿', cat:'Cash Crops'},
+  {id:'rubber', name:'Rubber',    variety:'Natural Rubber',  emoji:'⚫',cat:'Cash Crops'},
+  {id:'coffee', name:'Coffee',    variety:'Arabica / Robusta',emoji:'☕',cat:'Cash Crops'},
+  {id:'tea',    name:'Tea',       variety:'Chai — Assam, Darjeeling',emoji:'🍵',cat:'Cash Crops'},
+  {id:'cardamom',name:'Cardamom', variety:'Elaichi',        emoji:'🌿', cat:'Cash Crops'},
+
+  // Oilseeds
+  {id:'mustard',name:'Mustard',   variety:'Sarson / Rapeseed',emoji:'🌻',cat:'Oilseeds'},
+  {id:'sunflower',name:'Sunflower',variety:'Surajmukhi',    emoji:'🌻', cat:'Oilseeds'},
+  {id:'groundnut',name:'Groundnut',variety:'Moongphali',    emoji:'🥜', cat:'Oilseeds'},
+  {id:'sesame', name:'Sesame',    variety:'Til',            emoji:'🌿', cat:'Oilseeds'},
+  {id:'castor', name:'Castor',    variety:'Arandi',         emoji:'🌿', cat:'Oilseeds'},
+  {id:'linseed',name:'Linseed',   variety:'Alsi / Flax',    emoji:'🌿', cat:'Oilseeds'},
+
+  // Spices
+  {id:'turmeric',name:'Turmeric', variety:'Haldi',          emoji:'🟡', cat:'Spices'},
+  {id:'coriander',name:'Coriander',variety:'Dhaniya',       emoji:'🌿', cat:'Spices'},
+  {id:'cumin',  name:'Cumin',     variety:'Jeera',          emoji:'🌿', cat:'Spices'},
+  {id:'pepper', name:'Black Pepper',variety:'Kali Mirch',   emoji:'⚫', cat:'Spices'},
+  {id:'clove',  name:'Clove',     variety:'Laung',          emoji:'🌿', cat:'Spices'},
+];
+
+const CATEGORIES = ['All',...new Set(CROPS.map(c=>c.cat))];
+const DEALER_TYPES = [
+  {id:'seeds',   name:'Seeds',          sub:'Hybrid, native & GM seeds',        emoji:'🌱'},
+  {id:'fertilizer',name:'Fertilizers',  sub:'Organic, chemical & biofertilizers',emoji:'🧪'},
+  {id:'pesticide',name:'Pesticides',    sub:'Insecticides, herbicides, fungicides',emoji:'🧴'},
+  {id:'machinery',name:'Machinery',     sub:'Farm equipment & spare parts',      emoji:'🚜'},
+  {id:'irrigation',name:'Irrigation',   sub:'Drip, sprinkler & pump systems',    emoji:'💧'},
+  {id:'organic', name:'Organic Inputs', sub:'Vermicompost, neem, bio-agents',    emoji:'🌿'},
+  {id:'storage', name:'Storage & Logistics',sub:'Cold storage, warehousing',     emoji:'🏭'},
+  {id:'finance', name:'Finance & Credit',sub:'Loans, insurance & KCC',          emoji:'💰'},
+];
+
+// ══ STATE ══
+let selectedRole = null;
+let selectedCrops = new Set();
+let selectedDealerType = null;
+let currentStep = 1;
+let currentCat = 'All';
+let profilePhotoBase64 = null;
+
+// ══════════════ BACKGROUND SETUP ══════════════
+(function(){
+  // Leaves
+  const lc = document.getElementById('leaf-container');
+  for(let i=0;i<10;i++){
+    const l=document.createElement('div'); l.className='bg-leaf';
+    const s=10+Math.random()*16;
+    l.style.cssText=`left:${Math.random()*100}%;bottom:-40px;width:${s}px;height:${s*.6}px;background:hsl(${110+Math.random()*30},55%,${28+Math.random()*15}%);animation-duration:${12+Math.random()*14}s;animation-delay:${-Math.random()*20}s`;
+    lc.appendChild(l);
+  }
+  // Background wheat
+  const bw = document.getElementById('bg-wheat');
+  for(let i=0;i<160;i++){
+    const w=document.createElement('div'); w.className='bg-stalk';
+    const h=30+Math.random()*50;
+    const delay=-(i*0.04)%3.5;
+    w.style.cssText=`height:${h}px;flex-shrink:0;--d:${2.5+Math.random()*2}s;--dl:${delay}s`;
+    bw.appendChild(w);
+  }
+})();
+
+// ══════════════ RENDER CROPS ══════════════
+function renderCropCats(){
+  const c=document.getElementById('crop-cats');
+  c.innerHTML='';
+  CATEGORIES.forEach(cat=>{
+    const b=document.createElement('button'); b.className='cat-btn'+(cat==='All'?' active':'');
+    b.textContent=cat; b.onclick=()=>{
+      document.querySelectorAll('.cat-btn').forEach(x=>x.classList.remove('active'));
+      b.classList.add('active'); currentCat=cat; filterCrops(document.getElementById('crop-search').value);
+    };
+    c.appendChild(b);
+  });
+}
+
+function renderCropGrid(){
+  const g=document.getElementById('crop-grid');
+  g.innerHTML='';
+  CROPS.forEach(crop=>{
+    const d=document.createElement('div');
+    d.className='crop-card'+(selectedCrops.has(crop.id)?' selected':'');
+    d.dataset.id=crop.id; d.dataset.cat=crop.cat; d.dataset.name=crop.name.toLowerCase();
+    d.innerHTML=`<div class="crop-badge">✓</div><span class="crop-img">${crop.emoji}</span><div class="crop-name">${crop.name}</div><div class="crop-variety">${crop.variety}</div>`;
+    d.onclick=()=>toggleCrop(crop,d);
+    g.appendChild(d);
+  });
+}
+
+function filterCrops(q=''){
+  q=q.toLowerCase().trim();
+  document.querySelectorAll('.crop-card').forEach(c=>{
+    const catMatch = currentCat==='All' || c.dataset.cat===currentCat;
+    const nameMatch = !q || c.dataset.name.includes(q);
+    c.classList.toggle('hidden',!(catMatch&&nameMatch));
+  });
+}
+
+function toggleCrop(crop,el){
+  if(selectedCrops.has(crop.id)){
+    selectedCrops.delete(crop.id); el.classList.remove('selected');
+  } else {
+    selectedCrops.add(crop.id); el.classList.add('selected');
+  }
+  renderSelectedTags();
+  document.getElementById('crop-error').style.display='none';
+}
+
+function renderSelectedTags(){
+  const bar=document.getElementById('selected-crops-bar');
+  bar.innerHTML='';
+  selectedCrops.forEach(id=>{
+    const crop=CROPS.find(c=>c.id===id);
+    if(!crop)return;
+    const tag=document.createElement('div'); tag.className='crop-tag';
+    tag.innerHTML=`${crop.emoji} ${crop.name}<button class="crop-tag-remove" onclick="removeCrop('${id}')">×</button>`;
+    bar.appendChild(tag);
+  });
+  document.getElementById('crop-hint').textContent=selectedCrops.size?`${selectedCrops.size} crop${selectedCrops.size>1?'s':''} selected`:'✨ Tap a crop to select it. Select all that apply.';
+}
+
+function removeCrop(id){
+  selectedCrops.delete(id);
+  document.querySelectorAll('.crop-card').forEach(c=>{ if(c.dataset.id===id) c.classList.remove('selected'); });
+  renderSelectedTags();
+}
+
+// ══════════════ RENDER DEALER TYPES ══════════════
+function renderDealerTypes(){
+  const g=document.getElementById('dealer-types-grid');
+  g.innerHTML='';
+  DEALER_TYPES.forEach(dt=>{
+    const d=document.createElement('div'); d.className='dtype-card'+(selectedDealerType===dt.id?' selected':'');
+    d.innerHTML=`<span class="dtype-emoji">${dt.emoji}</span><div class="dtype-info"><div class="dtype-name">${dt.name}</div><div class="dtype-sub">${dt.sub}</div></div><div class="dtype-tick">✓</div>`;
+    d.onclick=()=>{
+      selectedDealerType=dt.id;
+      document.querySelectorAll('.dtype-card').forEach(x=>x.classList.remove('selected'));
+      d.classList.add('selected');
+      document.getElementById('dealer-type-error').style.display='none';
+    };
+    g.appendChild(d);
+  });
+}
+
+// ══════════════ ROLE SELECTION ══════════════
+function selectRole(el){
+  document.querySelectorAll('.role-card').forEach(c=>c.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedRole=el.dataset.role;
+  document.getElementById('role-error').style.display='none';
+  const labels={farmer:'Farmer',dealer:'Dealer',consumer:'Consumer'};
+  document.getElementById('role-label-btn').textContent='as '+labels[selectedRole];
+  
+  // Update profile photo requirement
+  const profilePhotoReq=document.getElementById('profile-photo-req');
+  const profilePhotoLabel=document.getElementById('profile-photo-label');
+  if(selectedRole==='dealer'){
+    profilePhotoReq.innerHTML='<span class="req-star">*</span>';
+    profilePhotoReq.style.color='#ff6b6b';
+    profilePhotoReq.style.fontSize='inherit';
+  } else {
+    profilePhotoReq.innerHTML='<span style="color:rgba(255,255,255,.3);font-size:10px">Optional</span>';
+  }
+}
+
+// Initialize file input handler
+document.addEventListener('DOMContentLoaded', function(){
+  const photoInput = document.getElementById('inp-profile-photo');
+  if(photoInput){
+    photoInput.addEventListener('change', handleProfilePhotoUpload);
+  }
+});
+
+// ══════════════ STEP NAVIGATION ══════════════
+function goStep(n,back=false){
+  const current=document.getElementById('step-'+currentStep);
+  current.classList.remove('active','back');
+  const next=document.getElementById('step-'+n);
+  next.classList.add('active');
+  if(back) next.classList.add('back');
+  currentStep=n;
+  updateProgress(n);
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function updateProgress(step){
+  for(let i=1;i<=4;i++){
+    const ps=document.getElementById('ps-'+i);
+    const pd=document.getElementById('pd-'+i);
+    ps.classList.remove('active','done');
+    pd.classList.remove('active','done');
+    if(i<step){ps.classList.add('done');pd.classList.add('done');}
+    else if(i===step){ps.classList.add('active');pd.classList.add('active');}
+    if(i<4){const pl=document.getElementById('pl-'+i);pl.classList.toggle('done',i<step);}
+  }
+}
+
+// STEP 1 → 2
+function step1Next(){
+  if(!selectedRole){document.getElementById('role-error').style.display='block';shakeEl(document.querySelector('.role-selector'));return;}
+  // Setup step 3
+  const titles={farmer:'Farm Profile',dealer:'Dealer Profile',consumer:'Consumer Profile'};
+  const subs={
+    farmer:'Tell us about your farm and the crops you grow. <span class="req">* Crop selection is mandatory.</span>',
+    dealer:'Tell us about your dealership. <span class="req">* Dealer type is mandatory.</span>',
+    consumer:'Tell us about your preferences.'
+  };
+  document.getElementById('s3-title').textContent=titles[selectedRole];
+  document.getElementById('s3-sub').innerHTML=subs[selectedRole];
+  document.getElementById('farmer-section').style.display=selectedRole==='farmer'?'block':'none';
+  document.getElementById('dealer-section').style.display=selectedRole==='dealer'?'block':'none';
+  document.getElementById('consumer-section').style.display=selectedRole==='consumer'?'block':'none';
+  if(selectedRole==='farmer'){renderCropCats();renderCropGrid();}
+  if(selectedRole==='dealer'){renderDealerTypes();}
+  goStep(2);
+}
+
+// STEP 2 → 3
+function step2Next(){
+  let ok=true;
+  if(!validateName()) ok=false;
+  if(!validateUID()) ok=false;
+  if(!validatePhone()) ok=false;
+  if(!validatePwd()) ok=false;
+  if(!validateCPwd()) ok=false;
+  const email=document.getElementById('inp-email').value.trim();
+  if(email && !validateEmail()) ok=false;
+  if(!ok){shakeEl(document.querySelector('.reg-card'));return;}
+  goStep(3);
+}
+
+// STEP 3 → 4
+function step3Next(){
+  let ok = true;
+  if(!validateProfilePhoto()) ok=false;
+  if(!validateLoc()) ok=false;
+  if(!validateState()) ok=false;
+  if(selectedRole==='farmer'){
+    if(!validateSoil()) ok=false;
+    if(!validateIrrigation()) ok=false;
+    if(selectedCrops.size===0){
+      document.getElementById('crop-error').style.display='block';
+      shakeEl(document.getElementById('crop-grid')); ok=false;
+    }
+  }
+  if(selectedRole==='dealer' && !selectedDealerType){
+    document.getElementById('dealer-type-error').style.display='block';
+    shakeEl(document.getElementById('dealer-types-grid')); ok=false;
+  }
+  if(!ok) return;
+
+  // Prepare registration payload - ONLY send what backend needs
+  const payload = {
+    username: document.getElementById('inp-uid').value.trim(),
+    email: document.getElementById('inp-email').value.trim() || null,
+    phone_number: document.getElementById('inp-phone').value.trim(),
+    password: document.getElementById('inp-pwd').value,
+    role: selectedRole,
+    location: document.getElementById('inp-loc').value.trim() || null
+  };
+
+  // Log payload to debug
+  console.log('Registration payload:', payload);
+
+  // Send registration request
+  const registerBtn = event.target;
+  registerBtn.textContent = '⏳ Creating Account…';
+  registerBtn.disabled = true;
+
+  fetch('/auth/register', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  })
+  .then(response => response.text().then(text => {
+    try {
+      return JSON.parse(text);
+    } catch (e) {
+      throw new Error('Invalid JSON: ' + text);
+    }
+  }))
+  .then(data => {
+    if(data.success) {
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('user_id', data.user_id);
+      localStorage.setItem('role', data.role);
+      localStorage.setItem('username', data.username);
+
+      const roleEmojis={farmer:'👨‍🌾',dealer:'🏪',consumer:'🛒'};
+      const roleLabels={farmer:'Farmer Account Created',dealer:'Dealer Account Created',consumer:'Consumer Account Created'};
+      document.getElementById('success-role-emoji').textContent=roleEmojis[selectedRole];
+      document.getElementById('success-role-text').textContent=roleLabels[selectedRole];
+      document.getElementById('success-name').textContent=document.getElementById('inp-name').value.trim().split(' ')[0];
+      goStep(4);
+
+      // Redirect after 2 seconds
+      setTimeout(() => {
+        const role = document.querySelector('input[name="role"]:checked').value;
+        window.location.href = data.redirect_to || `/dashboard/${role}`;
+      }, 2000);
+    } else {
+      registerBtn.textContent = 'Create Account 🌱';
+      registerBtn.disabled = false;
+      const errMsg = data.message || data.error || 'Unknown error';
+      const errorDiv = document.createElement('div');
+      errorDiv.style.cssText = 'position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#ff4444;color:white;padding:15px 20px;border-radius:8px;z-index:10000;font-weight:bold;box-shadow:0 4px 6px rgba(0,0,0,0.3);';
+      errorDiv.textContent = '❌ '+errMsg;
+      document.body.appendChild(errorDiv);
+      setTimeout(() => errorDiv.remove(), 4000);
+    }
+  })
+  .catch(error => {
+    registerBtn.textContent = 'Create Account 🌱';
+    registerBtn.disabled = false;
+    console.error('Registration error:', error);
+    const errorDiv = document.createElement('div');
+    errorDiv.style.cssText = 'position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#ff4444;color:white;padding:15px 20px;border-radius:8px;z-index:10000;font-weight:bold;box-shadow:0 4px 6px rgba(0,0,0,0.3);';
+    errorDiv.textContent = '❌ '+error.message;
+    document.body.appendChild(errorDiv);
+    setTimeout(() => errorDiv.remove(), 4000);
+  });
+}
+
+// ══════════════ VALIDATION ══════════════
+function setError(id,has){
+  const g=document.getElementById('fg-'+id);
+  if(g) g.classList.toggle('has-error',has);
+  const inp=document.getElementById('inp-'+id);
+  if(inp){inp.classList.toggle('error',has);if(!has&&inp.value.trim())inp.classList.add('valid');}
+  return !has;
+}
+
+function validateName(){
+  const v=document.getElementById('inp-name').value.trim();
+  return setError('name',v.length<2);
+}
+function validateUID(){
+  const v=document.getElementById('inp-uid').value.trim();
+  return setError('uid',!/^[a-zA-Z0-9_]{4,20}$/.test(v));
+}
+function validatePhone(){
+  const v=document.getElementById('inp-phone').value.replace(/\s/g,'');
+  const ok=/^[6-9]\d{9}$/.test(v);
+  const fg=document.getElementById('fg-phone');
+  const inp=document.getElementById('inp-phone');
+  const err=document.getElementById('phone-err');
+  fg.classList.toggle('has-error',!ok&&v.length>0);
+  inp.classList.toggle('error',!ok&&v.length>0);
+  inp.classList.toggle('valid',ok);
+  if(err) err.style.display=(!ok&&v.length>0)?'block':'none';
+  if(!ok&&v.length===0){fg.classList.add('has-error');inp.classList.add('error');err.style.display='block';}
+  return ok;
+}
+function validateEmail(){
+  const v=document.getElementById('inp-email').value.trim();
+  if(!v)return true; // optional
+  const ok=/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+  setError('email',!ok);
+  return ok;
+}
+function validatePwd(){
+  const v=document.getElementById('inp-pwd').value;
+  return setError('pwd',v.length<8);
+}
+function validateCPwd(){
+  const p=document.getElementById('inp-pwd').value;
+  const c=document.getElementById('inp-cpwd').value;
+  return setError('cpwd',p!==c||c.length===0);
+}
+function validateState(){
+  const v=document.getElementById('inp-state').value;
+  const fg=document.getElementById('fg-state');
+  const err=document.getElementById('state-err');
+  const ok=v!=='';
+  fg.classList.toggle('has-error',!ok);
+  if(err) err.style.display=ok?'none':'block';
+  return ok;
+}
+function validateSoil(){
+  const v=document.getElementById('inp-soil').value;
+  const fg=document.getElementById('fg-soil');
+  const err=document.getElementById('soil-err');
+  const ok=v!=='';
+  if(fg) fg.classList.toggle('has-error',!ok);
+  if(err) err.style.display=ok?'none':'block';
+  return ok;
+}
+function validateIrrigation(){
+  const v=document.getElementById('inp-irrigation').value;
+  const fg=document.getElementById('fg-irrigation');
+  const err=document.getElementById('irrigation-err');
+  const ok=v!=='';
+  if(fg) fg.classList.toggle('has-error',!ok);
+  if(err) err.style.display=ok?'none':'block';
+  return ok;
+}
+
+function useCurrentLocation(){
+  const btn=document.getElementById('gps-btn');
+  const lbl=document.getElementById('gps-label');
+  const icon=document.getElementById('gps-icon');
+  const status=document.getElementById('gps-status');
+  if(!navigator.geolocation){ status.textContent='⚠ Geolocation not supported by your browser'; status.style.display='block'; return; }
+  btn.classList.add('locating'); lbl.textContent='Fetching your location…'; icon.textContent='📡'; status.style.display='none';
+  navigator.geolocation.getCurrentPosition(
+    async pos=>{
+      const {latitude:lat, longitude:lng} = pos.coords;
+      btn.classList.remove('locating'); btn.classList.add('located');
+      icon.textContent='✅'; lbl.textContent='Location detected!';
+      // Reverse geocode using nominatim (free, no API key)
+      try{
+        const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`);
+        const data = await res.json();
+        const addr = data.address||{};
+        const village = addr.village||addr.town||addr.city||addr.county||'';
+        const state   = addr.state||'';
+        if(village) document.getElementById('inp-loc').value = village;
+        if(state){
+          const sel=document.getElementById('inp-state');
+          for(let opt of sel.options){ if(opt.text.toLowerCase().includes(state.toLowerCase())){ sel.value=opt.value; break; } }
+        }
+        status.style.color='#7ddd5c';
+        status.textContent=`📍 Located: ${village}${state?', '+state:''} (${lat.toFixed(4)}, ${lng.toFixed(4)})`;
+        status.style.display='block';
+        validateLoc(); validateState();
+      } catch(e){
+        status.style.color='rgba(255,255,255,.35)';
+        status.textContent=`📍 Coordinates captured: ${lat.toFixed(4)}, ${lng.toFixed(4)} — please fill location name manually`;
+        status.style.display='block';
+      }
+    },
+    err=>{
+      btn.classList.remove('locating'); icon.textContent='📡'; lbl.textContent='Use My Current Location';
+      status.style.color='#ff6b6b';
+      status.textContent = err.code===1 ? '🚫 Location permission denied. Please allow location access.' : '⚠ Could not get location. Try again.';
+      status.style.display='block';
+    },
+    {timeout:10000, enableHighAccuracy:true}
+  );
+}
+function validateLoc(){
+  const v=document.getElementById('inp-loc').value.trim();
+  return setError('loc',v.length<2);
+}
+
+function checkPwdStrength(v){
+  let sc=0;
+  if(v.length>=8)sc++;if(/[A-Z]/.test(v))sc++;if(/[0-9]/.test(v))sc++;if(/[^a-zA-Z0-9]/.test(v))sc++;
+  const lv=[{w:'0%',c:'transparent',t:''},{w:'25%',c:'#ef4444',t:'Weak'},{w:'50%',c:'#f97316',t:'Fair'},{w:'75%',c:'#eab308',t:'Good'},{w:'100%',c:'#56c239',t:'Strong ✓'}];
+  const l=lv[sc];
+  document.getElementById('pwd-fill').style.cssText=`width:${l.w};background:${l.c}`;
+  const tx=document.getElementById('pwd-txt'); tx.textContent=l.t; tx.style.color=l.c;
+}
+
+function togglePwd(id,btn){
+  const i=document.getElementById(id);
+  i.type=i.type==='password'?'text':'password';
+  btn.textContent=i.type==='password'?'👁':'🙈';
+}
+
+function shakeEl(el){
+  if(!el)return;
+  el.style.animation='shake .45s ease';
+  setTimeout(()=>el.style.animation='',500);
+}
+
+// ══════════════ PROFILE PHOTO HANDLERS ══════════════
+function handleProfilePhotoUpload(){
+  const file=document.getElementById('inp-profile-photo').files[0];
+  if(!file)return;
+  
+  // Validate file size (max 5MB)
+  if(file.size>5*1024*1024){
+    alert('File size must be less than 5MB');
+    return;
+  }
+  
+  // Validate file type
+  if(!file.type.startsWith('image/')){
+    alert('Please select a valid image file');
+    return;
+  }
+  
+  // Read file as base64
+  const reader=new FileReader();
+  reader.onload=function(e){
+    profilePhotoBase64=e.target.result;
+    
+    // Display preview
+    const preview=document.getElementById('profile-photo-preview');
+    preview.innerHTML=`<img src="${profilePhotoBase64}" alt="Profile photo">`;
+    preview.classList.add('has-image');
+    
+    // Show remove button
+    document.getElementById('btn-remove-photo').style.display='block';
+  };
+  reader.readAsDataURL(file);
+}
+
+function removeProfilePhoto(){
+  profilePhotoBase64=null;
+  document.getElementById('inp-profile-photo').value='';
+  
+  const preview=document.getElementById('profile-photo-preview');
+  preview.innerHTML=`<div class="photo-placeholder"><span style="font-size:40px">📷</span><p>Click to upload photo</p><p style="font-size:11px;color:rgba(255,255,255,.4)">JPG, PNG (Max 5MB)</p></div>`;
+  preview.classList.remove('has-image');
+  
+  document.getElementById('btn-remove-photo').style.display='none';
+}
+
+function validateProfilePhoto(){
+  const isDealerRequired=selectedRole==='dealer';
+  const hasPhoto=profilePhotoBase64!==null;
+  
+  if(isDealerRequired&&!hasPhoto){
+    return setError('profile-photo',true);
+  }
+  return setError('profile-photo',false);
+}
+
+// ══════════════ SOCIAL SIGNUP ══════════════
+function socialSignup(provider){
+  const names={google:'Google',apple:'Apple'};
+  const msg=document.createElement('div');
+  msg.style.cssText='position:fixed;top:20px;left:50%;transform:translateX(-50%);background:rgba(7,26,8,.95);border:1px solid rgba(86,194,57,.3);color:#56c239;padding:14px 28px;border-radius:14px;font-family:Raleway,sans-serif;font-size:13px;font-weight:700;z-index:999;box-shadow:0 8px 32px rgba(0,0,0,.5);letter-spacing:.5px;animation:dropIn .4s ease both';
+  msg.textContent=`🔗 Redirecting to ${names[provider]} sign-up…`;
+  document.body.appendChild(msg);
+  setTimeout(()=>msg.remove(),2800);
+}
+
+// ══ add shake keyframe to existing styles ══
+const st=document.createElement('style');
+st.textContent='@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-6px)}80%{transform:translateX(6px)}}';
+document.head.appendChild(st);
+
+// Phone number: digits only
+document.getElementById('inp-phone').addEventListener('input',function(){
+  this.value=this.value.replace(/[^0-9]/g,'');
+});
+</script>
+</body>
+</html>

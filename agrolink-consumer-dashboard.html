@@ -1,0 +1,1471 @@
+<!DOCTYPE html>
+<html lang="en">
+<title>Agrolink - Consumer Dashboard
+</title>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AgroLink – Consumer</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Raleway:wght@300;400;600;700;800&family=Caveat:wght@600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Raleway',sans-serif;background:#0d0a04;color:white;min-height:100vh;overflow-x:hidden}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:rgba(255,255,255,.03)}
+::-webkit-scrollbar-thumb{background:rgba(255,160,0,.3);border-radius:3px}
+
+/*Dynamic Size Utility*/
+/* Update your main dashboard container style */
+.dashboard-wrapper {
+  display: flex;
+  flex-wrap: wrap; /* Allows items to wrap to the next line on small screens */
+  min-height: 100vh;
+}
+
+.sidebar {
+  flex: 0 0 280px; /* Sidebar stays 280px on large screens */
+  max-width: 280px;
+}
+
+.main-content {
+  flex: 1; /* Main content takes up all remaining space */
+  padding: 20px;
+  min-width: 300px; /* Prevents it from getting too narrow */
+}
+
+/* Mobile Adjustments (Screen width < 768px) */
+@media (max-width: 768px) {
+  .dashboard-wrapper {
+    flex-direction: column; /* Stack sidebar on top of content */
+  }
+
+  .sidebar {
+    flex: 0 0 auto;
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    padding: 15px;
+  }
+
+  .nav-links {
+    display: flex;
+    overflow-x: auto; /* Allow horizontal scrolling for menu items on mobile */
+    gap: 10px;
+    padding-bottom: 10px;
+  }
+
+  .grid-container {
+    grid-template-columns: 1fr; /* Force cards to be one per row */
+  }
+}
+
+.product-card {
+  width: 100%; /* Instead of a fixed pixel width */
+  max-width: 350px; /* Keeps them from looking too stretched on tablets */
+  margin: 10px auto;
+}
+
+img {
+  max-width: 100%;
+  height: auto; /* Maintains aspect ratio while resizing */
+}
+
+  
+
+
+/* BG */
+.bg{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.bg-grad{position:absolute;inset:0;background:
+  radial-gradient(ellipse at 15% 10%,rgba(120,60,0,.35),transparent 50%),
+  radial-gradient(ellipse at 85% 80%,rgba(60,30,0,.4),transparent 55%),
+  linear-gradient(160deg,#0d0a04,#140e04)}
+.bg-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,160,0,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,160,0,.025) 1px,transparent 1px);background-size:44px 44px;animation:gridDrift 60s linear infinite}
+@keyframes gridDrift{to{background-position:44px 44px}}
+.bg-orb{position:absolute;border-radius:50%;filter:blur(100px);animation:orbFloat ease-in-out infinite}
+@keyframes orbFloat{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(15px,-15px) scale(1.08)}}
+/* floating petals */
+.petal{position:fixed;pointer-events:none;border-radius:50% 0 50% 0;animation:petalDrift linear infinite;opacity:0}
+@keyframes petalDrift{0%{transform:translateY(105vh) rotate(0deg) translateX(0);opacity:0}5%{opacity:.5}90%{opacity:.2}100%{transform:translateY(-10vh) rotate(720deg) translateX(40px);opacity:0}}
+
+/* HEADER */
+.header{position:sticky;top:0;z-index:200;background:rgba(13,10,4,.9);border-bottom:1px solid rgba(255,160,0,.1);backdrop-filter:blur(20px);padding:0 24px}
+.header-inner{display:flex;align-items:center;gap:0;height:60px}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none;flex-shrink:0}
+.logo-icon{font-size:24px;filter:drop-shadow(0 0 10px rgba(255,160,0,.7))}
+.logo-text{font-family:'Playfair Display',serif;font-size:20px;font-weight:900;letter-spacing:2px;color:#ffa500;text-shadow:0 0 20px rgba(255,165,0,.4)}
+.logo-role{font-size:9px;font-weight:700;letter-spacing:2px;color:rgba(255,255,255,.3);text-transform:uppercase;margin-left:6px;padding:3px 8px;border-radius:50px;background:rgba(255,160,0,.08);border:1px solid rgba(255,160,0,.15)}
+.header-search{flex:1;max-width:400px;margin:0 24px;position:relative}
+.header-search input{width:100%;padding:9px 14px 9px 38px;background:rgba(255,255,255,.05);border:1.5px solid rgba(255,255,255,.08);border-radius:50px;color:white;font-family:'Raleway',sans-serif;font-size:12px;outline:none;transition:all .3s}
+.header-search input::placeholder{color:rgba(255,255,255,.25)}
+.header-search input:focus{background:rgba(255,160,0,.06);border-color:rgba(255,160,0,.35)}
+.header-search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:14px;pointer-events:none}
+.header-actions{display:flex;align-items:center;gap:10px;margin-left:auto}
+.hbtn{padding:8px 16px;border-radius:50px;font-family:'Raleway',sans-serif;font-size:11px;font-weight:700;cursor:pointer;transition:all .25s;letter-spacing:.4px;border:1.5px solid rgba(255,255,255,.12);background:rgba(255,255,255,.04);color:rgba(255,255,255,.55);display:flex;align-items:center;gap:6px}
+.hbtn:hover{background:rgba(255,255,255,.08);color:white}
+.hbtn.cart{background:rgba(255,160,0,.1);border-color:rgba(255,160,0,.3);color:#ffa500;position:relative}
+.cart-count{position:absolute;top:-5px;right:-5px;width:17px;height:17px;border-radius:50%;background:#ffa500;color:#0d0a04;font-size:9px;font-weight:800;display:flex;align-items:center;justify-content:center}
+.nav-tabs{display:flex;gap:2px;padding:0 24px;border-bottom:1px solid rgba(255,160,0,.08);background:rgba(13,10,4,.85);backdrop-filter:blur(12px);overflow-x:auto}
+.nav-tab{padding:12px 18px;border:none;background:none;color:rgba(255,255,255,.35);font-family:'Raleway',sans-serif;font-size:12px;font-weight:700;cursor:pointer;border-bottom:2.5px solid transparent;transition:all .25s;letter-spacing:.5px;text-transform:uppercase;white-space:nowrap;display:flex;align-items:center;gap:7px;margin-bottom:-1px}
+.nav-tab:hover{color:rgba(255,255,255,.7)}
+.nav-tab.active{color:#ffa500;border-bottom-color:#ffa500}
+
+/* PANELS */
+.panel{display:none;padding:24px 24px 100px;position:relative;z-index:10;animation:panelIn .3s ease both}
+.panel.active{display:block}
+@keyframes panelIn{0%{opacity:0;transform:translateY(8px)}100%{opacity:1;transform:translateY(0)}}
+
+/* CARDS */
+.card{background:rgba(20,14,4,.85);border:1px solid rgba(255,160,0,.12);border-radius:18px;padding:22px;position:relative;overflow:hidden;transition:border-color .3s,box-shadow .3s}
+.card:hover{border-color:rgba(255,160,0,.28);box-shadow:0 6px 32px rgba(0,0,0,.5)}
+.card-title{font-size:10px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:rgba(255,160,0,.7);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.card-title::after{content:'';flex:1;height:1px;background:rgba(255,160,0,.1)}
+
+/* GRID */
+.grid{display:grid;gap:18px}
+.g2{grid-template-columns:1fr 1fr}
+.g3{grid-template-columns:1fr 1fr 1fr}
+.g4{grid-template-columns:repeat(4,1fr)}
+.g-3-9{grid-template-columns:3fr 9fr}
+.g-8-4{grid-template-columns:2fr 1fr}
+
+/* WEATHER */
+.w-hero{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px}
+.w-temp{font-family:'Playfair Display',serif;font-size:56px;font-weight:900;line-height:1;background:linear-gradient(135deg,#ffa500,#ffcc44);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.w-icon{font-size:60px;filter:drop-shadow(0 4px 16px rgba(255,200,0,.3))}
+.w-cond{font-size:14px;color:rgba(255,255,255,.5);margin-top:4px;font-weight:600}
+.w-loc{font-size:11px;color:rgba(255,160,0,.6);margin-top:2px}
+.w-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
+.wstat{background:rgba(255,255,255,.03);border-radius:11px;padding:9px 10px;text-align:center}
+.wstat-v{font-size:16px;font-weight:800;color:white;margin-bottom:1px}
+.wstat-l{font-size:9px;color:rgba(255,255,255,.3);letter-spacing:.8px;text-transform:uppercase}
+.forecast{display:flex;gap:7px;overflow-x:auto;padding-bottom:4px}
+.fday{flex-shrink:0;background:rgba(255,255,255,.03);border-radius:11px;padding:9px 11px;text-align:center;min-width:62px;border:1px solid rgba(255,255,255,.05);transition:border-color .25s}
+.fday:hover{border-color:rgba(255,160,0,.3)}
+.fday-n{font-size:9px;color:rgba(255,255,255,.3);font-weight:700;letter-spacing:.5px;margin-bottom:5px;text-transform:uppercase}
+.fday-i{font-size:20px;margin-bottom:3px}
+.fday-h{font-size:12px;font-weight:800;color:white}
+.fday-l{font-size:10px;color:rgba(255,255,255,.3)}
+
+/* SEASON BANNER */
+.season-banner{background:linear-gradient(135deg,rgba(255,160,0,.15),rgba(255,100,0,.08));border:1px solid rgba(255,160,0,.25);border-radius:18px;padding:20px 24px;display:flex;align-items:center;gap:16px;margin-bottom:20px;cursor:pointer;transition:all .3s;position:relative;overflow:hidden}
+.season-banner:hover{border-color:rgba(255,160,0,.5);box-shadow:0 6px 28px rgba(255,160,0,.15)}
+.season-banner::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,160,0,.04),transparent);animation:bannerSheen 4s ease-in-out infinite}
+@keyframes bannerSheen{0%{transform:translateX(-100%)}100%{transform:translateX(200%)}}
+.season-icon{font-size:52px;flex-shrink:0;filter:drop-shadow(0 4px 16px rgba(255,160,0,.4))}
+.season-info{flex:1}
+.season-tag{font-size:10px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:rgba(255,160,0,.7);margin-bottom:4px}
+.season-title{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:white;margin-bottom:4px}
+.season-sub{font-size:12px;color:rgba(255,255,255,.45);line-height:1.5}
+.season-cta{flex-shrink:0;padding:10px 20px;border-radius:50px;background:linear-gradient(135deg,#c27a00,#ffa500);color:white;font-family:'Raleway',sans-serif;font-size:12px;font-weight:800;cursor:pointer;border:none;box-shadow:0 4px 16px rgba(255,165,0,.35);transition:all .3s;letter-spacing:.5px}
+.season-cta:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(255,165,0,.5)}
+
+/* CROP SEASONS SCROLL */
+.seasons-scroll{display:flex;gap:12px;overflow-x:auto;padding:4px 0 12px;margin-bottom:20px}
+.seasons-scroll::-webkit-scrollbar{height:3px}
+.seasons-scroll::-webkit-scrollbar-thumb{background:rgba(255,160,0,.3);border-radius:2px}
+.season-chip{flex-shrink:0;padding:10px 16px;border-radius:14px;border:1.5px solid rgba(255,255,255,.1);background:rgba(255,255,255,.03);cursor:pointer;text-align:center;transition:all .3s;min-width:100px}
+.season-chip:hover{border-color:rgba(255,160,0,.4);background:rgba(255,160,0,.06)}
+.season-chip.active{border-color:#ffa500;background:rgba(255,160,0,.12)}
+.sc-icon{font-size:28px;margin-bottom:5px;display:block}
+.sc-name{font-size:11px;font-weight:700;color:white;margin-bottom:1px}
+.sc-sub{font-size:9px;color:rgba(255,255,255,.35)}
+
+/* FARMER CARDS */
+.farmer-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}
+.farmer-card{background:rgba(20,14,4,.85);border:1px solid rgba(255,160,0,.12);border-radius:16px;overflow:hidden;cursor:pointer;transition:all .3s}
+.farmer-card:hover{border-color:rgba(255,160,0,.35);transform:translateY(-3px);box-shadow:0 10px 36px rgba(0,0,0,.5)}
+.fc-img{height:130px;background:linear-gradient(135deg,rgba(60,30,0,.6),rgba(120,60,0,.4));display:flex;align-items:center;justify-content:center;font-size:56px;position:relative;overflow:hidden}
+.fc-img::after{content:'';position:absolute;inset:0;background:linear-gradient(to bottom,transparent 50%,rgba(13,10,4,.9))}
+.fc-season-badge{position:absolute;top:10px;right:10px;padding:4px 10px;border-radius:50px;font-size:9px;font-weight:800;letter-spacing:.5px;z-index:2}
+.badge-season{background:rgba(255,160,0,.2);border:1px solid rgba(255,160,0,.4);color:#ffa500}
+.badge-organic{background:rgba(86,194,57,.2);border:1px solid rgba(86,194,57,.4);color:#56c239}
+.badge-new{background:rgba(100,100,255,.2);border:1px solid rgba(100,100,255,.4);color:#9999ff}
+.fc-body{padding:14px 16px}
+.fc-farmer-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.fc-avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#1a5c1e,#56c239);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;border:2px solid rgba(86,194,57,.3)}
+.fc-name{font-size:13px;font-weight:700;color:white;margin-bottom:1px}
+.fc-loc{font-size:10px;color:rgba(255,255,255,.35);display:flex;align-items:center;gap:3px}
+.fc-rating{margin-left:auto;display:flex;align-items:center;gap:3px;font-size:11px;font-weight:700;color:#ffa500}
+.fc-crop{font-size:14px;font-weight:700;color:white;margin-bottom:4px}
+.fc-desc{font-size:11px;color:rgba(255,255,255,.4);line-height:1.5;margin-bottom:10px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.fc-footer{display:flex;align-items:center;justify-content:space-between}
+.fc-price{font-size:15px;font-weight:800;color:white}
+.fc-price span{font-size:10px;color:rgba(255,255,255,.3);font-weight:600}
+.fc-btn{padding:7px 16px;border-radius:50px;background:linear-gradient(135deg,#c27a00,#ffa500);color:white;font-family:'Raleway',sans-serif;font-size:11px;font-weight:800;border:none;cursor:pointer;transition:all .25s;letter-spacing:.4px}
+.fc-btn:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(255,165,0,.4)}
+
+/* SECTION HEADING */
+.section-heading{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.section-h{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:white}
+.section-see-all{font-size:11px;font-weight:700;color:rgba(255,160,0,.7);cursor:pointer;letter-spacing:.5px;transition:color .25s}
+.section-see-all:hover{color:#ffa500}
+
+/* GARDEN RECOMMENDATIONS */
+.garden-card{background:rgba(20,14,4,.85);border:1px solid rgba(86,194,57,.14);border-radius:16px;padding:18px;transition:all .3s;cursor:pointer}
+.garden-card:hover{border-color:rgba(86,194,57,.3);transform:translateY(-2px)}
+.garden-img{font-size:48px;text-align:center;margin-bottom:10px;transition:transform .3s}
+.garden-card:hover .garden-img{transform:scale(1.15)}
+.garden-name{font-size:14px;font-weight:700;color:white;margin-bottom:3px;text-align:center}
+.garden-diff{font-size:10px;font-weight:700;padding:3px 10px;border-radius:50px;text-align:center;display:inline-block}
+.diff-easy{background:rgba(86,194,57,.12);color:#56c239;border:1px solid rgba(86,194,57,.25)}
+.diff-med{background:rgba(255,160,0,.12);color:#ffa500;border:1px solid rgba(255,160,0,.25)}
+.diff-hard{background:rgba(255,60,60,.1);color:#ff6b6b;border:1px solid rgba(255,60,60,.2)}
+.garden-tip{font-size:11px;color:rgba(255,255,255,.4);line-height:1.55;margin-top:8px;text-align:center}
+.garden-season{font-size:10px;color:rgba(255,160,0,.6);font-weight:700;margin-top:5px;text-align:center}
+
+/* SHOP */
+.shop-filter-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+.sf-chip{padding:7px 16px;border-radius:50px;border:1px solid rgba(255,255,255,.1);background:transparent;color:rgba(255,255,255,.4);font-family:'Raleway',sans-serif;font-size:11px;font-weight:700;cursor:pointer;transition:all .25s;letter-spacing:.3px}
+.sf-chip:hover{border-color:rgba(255,160,0,.4);color:rgba(255,255,255,.7)}
+.sf-chip.active{border-color:#ffa500;background:rgba(255,160,0,.1);color:#ffa500}
+.shop-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px}
+.shop-item{background:rgba(20,14,4,.85);border:1px solid rgba(255,160,0,.12);border-radius:16px;overflow:hidden;transition:all .3s;cursor:pointer}
+.shop-item:hover{border-color:rgba(255,160,0,.3);transform:translateY(-3px);box-shadow:0 8px 30px rgba(0,0,0,.5)}
+.si-img{height:150px;background:rgba(255,160,0,.04);display:flex;align-items:center;justify-content:center;font-size:56px;transition:transform .3s;overflow:hidden}
+.shop-item:hover .si-img{transform:scale(1.05)}
+.si-img img{width:100%;height:100%;object-fit:cover}
+.si-body{padding:13px 15px}
+.si-cat{font-size:9px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,160,0,.6);margin-bottom:3px}
+.si-name{font-size:13px;font-weight:700;color:white;margin-bottom:2px}
+.si-farmer{font-size:10px;color:rgba(255,255,255,.35);margin-bottom:6px;display:flex;align-items:center;gap:4px}
+.si-footer{display:flex;align-items:center;justify-content:space-between;margin-top:6px}
+.si-price{font-size:15px;font-weight:800;color:white}
+.si-price span{font-size:10px;color:rgba(255,255,255,.3);font-weight:600}
+.si-add{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#c27a00,#ffa500);border:none;color:white;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .25s;font-weight:700}
+.si-add:hover{transform:scale(1.15);box-shadow:0 4px 14px rgba(255,165,0,.4)}
+.si-rating{font-size:10px;color:#ffa500;font-weight:700;display:flex;align-items:center;gap:3px}
+
+/* CART MODAL */
+.cart-overlay{position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:500;display:flex;justify-content:flex-end;backdrop-filter:blur(6px);opacity:0;pointer-events:none;transition:opacity .3s}
+.cart-overlay.open{opacity:1;pointer-events:all}
+.cart-panel{width:380px;height:100vh;background:rgba(13,10,4,.98);border-left:1px solid rgba(255,160,0,.15);display:flex;flex-direction:column;transform:translateX(100%);transition:transform .35s cubic-bezier(.25,1,.5,1)}
+.cart-overlay.open .cart-panel{transform:translateX(0)}
+.cart-header{padding:20px 22px;border-bottom:1px solid rgba(255,160,0,.1);display:flex;align-items:center;justify-content:space-between}
+.cart-title{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:white}
+.cart-close{width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.5);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .25s}
+.cart-close:hover{background:rgba(255,60,60,.15);color:#ff6b6b}
+.cart-items{flex:1;overflow-y:auto;padding:16px 22px;display:flex;flex-direction:column;gap:12px}
+.cart-item{display:flex;align-items:center;gap:12px;padding:12px 14px;background:rgba(255,255,255,.03);border-radius:12px;border:1px solid rgba(255,255,255,.06)}
+.ci-img{width:44px;height:44px;border-radius:10px;background:rgba(255,160,0,.06);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.ci-info{flex:1}
+.ci-name{font-size:12px;font-weight:700;color:white;margin-bottom:1px}
+.ci-farmer{font-size:10px;color:rgba(255,255,255,.3)}
+.ci-price{font-size:13px;font-weight:800;color:#ffa500}
+.ci-qty{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.qty-btn{width:24px;height:24px;border-radius:50%;border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.05);color:white;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .25s}
+.qty-btn:hover{background:rgba(255,160,0,.15);border-color:rgba(255,160,0,.4);color:#ffa500}
+.qty-num{font-size:13px;font-weight:700;color:white;min-width:16px;text-align:center}
+.cart-footer{padding:18px 22px;border-top:1px solid rgba(255,160,0,.1)}
+.cart-total-row{display:flex;justify-content:space-between;margin-bottom:14px}
+.cart-total-l{font-size:13px;color:rgba(255,255,255,.5)}
+.cart-total-v{font-size:18px;font-weight:800;color:white}
+.checkout-btn{width:100%;padding:14px;border-radius:14px;border:none;background:linear-gradient(135deg,#c27a00,#ffa500);color:white;font-family:'Raleway',sans-serif;font-size:14px;font-weight:800;cursor:pointer;transition:all .3s;letter-spacing:1.5px;text-transform:uppercase;box-shadow:0 6px 20px rgba(255,165,0,.3)}
+.checkout-btn:hover{transform:translateY(-2px);box-shadow:0 10px 28px rgba(255,165,0,.45)}
+.cart-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:200px;color:rgba(255,255,255,.2);font-size:13px;font-weight:700}
+.cart-empty-icon{font-size:48px;margin-bottom:12px;opacity:.4}
+
+/* FARMER PROFILE MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:600;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(8px);opacity:0;pointer-events:none;transition:opacity .3s}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal{background:rgba(13,10,4,.98);border:1px solid rgba(255,160,0,.18);border-radius:22px;width:100%;max-width:560px;max-height:88vh;overflow-y:auto;position:relative;transform:translateY(20px) scale(.97);transition:all .3s}
+.modal-overlay.open .modal{transform:translateY(0) scale(1)}
+.modal-hero{height:180px;background:linear-gradient(135deg,rgba(120,60,0,.5),rgba(60,30,0,.4));display:flex;align-items:center;justify-content:center;font-size:80px;position:relative;border-radius:22px 22px 0 0}
+.modal-close{position:absolute;top:14px;right:14px;width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.6);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .25s}
+.modal-close:hover{background:rgba(255,60,60,.3);color:#ff6b6b}
+.modal-body{padding:24px}
+.modal-farmer-row{display:flex;align-items:center;gap:14px;margin-bottom:16px}
+.modal-avatar{width:54px;height:54px;border-radius:50%;background:linear-gradient(135deg,#1a5c1e,#56c239);display:flex;align-items:center;justify-content:center;font-size:24px;border:3px solid rgba(86,194,57,.4);flex-shrink:0}
+.modal-name{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:white;margin-bottom:2px}
+.modal-loc{font-size:11px;color:rgba(255,255,255,.4)}
+.modal-rating{display:flex;align-items:center;gap:4px;font-size:12px;font-weight:700;color:#ffa500;margin-top:4px}
+.modal-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px}
+.mstat{background:rgba(255,255,255,.03);border-radius:12px;padding:10px;text-align:center;border:1px solid rgba(255,255,255,.06)}
+.mstat-v{font-size:18px;font-weight:800;color:#ffa500;margin-bottom:2px}
+.mstat-l{font-size:9px;color:rgba(255,255,255,.3);letter-spacing:.8px;text-transform:uppercase}
+.modal-section{margin-bottom:16px}
+.modal-section-title{font-size:10px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,160,0,.6);margin-bottom:10px}
+.crop-chip{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:50px;background:rgba(86,194,57,.1);border:1px solid rgba(86,194,57,.2);font-size:11px;font-weight:700;color:rgba(86,194,57,.9);margin:0 5px 5px 0}
+.contact-btn{width:100%;padding:13px;border-radius:14px;border:none;background:linear-gradient(135deg,#c27a00,#ffa500);color:white;font-family:'Raleway',sans-serif;font-size:13px;font-weight:800;cursor:pointer;transition:all .3s;letter-spacing:1px;text-transform:uppercase;box-shadow:0 6px 20px rgba(255,165,0,.3)}
+.contact-btn:hover{transform:translateY(-2px);box-shadow:0 10px 26px rgba(255,165,0,.45)}
+
+/* ═══ SIDEBAR ═══ */
+.sidebar{position:fixed;left:0;top:0;width:230px;height:100vh;background:rgba(13,10,4,.95);border-right:1px solid rgba(255,160,0,.12);backdrop-filter:blur(20px);padding:20px 16px;overflow-y:auto;z-index:100;display:flex;flex-direction:column}
+.sb-logo{display:flex;align-items:center;gap:10px;margin-bottom:28px;text-decoration:none;color:white}
+.sb-logo-icon{font-size:28px;filter:drop-shadow(0 0 10px rgba(255,160,0,.7))}
+.sb-logo-text{font-family:'Playfair Display',serif;font-size:16px;font-weight:900;letter-spacing:1px;color:#ffa500}
+.sb-profile{padding:14px;background:rgba(255,160,0,.05);border:1px solid rgba(255,160,0,.15);border-radius:14px;margin-bottom:24px;text-align:center}
+.sb-avatar{width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#c27a00,#ffa500);display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto 10px;border:2px solid rgba(255,160,0,.3)}
+.sb-pname{font-size:13px;font-weight:700;color:white;margin-bottom:1px}
+.sb-prole{font-size:10px;color:rgba(255,160,0,.7);letter-spacing:.4px;text-transform:uppercase}
+.sb-nav{flex:1;display:flex;flex-direction:column;gap:4px;margin-bottom:20px}
+.sb-item{display:flex;align-items:center;gap:12px;padding:11px 13px;border-radius:11px;cursor:pointer;font-size:12px;font-weight:700;color:rgba(255,255,255,.4);transition:all .25s;border:1px solid transparent}
+.sb-item:hover{background:rgba(255,160,0,.07);color:rgba(255,255,255,.7)}
+.sb-item.active{background:rgba(255,160,0,.13);color:#ffa500;border-color:rgba(255,160,0,.25)}
+.sb-item-icon{font-size:16px;width:20px;text-align:center}
+.sb-bottom{padding-top:16px;border-top:1px solid rgba(255,160,0,.08)}
+.sb-logout{display:flex;align-items:center;gap:12px;padding:11px 13px;border-radius:11px;cursor:pointer;font-size:12px;font-weight:700;color:rgba(255,255,255,.4);transition:all .25s;border:1px solid transparent}
+.sb-logout:hover{background:rgba(255,60,60,.1);color:#ff6b6b}
+/* Main layout with sidebar */
+.layout-wrapper{display:flex;min-height:100vh}
+.content-wrapper{flex:1;margin-left:200px;display:flex;flex-direction:column}
+.header{margin-left:0}
+.nav-tabs{margin-left:0}
+.panel{margin-left:0}
+
+/* SETTINGS PANEL */
+.settings-layout{display:grid;grid-template-columns:200px 1fr;gap:20px;align-items:start;padding:24px}
+.settings-nav{background:rgba(20,14,4,.85);border:1px solid rgba(255,160,0,.12);border-radius:16px;padding:12px;display:flex;flex-direction:column;gap:3px;position:sticky;top:20px}
+.snav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:11px;cursor:pointer;font-size:12px;font-weight:700;color:rgba(255,255,255,.4);transition:all .25s;border:1px solid transparent}
+.snav-item:hover{background:rgba(255,160,0,.07);color:rgba(255,255,255,.75)}
+.snav-item.active{background:rgba(255,160,0,.13);color:#ffa500;border-color:rgba(255,160,0,.25)}
+.snav-ic{font-size:16px;width:20px;text-align:center}
+.settings-content{display:flex;flex-direction:column;gap:16px}
+.s-section{background:rgba(20,14,4,.85);border:1px solid rgba(255,160,0,.12);border-radius:18px;padding:24px;display:none}
+.s-section.active{display:block}
+.s-section-title{font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:white;margin-bottom:4px}
+.s-section-sub{font-size:12px;color:rgba(255,255,255,.35);margin-bottom:20px}
+.s-divider{height:1px;background:rgba(255,160,0,.08);margin:16px 0}
+.s-row{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding:12px 0}
+.s-row+.s-row{border-top:1px solid rgba(255,255,255,.04)}
+.s-label{font-size:13px;font-weight:700;color:rgba(255,255,255,.75)}
+.s-sub{font-size:11px;color:rgba(255,255,255,.3);margin-top:2px;line-height:1.5}
+.s-right{flex-shrink:0}
+/* Settings input */
+.s-input{padding:10px 14px;background:rgba(255,255,255,.04);border:1.5px solid rgba(255,255,255,.1);border-radius:12px;color:white;font-family:'Raleway',sans-serif;font-size:13px;outline:none;transition:all .3s;width:100%}
+.s-input:focus{background:rgba(255,160,0,.06);border-color:rgba(255,160,0,.4)}
+.s-input::placeholder{color:rgba(255,255,255,.22)}
+.s-select{padding:10px 14px;background:rgba(255,255,255,.04);border:1.5px solid rgba(255,255,255,.1);border-radius:12px;color:white;font-family:'Raleway',sans-serif;font-size:13px;outline:none;transition:all .3s;width:100%;appearance:none;cursor:pointer}
+.s-select:focus{background:rgba(255,160,0,.06);border-color:rgba(255,160,0,.4)}
+.s-select option{background:#140e04}
+.s-form-group{display:flex;flex-direction:column;gap:7px;margin-bottom:14px}
+.s-form-label{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.4)}
+.s-btn{padding:10px 20px;border-radius:12px;font-family:'Raleway',sans-serif;font-size:12px;font-weight:700;cursor:pointer;transition:all .25s;letter-spacing:.4px}
+.s-btn-outline{background:transparent;border:1.5px solid rgba(255,160,0,.4);color:#ffa500}
+.s-btn-outline:hover{background:rgba(255,160,0,.1)}
+.s-btn-primary{background:linear-gradient(135deg,#c27a00,#ffa500);border:none;color:white;box-shadow:0 4px 14px rgba(255,165,0,.3)}
+.s-btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(255,165,0,.45)}
+.s-btn-danger{background:rgba(255,60,60,.08);border:1.5px solid rgba(255,60,60,.25);color:#ff6b6b}
+.s-btn-danger:hover{background:rgba(255,60,60,.15)}
+
+/* TOAST */
+.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-80px);background:rgba(13,10,4,.97);border:1px solid rgba(255,160,0,.35);color:#ffa500;padding:12px 24px;border-radius:12px;font-family:'Raleway',sans-serif;font-size:13px;font-weight:700;z-index:9999;box-shadow:0 8px 32px rgba(0,0,0,.5);letter-spacing:.4px;transition:transform .35s cubic-bezier(.34,1.56,.64,1)}
+.toast.show{transform:translateX(-50%) translateY(0)}
+
+/* ALERT STRIP */
+.alert-strip{display:flex;gap:8px;padding:8px 12px;border-radius:12px;margin-bottom:14px;align-items:flex-start}
+.as-green{background:rgba(86,194,57,.06);border:1px solid rgba(86,194,57,.18)}
+.as-orange{background:rgba(255,160,0,.06);border:1px solid rgba(255,160,0,.18)}
+
+@media(max-width:768px){
+  .sidebar{width:70px;padding:12px 8px}.sb-logo-text{display:none}.sb-profile{padding:8px;margin-bottom:16px}.sb-avatar{width:44px;height:44px;font-size:20px;margin:0 auto 6px}.sb-pname,.sb-prole{font-size:0;display:none}.sb-item{justify-content:center;padding:10px;gap:0}.sb-item span{display:none}.sb-item-icon{font-size:18px;width:auto}.content-wrapper{margin-left:70px}.header,.nav-tabs,.panel{margin-left:0}
+  .g2,.g3,.g4,.g-3-9,.g-8-4{grid-template-columns:1fr}
+  .settings-layout{grid-template-columns:1fr}.settings-nav{position:sticky;top:0;z-index:50;flex-direction:row;gap:2px;overflow-x:auto;margin-bottom:16px}.snav-item{padding:8px 12px;white-space:nowrap}.panel{padding:16px 16px 100px}
+  .farmer-grid,.shop-grid{grid-template-columns:1fr 1fr}
+}
+@media(max-width:480px){
+  .sidebar{display:none}.content-wrapper{margin-left:0}.farmer-grid,.shop-grid{grid-template-columns:1fr}.header-search{display:none}.s-input,.s-select{font-size:14px}.settings-layout{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<div class="bg">
+  <div class="bg-grad"></div>
+  <div class="bg-grid"></div>
+  <div class="bg-orb" style="width:500px;height:500px;background:rgba(120,60,0,.1);top:-120px;left:-80px;animation-duration:14s"></div>
+  <div class="bg-orb" style="width:380px;height:380px;background:rgba(60,30,0,.09);bottom:5%;right:-60px;animation-duration:11s;animation-delay:-5s"></div>
+  <div id="petals-container"></div>
+</div>
+
+<div class="layout-wrapper">
+
+<!-- ════════ SIDEBAR ════════ -->
+<aside class="sidebar" id="sidebar">
+  <a class="sb-logo" href="#">
+    <div class="sb-logo-icon">🌅</div>
+    <div class="sb-logo-text">AGROLINK</div>
+  </a>
+  
+  <div class="sb-profile">
+    <div class="sb-avatar" id="sb-avatar-display">🛒</div>
+    <div class="sb-pname" id="sb-pname-display">Consumer</div>
+    <div class="sb-prole">Customer</div>
+  </div>
+  
+  <nav class="sb-nav">
+    <div class="sb-item active" onclick="switchNavTab('home',this)">
+      <div class="sb-item-icon">🏡</div>
+      <span>Home</span>
+    </div>
+    <div class="sb-item" onclick="switchNavTab('seasonal',this)">
+      <div class="sb-item-icon">🌸</div>
+      <span>Seasonal</span>
+    </div>
+    <div class="sb-item" onclick="switchNavTab('farmers',this)">
+      <div class="sb-item-icon">👨‍🌾</div>
+      <span>Farmers</span>
+    </div>
+    <div class="sb-item" onclick="switchNavTab('shop',this)">
+      <div class="sb-item-icon">🛍️</div>
+      <span>Shop</span>
+    </div>
+    <div class="sb-item" onclick="switchNavTab('garden',this)">
+      <div class="sb-item-icon">🌿</div>
+      <span>Garden</span>
+    </div>
+    <div class="sb-item" onclick="switchNavTab('settings',this)">
+      <div class="sb-item-icon">⚙️</div>
+      <span>Settings</span>
+    </div>
+  
+    <div class="sb-item" onclick="doLogout()">
+        <div class="sb-item-icon">🚪</div>
+        <span>Logout</span>
+    </div>
+  </nav>
+  <div class="sb-bottom">
+    <div class="sb-profile" onclick="switchTab('settings',null)">
+      <div class="sb-avatar" id="sb-avatar-display">👨‍🌾</div>
+      <div><div class="sb-pname" id="sb-pname-display">Ramesh Kumar</div><div class="sb-prole" id="sb-prole-display">Farmer · Karnataka</div></div>
+    </div>
+  </div>
+
+</aside>
+
+<div class="content-wrapper">
+
+<!-- HEADER -->
+<header class="header">
+  <div class="header-inner">
+    <a class="logo" href="#">
+      <div class="logo-icon">🌅</div>
+      <div class="logo-text">AGROLINK</div>
+      <div class="logo-role">Consumer</div>
+    </a>
+    <div class="header-search">
+      <span class="header-search-icon">🔍</span>
+      <input type="text" placeholder="Search crops, farmers, products…" id="global-search" oninput="globalSearch(this.value)">
+    </div>
+    <div class="header-actions">
+      <button class="hbtn" onclick="switchPanel('garden')">🌿 My Garden</button>
+      <button class="hbtn cart" onclick="openCart()" id="cart-btn">
+        🛒 Cart
+        <span class="cart-count" id="cart-count">0</span>
+      </button>
+      <button class="hbtn" onclick="doLogout()">🚪 Logout</button>
+    </div>
+  </div>
+</header>
+
+<!-- NAV TABS -->
+<nav class="nav-tabs">
+  <button class="nav-tab active" id="tab-home" onclick="switchPanel('home',this)">🏡 Home</button>
+  <button class="nav-tab" id="tab-seasonal" onclick="switchPanel('seasonal',this)">🌸 Seasonal Crops</button>
+  <button class="nav-tab" id="tab-farmers" onclick="switchPanel('farmers',this)">👨‍🌾 Find Farmers</button>
+  <button class="nav-tab" id="tab-shop" onclick="switchPanel('shop',this)">🛍️ Shop</button>
+  <button class="nav-tab" id="tab-garden" onclick="switchPanel('garden',this)">🌿 My Garden</button>
+</nav>
+
+
+
+<!-- ═══════════════ HOME ═══════════════ -->
+<div class="panel active" id="panel-home">
+
+  <!-- Welcome + weather row -->
+  <div class="grid g-8-4" style="margin-bottom:22px">
+    <!-- Weather -->
+    <div class="card">
+      <div class="card-title">🌦️ Today's Weather — <span id="w-loc-label" style="color:rgba(255,255,255,.4);font-size:9px;text-transform:none;letter-spacing:0;font-weight:600;margin-left:4px">detecting location…</span></div>
+      <div class="w-hero">
+        <div><div class="w-temp" id="w-temp">—</div><div class="w-cond" id="w-cond">Loading…</div><div class="w-loc" id="w-loc">📍 —</div></div>
+        <div class="w-icon" id="w-icon">⏳</div>
+      </div>
+      <div class="w-stats">
+        <div class="wstat"><div class="wstat-v" id="w-hum">—%</div><div class="wstat-l">Humidity</div></div>
+        <div class="wstat"><div class="wstat-v" id="w-wind">—</div><div class="wstat-l">Wind km/h</div></div>
+        <div class="wstat"><div class="wstat-v" id="w-rain">—mm</div><div class="wstat-l">Rain Today</div></div>
+      </div>
+      <div class="card-title" style="margin-bottom:10px">5-Day Forecast</div>
+      <div class="forecast" id="forecast-row">
+        <div class="fday" style="opacity:.3"><div class="fday-n">—</div><div class="fday-i">⏳</div><div class="fday-h">—</div><div class="fday-l">—</div></div>
+      </div>
+    </div>
+    <!-- Quick actions -->
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div class="card" style="cursor:pointer" onclick="switchPanel('seasonal')">
+        <div style="font-size:28px;margin-bottom:8px">🌸</div>
+        <div style="font-size:13px;font-weight:700;color:white;margin-bottom:3px">In Season Now</div>
+        <div style="font-size:11px;color:rgba(255,160,0,.7);font-weight:600" id="season-quick">Mango · Watermelon · Lychee</div>
+      </div>
+      <div class="card" style="cursor:pointer" onclick="switchPanel('farmers')">
+        <div style="font-size:28px;margin-bottom:8px">👨‍🌾</div>
+        <div style="font-size:13px;font-weight:700;color:white;margin-bottom:3px">Local Farmers</div>
+        <div style="font-size:11px;color:rgba(255,160,0,.7);font-weight:600" id="farmers-quick-loc">Near you</div>
+      </div>
+      <div class="card" style="cursor:pointer" onclick="switchPanel('garden')">
+        <div style="font-size:28px;margin-bottom:8px">🌿</div>
+        <div style="font-size:13px;font-weight:700;color:white;margin-bottom:3px">Garden Tips</div>
+        <div style="font-size:11px;color:rgba(86,194,57,.7);font-weight:600">3 plants ready to harvest</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Season spotlight -->
+  <div class="season-banner" onclick="switchPanel('seasonal')">
+    <div class="season-icon">🥭</div>
+    <div class="season-info">
+      <div class="season-tag">🌸 Peak Season — Now Available</div>
+      <div class="season-title">Alphonso Mango Season is Here!</div>
+      <div class="season-sub">Freshly harvested Hapus mangoes from Ratnagiri farmers · Direct from orchard to your table</div>
+    </div>
+    <button class="season-cta">Shop Now →</button>
+  </div>
+
+  <!-- Seasonal quick scroll -->
+  <div class="section-heading">
+    <div class="section-h">🌸 What's Fresh This Season</div>
+    <span class="section-see-all" onclick="switchPanel('seasonal')">See all →</span>
+  </div>
+  <div class="seasons-scroll" id="season-chips-home"></div>
+
+  <!-- Featured farmers -->
+  <div class="section-heading" style="margin-top:8px">
+    <div class="section-h">👨‍🌾 Featured Farmers Near You</div>
+    <span class="section-see-all" onclick="switchPanel('farmers')">See all →</span>
+  </div>
+  <div class="farmer-grid" id="featured-farmers"></div>
+
+  <!-- Garden strip -->
+  <div class="section-heading" style="margin-top:24px">
+    <div class="section-h">🌿 Grow at Home</div>
+    <span class="section-see-all" onclick="switchPanel('garden')">See tips →</span>
+  </div>
+  <div class="grid g4" id="garden-home-strip"></div>
+
+</div>
+
+<!-- ═══════════════ SEASONAL ═══════════════ -->
+<div class="panel" id="panel-seasonal">
+  <div class="section-heading">
+    <div class="section-h">🌸 Seasonal Crops — March 2026</div>
+  </div>
+  <div class="seasons-scroll" id="season-filter-chips" style="margin-bottom:20px"></div>
+  <div style="font-size:12px;color:rgba(255,255,255,.35);margin-bottom:18px" id="season-desc-text">Showing all crops currently in season</div>
+  <div class="farmer-grid" id="seasonal-farmers"></div>
+</div>
+
+<!-- ═══════════════ FARMERS ═══════════════ -->
+<div class="panel" id="panel-farmers">
+  <div class="section-heading"><div class="section-h">👨‍🌾 All Farmers</div></div>
+  <div class="shop-filter-bar" id="farmer-filters">
+    <button class="sf-chip active" onclick="filterFarmers('all',this)">All</button>
+    <button class="sf-chip" onclick="filterFarmers('Vegetables',this)">🥦 Vegetables</button>
+    <button class="sf-chip" onclick="filterFarmers('Fruits',this)">🍎 Fruits</button>
+    <button class="sf-chip" onclick="filterFarmers('Grains',this)">🌾 Grains</button>
+    <button class="sf-chip" onclick="filterFarmers('Organic',this)">🌿 Organic</button>
+  </div>
+  <div class="farmer-grid" id="all-farmers"></div>
+</div>
+
+<!-- ═══════════════ SHOP ═══════════════ -->
+<div class="panel" id="panel-shop">
+  <div class="section-heading"><div class="section-h">🛍️ Fresh Produce & Products</div></div>
+  <div class="shop-filter-bar">
+    <button class="sf-chip active" onclick="filterShop('all',this)">All</button>
+    <button class="sf-chip" onclick="filterShop('Fruits',this)">🍎 Fruits</button>
+    <button class="sf-chip" onclick="filterShop('Vegetables',this)">🥦 Vegetables</button>
+    <button class="sf-chip" onclick="filterShop('Grains',this)">🌾 Grains</button>
+    <button class="sf-chip" onclick="filterShop('Organic',this)">🌿 Organic</button>
+    <button class="sf-chip" onclick="filterShop('Spices',this)">🌶️ Spices</button>
+    <button class="sf-chip" onclick="filterShop('Agri Products',this)">🧪 Agri Products</button>
+  </div>
+  <div class="shop-grid" id="shop-grid"></div>
+</div>
+
+<!-- ═══════════════ GARDEN ═══════════════ -->
+<div class="panel" id="panel-garden">
+  <div class="alert-strip as-green" style="margin-bottom:20px">
+    <span style="font-size:18px;flex-shrink:0">🌿</span>
+    <div><div style="font-size:12px;font-weight:700;color:#56c239;margin-bottom:2px">Personalised to your preferences</div><div style="font-size:11px;color:rgba(255,255,255,.4)">Based on your registered gardening plants and your local climate</div></div>
+  </div>
+  <div class="section-heading"><div class="section-h">🌿 My Garden Plants</div></div>
+  <div class="grid g4" id="my-garden-plants" style="margin-bottom:28px"></div>
+  <div class="section-heading"><div class="section-h">💡 Recommendations For You</div></div>
+  <div class="grid g4" id="garden-recommendations"></div>
+  <div class="section-heading" style="margin-top:28px"><div class="section-h">📅 This Month's Garden Calendar</div></div>
+  <div class="card" id="garden-calendar"></div>
+</div>
+
+<!-- ═══════════════ SETTINGS ═══════════════ -->
+<div class="panel" id="panel-settings">
+  <div class="settings-layout">
+    <!-- Settings Nav -->
+    <div class="settings-nav">
+      <div class="snav-item active" onclick="switchSettings('profile',this)">
+        <div class="snav-ic">👤</div>
+        <span>Profile</span>
+      </div>
+      <div class="snav-item" onclick="switchSettings('preferences',this)">
+        <div class="snav-ic">🎯</div>
+        <span>Preferences</span>
+      </div>
+      <div class="snav-item" onclick="switchSettings('account',this)">
+        <div class="snav-ic">🔐</div>
+        <span>Account</span>
+      </div>
+    </div>
+
+    <!-- Settings Content -->
+    <div class="settings-content">
+      <!-- Profile Section -->
+      <div class="s-section active" id="s-profile">
+        <div class="s-section-title">Profile Settings</div>
+        <div class="s-section-sub">Manage your personal information and contact details</div>
+        
+        <div class="s-form-group">
+          <label class="s-form-label">Full Name</label>
+          <input type="text" class="s-input" id="inp-name" placeholder="Your full name">
+        </div>
+        
+        <div class="s-form-group">
+          <label class="s-form-label">Email Address</label>
+          <input type="email" class="s-input" id="inp-email" placeholder="your@email.com">
+        </div>
+        
+        <div class="s-form-group">
+          <label class="s-form-label">Phone Number</label>
+          <input type="tel" class="s-input" id="inp-phone" placeholder="+91 98765 43210">
+        </div>
+        
+        <div class="s-form-group">
+          <label class="s-form-label">Location / City</label>
+          <input type="text" class="s-input" id="inp-location" placeholder="Your city or district">
+        </div>
+        
+        <div class="s-form-group">
+          <label class="s-form-label">State/Region</label>
+          <select class="s-select" id="inp-state">
+            <option value="">Select state</option>
+            <option value="karnataka">Karnataka</option>
+            <option value="maharashtra">Maharashtra</option>
+            <option value="tamilnadu">Tamil Nadu</option>
+            <option value="andhra_pradesh">Andhra Pradesh</option>
+            <option value="telangana">Telangana</option>
+            <option value="kerala">Kerala</option>
+            <option value="uttar_pradesh">Uttar Pradesh</option>
+            <option value="bihar">Bihar</option>
+            <option value="punjab">Punjab</option>
+            <option value="haryana">Haryana</option>
+          </select>
+        </div>
+
+        <div style="display:flex;gap:10px;margin-top:20px">
+          <button class="s-btn s-btn-primary" onclick="saveProfileChanges()">💾 Save Changes</button>
+          <button class="s-btn s-btn-outline" onclick="resetProfileForm()">↺ Reset</button>
+        </div>
+      </div>
+
+      <!-- Preferences Section -->
+      <div class="s-section" id="s-preferences">
+        <div class="s-section-title">Garden Preferences</div>
+        <div class="s-section-sub">Tell us what you like to grow and we'll send you tailored tips</div>
+        
+        <div class="s-form-group">
+          <label class="s-form-label">Garden Type</label>
+          <select class="s-select" id="inp-garden-type">
+            <option value="">Select type</option>
+            <option value="balcony">Balcony/Container Garden</option>
+            <option value="terrace">Terrace Garden</option>
+            <option value="backyard">Backyard</option>
+            <option value="farm">Farm Plot</option>
+            <option value="mixed">Mixed (Multiple)</option>
+          </select>
+        </div>
+        
+        <div class="s-form-group">
+          <label class="s-form-label">Available Sunlight</label>
+          <select class="s-select" id="inp-sunlight">
+            <option value="">Select sunlight</option>
+            <option value="full">Full Sun (6+ hours)</option>
+            <option value="partial">Partial Shade (3-6 hours)</option>
+            <option value="shade">Shade (Less than 3 hours)</option>
+          </select>
+        </div>
+        
+        <div class="s-form-group">
+          <label class="s-form-label">Preferred Plants (Select all)</label>
+          <div style="display:grid;gap:10px">
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+              <input type="checkbox" id="pref-vegetables" style="width:16px;height:16px;cursor:pointer">
+              <span style="font-size:12px;color:rgba(255,255,255,.6)">🥦 Vegetables</span>
+            </label>
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+              <input type="checkbox" id="pref-fruits" style="width:16px;height:16px;cursor:pointer">
+              <span style="font-size:12px;color:rgba(255,255,255,.6)">🍎 Fruits</span>
+            </label>
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+              <input type="checkbox" id="pref-herbs" style="width:16px;height:16px;cursor:pointer">
+              <span style="font-size:12px;color:rgba(255,255,255,.6)">🌿 Herbs & Spices</span>
+            </label>
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+              <input type="checkbox" id="pref-flowers" style="width:16px;height:16px;cursor:pointer">
+              <span style="font-size:12px;color:rgba(255,255,255,.6)">🌸 Flowers</span>
+            </label>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:10px;margin-top:20px">
+          <button class="s-btn s-btn-primary" onclick="savePreferences()">💾 Save Preferences</button>
+        </div>
+      </div>
+
+      <!-- Account Section -->
+      <div class="s-section" id="s-account">
+        <div class="s-section-title">Account Management</div>
+        <div class="s-section-sub">Security and account settings</div>
+        
+        <div class="s-form-group">
+          <label class="s-form-label">Current Password</label>
+          <input type="password" class="s-input" id="inp-current-pwd" placeholder="Enter current password">
+        </div>
+        
+        <div class="s-form-group">
+          <label class="s-form-label">New Password</label>
+          <input type="password" class="s-input" id="inp-new-pwd" placeholder="Enter new password (leave blank to keep)">
+        </div>
+        
+        <div class="s-form-group">
+          <label class="s-form-label">Confirm New Password</label>
+          <input type="password" class="s-input" id="inp-confirm-pwd" placeholder="Confirm new password">
+        </div>
+
+        <button class="s-btn s-btn-primary" onclick="changePassword()" style="margin-bottom:24px">🔑 Change Password</button>
+
+        <div class="s-divider"></div>
+
+        <div style="margin-top:20px">
+          <div class="s-section-title" style="font-size:14px;margin-bottom:12px">🚨 Danger Zone</div>
+          <button class="s-btn s-btn-danger" onclick="deleteAccount()">Delete Account</button>
+          <div style="font-size:11px;color:rgba(255,255,255,.35);margin-top:8px">This action cannot be undone. All your data will be permanently deleted.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- close content-wrapper -->
+
+<!-- CART PANEL -->
+<div class="cart-overlay" id="cart-overlay">
+  <div class="cart-panel">
+    <div class="cart-header">
+      <div class="cart-title">🛒 My Cart</div>
+      <button class="cart-close" onclick="closeCart()">✕</button>
+    </div>
+    <div class="cart-items" id="cart-items-list"></div>
+    <div class="cart-footer">
+      <div class="cart-total-row"><span class="cart-total-l">Total</span><span class="cart-total-v" id="cart-total">₹0</span></div>
+      <button class="checkout-btn" onclick="checkout()">Checkout →</button>
+    </div>
+  </div>
+</div>
+
+<!-- FARMER PROFILE MODAL -->
+<div class="modal-overlay" id="farmer-modal">
+  <div class="modal">
+    <div class="modal-hero" id="modal-hero">🌾</div>
+    <button class="modal-close" onclick="closeFarmerModal()">✕</button>
+    <div class="modal-body">
+      <div class="modal-farmer-row">
+        <div class="modal-avatar" id="modal-avatar">👨‍🌾</div>
+        <div>
+          <div class="modal-name" id="modal-name">—</div>
+          <div class="modal-loc" id="modal-loc">—</div>
+          <div class="modal-rating" id="modal-rating">⭐ —</div>
+        </div>
+      </div>
+      <div class="modal-stats">
+        <div class="mstat"><div class="mstat-v" id="modal-exp">—</div><div class="mstat-l">Years Farming</div></div>
+        <div class="mstat"><div class="mstat-v" id="modal-acres">—</div><div class="mstat-l">Acres</div></div>
+        <div class="mstat"><div class="mstat-v" id="modal-orders">—</div><div class="mstat-l">Orders Done</div></div>
+      </div>
+      <div class="modal-section">
+        <div class="modal-section-title">About</div>
+        <div id="modal-about" style="font-size:12px;color:rgba(255,255,255,.5);line-height:1.7"></div>
+      </div>
+      <div class="modal-section">
+        <div class="modal-section-title">Crops Available</div>
+        <div id="modal-crops"></div>
+      </div>
+      <div class="modal-section">
+        <div class="modal-section-title">🛍️ Available Products</div>
+        <div id="modal-products" style="display:flex;flex-direction:column;gap:8px"></div>
+      </div>
+      <button class="contact-btn" onclick="contactFarmer()">📞 Contact Farmer & Order</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+</div><!-- close layout-wrapper -->
+
+<script>
+// ══════════════ API CONFIGURATION ══════════════
+const API_URL = 'http://localhost:5000';  // Flask Backend API
+
+// ══════════════ DATA ══════════════
+const SEASONS = [
+  {id:'mango',    name:'Mango',        emoji:'🥭', season:'Mar–Jun',  peak:true,  cat:'Fruits'},
+  {id:'watermelon',name:'Watermelon',  emoji:'🍉', season:'Mar–May',  peak:true,  cat:'Fruits'},
+  {id:'lychee',   name:'Lychee',       emoji:'🔴', season:'May–Jun',  peak:false, cat:'Fruits'},
+  {id:'cucumber', name:'Cucumber',     emoji:'🥒', season:'Mar–May',  peak:true,  cat:'Vegetables'},
+  {id:'tomato',   name:'Tomato',       emoji:'🍅', season:'Dec–Mar',  peak:true,  cat:'Vegetables'},
+  {id:'onion',    name:'Onion',        emoji:'🧅', season:'Nov–Apr',  peak:false, cat:'Vegetables'},
+  {id:'wheat',    name:'Wheat',        emoji:'🌾', season:'Mar–Apr',  peak:true,  cat:'Grains'},
+  {id:'peas',     name:'Green Peas',   emoji:'🫛', season:'Dec–Mar',  peak:false, cat:'Vegetables'},
+  {id:'spinach',  name:'Spinach',      emoji:'🥬', season:'Oct–Mar',  peak:true,  cat:'Vegetables'},
+  {id:'guava',    name:'Guava',        emoji:'🍐', season:'Feb–May',  peak:true,  cat:'Fruits'},
+  {id:'grapes',   name:'Grapes',       emoji:'🍇', season:'Feb–May',  peak:false, cat:'Fruits'},
+  {id:'okra',     name:'Okra/Bhindi',  emoji:'🥦', season:'Apr–Aug',  peak:false, cat:'Vegetables'},
+];
+
+const FARMERS = [
+  {id:1,name:'Ramesh Patil',loc:'Ratnagiri, Maharashtra',avatar:'👨‍🌾',emoji:'🥭',crop:'Alphonso Mango',cat:'Fruits',desc:'Third-generation mango farmer. GI-certified Hapus mangoes from 12-acre orchard.',price:380,unit:'dozen',rating:4.9,reviews:124,exp:22,acres:12,orders:340,organic:true,badge:'Organic',crops:['Alphonso Mango','Kesar Mango','Coconut'],about:'My family has been farming Alphonso mangoes for three generations in the coastal Ratnagiri belt. All fruit is naturally ripened — no carbide. Order 3 days in advance for guaranteed fresh delivery.'},
+  {id:2,name:'Suresh Kumar',loc:'Nashik, Maharashtra',avatar:'👨‍🌾',emoji:'🍇',crop:'Thompson Seedless Grapes',cat:'Fruits',desc:'Award-winning vineyard. Export-quality grapes available directly.',price:140,unit:'kg',rating:4.7,reviews:89,exp:15,acres:8,orders:210,organic:false,badge:'Premium',crops:['Thompson Grapes','Sharad Grapes','Pomegranate'],about:'Running a 8-acre vineyard in Nashik valley. Wine grapes and table grapes both available. Regular export to Gulf countries. Freshness guaranteed within 24hrs of harvest.'},
+  {id:3,name:'Lakshmi Devi',loc:'Mysuru, Karnataka',avatar:'👩‍🌾',emoji:'🍅',crop:'Heirloom Tomatoes',cat:'Vegetables',desc:'Chemical-free heirloom varieties. Home delivery available in Mysuru district.',price:60,unit:'kg',rating:4.8,reviews:67,exp:8,acres:3,orders:156,organic:true,badge:'Organic',crops:['Tomato','Capsicum','Chilli','Brinjal'],about:'Practising natural farming for 8 years. No pesticides — only neem spray and compost. My tomatoes are lower yield but much tastier. Regular customers get 10% off.'},
+  {id:4,name:'Vijay Reddy',loc:'Kurnool, Andhra Pradesh',avatar:'👨‍🌾',emoji:'🥒',crop:'Fresh Cucumbers & Gourds',cat:'Vegetables',desc:'High-volume vegetable farmer. Daily fresh dispatch to city markets.',price:35,unit:'kg',rating:4.5,reviews:201,exp:12,acres:6,orders:520,organic:false,badge:'Fresh',crops:['Cucumber','Bottle Gourd','Bitter Gourd','Snake Gourd'],about:'I grow cucumbers and gourds in my 6-acre drip-irrigated farm near Kurnool. Morning harvest dispatched same day. Bulk orders get 15% discount. Minimum 5kg.'},
+  {id:5,name:'Mohan Singh',loc:'Varanasi, Uttar Pradesh',avatar:'👨‍🌾',emoji:'🌾',crop:'Sharbati Wheat',cat:'Grains',desc:'Premium Sharbati wheat from MP border. Flour milling available on request.',price:32,unit:'kg',rating:4.6,reviews:55,exp:18,acres:10,orders:180,organic:false,badge:'Premium',crops:['Sharbati Wheat','Chickpea','Lentil'],about:'Premium wheat farmer near the UP-MP border. Sharbati is known for its natural sweet taste and golden colour. Flour milling on 2-day notice. Min order 10kg.'},
+  {id:6,name:'Priya Nair',loc:'Palakkad, Kerala',avatar:'👩‍🌾',emoji:'🥬',crop:'Organic Greens & Spinach',cat:'Organic',desc:'Certified organic farm. Subscription boxes available weekly.',price:45,unit:'bundle',rating:4.9,reviews:143,exp:6,acres:2,orders:310,organic:true,badge:'Organic',crops:['Spinach','Fenugreek','Coriander','Curry Leaves','Drumstick Leaves'],about:'Running a certified organic micro-farm in Palakkad. Weekly subscription box: 6 seasonal greens + herbs delivered to your door. Currently 45 subscribers. Limited slots.'},
+];
+
+const SHOP_ITEMS = [
+  {id:1,farmer:'Ramesh Patil',fid:1,name:'Alphonso Mango (1 Dozen)',cat:'Fruits',emoji:'🥭',price:380,unit:'dozen',rating:4.9,desc:'GI certified Hapus from Ratnagiri'},
+  {id:2,farmer:'Suresh Kumar',fid:2,name:'Thompson Seedless Grapes',cat:'Fruits',emoji:'🍇',price:140,unit:'kg',rating:4.7,desc:'Export quality, Nashik vineyard'},
+  {id:3,farmer:'Lakshmi Devi',fid:3,name:'Heirloom Tomatoes',cat:'Vegetables',emoji:'🍅',price:60,unit:'kg',rating:4.8,desc:'Chemical-free, 5 heirloom varieties'},
+  {id:4,farmer:'Vijay Reddy',fid:4,name:'Fresh Cucumber (5kg box)',cat:'Vegetables',emoji:'🥒',price:175,unit:'5kg',rating:4.5,desc:'Morning harvest, same-day dispatch'},
+  {id:5,farmer:'Mohan Singh',fid:5,name:'Sharbati Wheat Flour',cat:'Grains',emoji:'🌾',price:85,unit:'2kg',rating:4.6,desc:'Stone-ground, golden Sharbati wheat'},
+  {id:6,farmer:'Priya Nair',fid:6,name:'Organic Weekly Veggie Box',cat:'Organic',emoji:'🥬',price:350,unit:'box',rating:4.9,desc:'6 seasonal greens + herbs, certified organic'},
+  {id:7,farmer:'Ramesh Patil',fid:1,name:'Raw Coconut',cat:'Fruits',emoji:'🥥',price:30,unit:'piece',rating:4.7,desc:'Fresh Ratnagiri coast coconuts'},
+  {id:8,farmer:'Lakshmi Devi',fid:3,name:'Green Chillies',cat:'Spices',emoji:'🌶️',price:40,unit:'250g',rating:4.6,desc:'Fiery Byadagi variety, fresh picked'},
+  {id:9,farmer:'Priya Nair',fid:6,name:'Fresh Curry Leaves',cat:'Spices',emoji:'🌿',price:25,unit:'bunch',rating:4.8,desc:'Organic curry leaves, full flavour'},
+  {id:10,farmer:'Vijay Reddy',fid:4,name:'Bitter Gourd',cat:'Vegetables',emoji:'🥒',price:50,unit:'kg',rating:4.4,desc:'Fresh karela, ideal for diabetes diet'},
+  {id:11,farmer:'Mohan Singh',fid:5,name:'Chickpea (Chana) 2kg',cat:'Grains',emoji:'🫘',price:180,unit:'2kg',rating:4.5,desc:'Desi chana, high protein, unprocessed'},
+  {id:12,farmer:'Suresh Kumar',fid:2,name:'Pomegranate',cat:'Fruits',emoji:'🔴',price:120,unit:'kg',rating:4.7,desc:'Bhagwa pomegranate, juicy & sweet'},
+];
+
+const GARDEN_PLANTS = [
+  {id:'tomato',name:'Cherry Tomato',emoji:'🍅',diff:'easy',tip:'Water daily, needs 6hr sunlight. Pinch side shoots for more fruit.',season:'Year-round',care:'Daily watering + weekly liquid fertiliser'},
+  {id:'chilli',name:'Green Chilli',emoji:'🌶️',diff:'easy',tip:'Loves heat. Water 2x/week. Great in containers.',season:'Summer',care:'Minimal water, full sun required'},
+  {id:'spinach',name:'Palak Spinach',emoji:'🥬',diff:'easy',tip:'Harvest outer leaves first. Prefers shade in summer.',season:'Oct–Feb',care:'Keep soil moist, avoid waterlogging'},
+  {id:'coriander',name:'Coriander',emoji:'🌿',diff:'easy',tip:'Sow seeds directly. Harvest before flowering for best taste.',season:'Oct–Mar',care:'Partial shade + regular watering'},
+  {id:'mint',name:'Pudina Mint',emoji:'🌿',diff:'easy',tip:'Grows in water or soil. Trim regularly to prevent legginess.',season:'Year-round',care:'Keep in moist soil, avoid direct midday sun'},
+  {id:'brinjal',name:'Brinjal / Eggplant',emoji:'🍆',diff:'medium',tip:'Needs staking. Feed with potassium-rich fertiliser for large fruits.',season:'Mar–Aug',care:'Deep watering 3x/week + full sun'},
+  {id:'cucumber',name:'Cucumber',emoji:'🥒',diff:'medium',tip:'Train on a trellis. Pick when 15–18cm for best taste.',season:'Feb–May',care:'High water needs, trellis support'},
+  {id:'okra',name:'Bhindi / Okra',emoji:'🥦',diff:'easy',tip:'Fast grower. Harvest every 2 days to keep producing.',season:'Apr–Aug',care:'Minimal care, drought tolerant'},
+  {id:'lemon',name:'Lemon Tree',emoji:'🍋',diff:'medium',tip:'Prune dead branches after harvest. Feed citrus fertiliser.',season:'Year-round',care:'Monthly feeding, well-drained soil'},
+  {id:'aloe',name:'Aloe Vera',emoji:'🌵',diff:'easy',tip:'Water once a week only. Perfect in sunny windowsill.',season:'Year-round',care:'Very low water, bright indirect light'},
+  {id:'curry',name:'Curry Leaf Plant',emoji:'🌿',diff:'easy',tip:'Grows fast. Neem spray once a month for pests.',season:'Year-round',care:'Moderate watering, full/partial sun'},
+  {id:'papaya',name:'Papaya',emoji:'🍑',diff:'medium',tip:'Needs space — 3m height. Fruits in 8–10 months.',season:'Year-round',care:'Regular deep watering + full sun'},
+];
+
+const CALENDAR = [
+  {month:'March 2026',tasks:[
+    {type:'sow',text:'Sow okra, bottle gourd and ridge gourd seeds (summer vegetables)'},
+    {type:'water',text:'Increase watering frequency — temperatures rising above 30°C'},
+    {type:'harvest',text:'Harvest mature tomatoes and chillies before heat stress sets in'},
+    {type:'feed',text:'Apply potassium-rich fertiliser to fruiting plants'},
+    {type:'protect',text:'Cover tender plants with shade cloth during peak afternoon heat (12–4 PM)'},
+    {type:'prune',text:'Prune old spinach and coriander plants before they bolt to seed'},
+  ]}
+];
+
+// Consumer's registered garden plants (from registration)
+let myGardenPlants = ['tomato','chilli','coriander','mint'];
+let cart = [];
+let currentFarmer = null;
+
+// ══════════════ CRITICAL FUNCTIONS (EARLY DEFINITION) ══════════════
+// These must be defined before any onclick handlers reference them
+
+function switchPanel(panel, btn){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('panel-'+panel)?.classList.add('active');
+  document.getElementById('tab-'+panel)?.classList.add('active');
+  if(btn) btn.classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function switchNavTab(panel, el){
+  document.querySelectorAll('.sb-item').forEach(i=>i.classList.remove('active'));
+  if(el) el.classList.add('active');
+  switchPanel(panel);
+}
+
+function switchSettings(section, el){
+  document.querySelectorAll('.s-section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.snav-item').forEach(s=>s.classList.remove('active'));
+  document.getElementById('s-' + section)?.classList.add('active');
+  if(el) el.classList.add('active');
+}
+
+function showToast(msg){
+  const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+function doLogout(){
+  fetch('/auth/logout', {method: 'POST', headers: {'Content-Type': 'application/json'}})
+  .then(() => {
+    localStorage.removeItem('agrolink_token');
+    localStorage.removeItem('agrolink_user');
+    localStorage.removeItem('token');
+    localStorage.removeItem('user_id');
+    localStorage.removeItem('role');
+    localStorage.removeItem('username');
+    window.location.href = '/login';
+  })
+  .catch(err => {
+    console.error('Logout error:', err);
+    localStorage.clear();
+    window.location.href = '/login';
+  });
+}
+
+// ══════════════ INIT ══════════════
+document.getElementById('today-date') && (document.getElementById('today-date').textContent = new Date().toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long',year:'numeric'}));
+
+// Petals
+(function(){
+  const pc=document.getElementById('petals-container');
+  const colors=['rgba(255,160,0,.4)','rgba(255,100,0,.3)','rgba(255,200,100,.35)'];
+  for(let i=0;i<12;i++){
+    const p=document.createElement('div');p.className='petal';
+    const s=8+Math.random()*12;
+    p.style.cssText=`left:${Math.random()*100}%;width:${s}px;height:${s*.6}px;background:${colors[i%3]};animation-duration:${14+Math.random()*14}s;animation-delay:${-Math.random()*20}s`;
+    pc.appendChild(p);
+  }
+})();
+
+// Season chips
+function renderSeasonChips(containerId, onclick){
+  const c=document.getElementById(containerId); if(!c)return;
+  c.innerHTML='';
+  SEASONS.forEach(s=>{
+    const d=document.createElement('div');d.className='season-chip'+(s.peak?' active':'');
+    d.innerHTML=`<span class="sc-icon">${s.emoji}</span><div class="sc-name">${s.name}</div><div class="sc-sub">${s.season}</div>`;
+    d.onclick=()=>onclick(s);
+    c.appendChild(d);
+  });
+}
+renderSeasonChips('season-chips-home',s=>{switchPanel('seasonal');filterSeasonBy(s.id);});
+renderSeasonChips('season-filter-chips',s=>filterSeasonBy(s.id));
+
+// Featured farmers
+function renderFarmerCards(containerId, list, limit){
+  const c=document.getElementById(containerId);if(!c)return;c.innerHTML='';
+  (limit?list.slice(0,limit):list).forEach(f=>{
+    const d=document.createElement('div');d.className='farmer-card';
+    d.innerHTML=`
+      <div class="fc-img">${f.emoji}<span class="fc-season-badge ${f.organic?'badge-organic':'badge-season'}">${f.badge}</span></div>
+      <div class="fc-body">
+        <div class="fc-farmer-row">
+          <div class="fc-avatar">${f.avatar}</div>
+          <div><div class="fc-name">${f.name}</div><div class="fc-loc">📍 ${f.loc}</div></div>
+          <div class="fc-rating">⭐ ${f.rating}</div>
+        </div>
+        <div class="fc-crop">${f.emoji} ${f.crop}</div>
+        <div class="fc-desc">${f.desc}</div>
+        <div class="fc-footer">
+          <div class="fc-price">₹${f.price}<span>/${f.unit}</span></div>
+          <button class="fc-btn" onclick="openFarmerModal(${f.id},event)">View Profile</button>
+        </div>
+      </div>`;
+    c.appendChild(d);
+  });
+}
+renderFarmerCards('featured-farmers',FARMERS,4);
+renderFarmerCards('all-farmers',FARMERS);
+renderFarmerCards('seasonal-farmers',FARMERS);
+
+// Garden home strip
+function renderGardenStrip(containerId, limit){
+  const c=document.getElementById(containerId);if(!c)return;c.innerHTML='';
+  GARDEN_PLANTS.slice(0,limit||4).forEach(p=>{
+    const d=document.createElement('div');d.className='garden-card';
+    const myPlant=myGardenPlants.includes(p.id);
+    d.innerHTML=`<div class="garden-img">${p.emoji}</div><div class="garden-name">${p.name}</div><div style="text-align:center;margin-top:4px"><span class="garden-diff ${p.diff==='easy'?'diff-easy':p.diff==='medium'?'diff-med':'diff-hard'}">${p.diff}</span></div><div class="garden-tip">${p.tip}</div><div class="garden-season">📅 ${p.season}</div>${myPlant?'<div style="font-size:10px;font-weight:700;color:rgba(86,194,57,.7);text-align:center;margin-top:6px">✅ In Your Garden</div>':''}`;
+    c.appendChild(d);
+  });
+}
+renderGardenStrip('garden-home-strip',4);
+
+// My Garden
+function renderMyGarden(){
+  const c=document.getElementById('my-garden-plants');if(!c)return;c.innerHTML='';
+  myGardenPlants.forEach(id=>{
+    const p=GARDEN_PLANTS.find(x=>x.id===id);if(!p)return;
+    const d=document.createElement('div');d.className='garden-card';
+    d.innerHTML=`<div class="garden-img">${p.emoji}</div><div class="garden-name">${p.name}</div><div style="text-align:center;margin-top:4px"><span class="garden-diff diff-easy">My Plant</span></div><div class="garden-tip">${p.care}</div><div class="garden-season">📅 ${p.season}</div>`;
+    c.appendChild(d);
+  });
+  // Recommendations = plants NOT in user's garden
+  const recC=document.getElementById('garden-recommendations');recC.innerHTML='';
+  GARDEN_PLANTS.filter(p=>!myGardenPlants.includes(p.id)).slice(0,4).forEach(p=>{
+    const d=document.createElement('div');d.className='garden-card';
+    d.innerHTML=`<div class="garden-img">${p.emoji}</div><div class="garden-name">${p.name}</div><div style="text-align:center;margin-top:4px"><span class="garden-diff ${p.diff==='easy'?'diff-easy':p.diff==='medium'?'diff-med':'diff-hard'}">${p.diff}</span></div><div class="garden-tip">${p.tip}</div><div class="garden-season">📅 ${p.season}</div><div style="margin-top:8px;text-align:center"><button onclick="addToGarden('${p.id}','${p.name}')" style="padding:6px 14px;border-radius:50px;background:rgba(86,194,57,.12);border:1px solid rgba(86,194,57,.3);color:#56c239;font-family:'Raleway',sans-serif;font-size:10px;font-weight:700;cursor:pointer;transition:all .25s" onmouseover="this.style.background='rgba(86,194,57,.22)'" onmouseout="this.style.background='rgba(86,194,57,.12)'">+ Add to My Garden</button></div>`;
+    c.appendChild(d);
+  });
+}
+renderMyGarden();
+
+// Garden Calendar
+(function(){
+  const c=document.getElementById('garden-calendar');if(!c)return;
+  const cal=CALENDAR[0];
+  const typeStyles={sow:'rgba(86,194,57,.08)',water:'rgba(0,180,216,.08)',harvest:'rgba(255,160,0,.08)',feed:'rgba(150,100,255,.08)',protect:'rgba(255,60,60,.08)',prune:'rgba(255,180,0,.08)'};
+  const typeIcons={sow:'🌱',water:'💧',harvest:'🌾',feed:'🧪',protect:'☂️',prune:'✂️'};
+  c.innerHTML=`<div class="card-title">📅 ${cal.month}</div>`+cal.tasks.map(t=>`<div style="display:flex;gap:10px;padding:10px 12px;border-radius:11px;margin-bottom:7px;background:${typeStyles[t.type]||'rgba(255,255,255,.03)'};border:1px solid rgba(255,255,255,.05)"><span style="font-size:16px;flex-shrink:0">${typeIcons[t.type]||'📌'}</span><span style="font-size:12px;color:rgba(255,255,255,.6);line-height:1.55">${t.text}</span></div>`).join('');
+})();
+
+// Shop
+// Store all products from API
+let allProducts = [];
+
+// Load products from API
+async function loadProducts(){
+  try {
+    const res = await fetch('/api/products');
+    const data = await res.json();
+    if(data.success && data.products){
+      allProducts = data.products.map(p => ({
+        id: p.product_id,
+        name: p.product_name,
+        price: p.product_price,
+        desc: p.product_description,
+        cat: p.category || 'Miscellaneous',
+        emoji: getEmojiForCategory(p.category),
+        fid: p.product_owner_id,
+        unit: 'unit',
+        rating: 4.5
+      }));
+      renderShop('all');
+    }
+  } catch(err) {
+    console.error('Failed to load products:', err);
+    allProducts = SHOP_ITEMS;
+    renderShop('all');
+  }
+}
+
+function getEmojiForCategory(cat){
+  const emojiMap = {
+    'Fruits':'🥭','Vegetables':'🥒','Grains':'🌾','Organic':'🥬','Spices':'🌶️','Agri Products':'🧪'
+  };
+  return emojiMap[cat] || '🛍️';
+}
+
+function renderShop(filter='all'){
+  const c=document.getElementById('shop-grid');if(!c)return;c.innerHTML='';
+  const list=filter==='all' || filter===null ? allProducts : allProducts.filter(i=>i.cat===filter);
+  
+  if(list.length === 0){
+    c.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:rgba(255,255,255,.4)">Loading products...</div>';
+    return;
+  }
+  
+  list.forEach(item=>{
+    const inCart=cart.find(x=>x.id===item.id);
+    const d=document.createElement('div');d.className='shop-item';
+    d.innerHTML=`
+      <div class="si-img">${item.emoji}</div>
+      <div class="si-body">
+        <div class="si-cat">${item.cat}</div>
+        <div class="si-name">${item.name}</div>
+        <div class="si-farmer">👨‍🌾 Farmer #${item.fid}</div>
+        <div style="font-size:10px;color:rgba(255,255,255,.35);margin-bottom:6px">${item.desc.substring(0,60)}…</div>
+        <div class="si-rating">⭐ ${item.rating} <span style="color:rgba(255,255,255,.2)">· In Stock</span></div>
+        <div class="si-footer">
+          <div class="si-price">₹${item.price}<span>/${item.unit}</span></div>
+          <button class="si-add" onclick="addToCart(${item.id},event)" title="Add to cart" style="${inCart?'background:linear-gradient(135deg,#56c239,#2a7a2e)':''}">+</button>
+        </div>
+      </div>`;
+    c.appendChild(d);
+  });
+}
+
+// Load products on page load
+loadProducts();
+
+function filterShop(cat,btn){
+  document.querySelectorAll('.shop-filter-bar .sf-chip').forEach(b=>b.classList.remove('active'));
+  if(btn)btn.classList.add('active');
+  renderShop(cat);
+}
+
+function filterFarmers(cat,btn){
+  document.querySelectorAll('#farmer-filters .sf-chip').forEach(b=>b.classList.remove('active'));
+  if(btn)btn.classList.add('active');
+  const list=cat==='all'?FARMERS:cat==='Organic'?FARMERS.filter(f=>f.organic):FARMERS.filter(f=>f.cat===cat);
+  renderFarmerCards('all-farmers',list);
+}
+
+function filterSeasonBy(id){
+  const season=SEASONS.find(s=>s.id===id);
+  if(season){
+    document.getElementById('season-desc-text').textContent=`Showing farmers with ${season.name} — ${season.season}`;
+    const list=FARMERS.filter(f=>f.crops?.some(c=>c.toLowerCase().includes(season.name.toLowerCase()))||f.cat===season.cat);
+    renderFarmerCards('seasonal-farmers',list.length>0?list:FARMERS);
+    document.querySelectorAll('#season-filter-chips .season-chip').forEach((c,i)=>{c.classList.toggle('active',SEASONS[i]?.id===id);});
+  }
+}
+//Pannel switchers
+document.getElementById('tab-home')?.addEventListener('click',()=>switchPanel('home',document.getElementById('tab-home')));
+document.getElementById('tab-seasonal')?.addEventListener('click',()=>switchPanel('seasonal',document.getElementById('tab-seasonal')));
+document.getElementById('tab-garden')?.addEventListener('click',()=>switchPanel('garden',document.getElementById('tab-garden')));
+
+// ══ FARMER MODAL ══
+function openFarmerModal(id,e){
+  if(e)e.stopPropagation();
+  const f=FARMERS.find(x=>x.id===id);if(!f)return;
+  currentFarmer=f;
+  document.getElementById('modal-hero').textContent=f.emoji;
+  document.getElementById('modal-avatar').textContent=f.avatar;
+  document.getElementById('modal-name').textContent=f.name;
+  document.getElementById('modal-loc').textContent='📍 '+f.loc;
+  document.getElementById('modal-rating').innerHTML=`⭐ ${f.rating} <span style="color:rgba(255,255,255,.3)">(${f.reviews} reviews)</span>`;
+  document.getElementById('modal-exp').textContent=f.exp;
+  document.getElementById('modal-acres').textContent=f.acres;
+  document.getElementById('modal-orders').textContent=f.orders+'+';
+  document.getElementById('modal-about').textContent=f.about;
+  document.getElementById('modal-crops').innerHTML=f.crops.map(c=>`<span class="crop-chip">🌱 ${c}</span>`).join('');
+  const items=SHOP_ITEMS.filter(i=>i.fid===id);
+  document.getElementById('modal-products').innerHTML=items.map(i=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:9px 12px;background:rgba(255,255,255,.03);border-radius:11px;border:1px solid rgba(255,255,255,.06)"><div style="display:flex;align-items:center;gap:8px"><span style="font-size:18px">${i.emoji}</span><div><div style="font-size:12px;font-weight:700;color:white">${i.name}</div><div style="font-size:10px;color:rgba(255,255,255,.3)">₹${i.price}/${i.unit}</div></div></div><button onclick="addToCart(${i.id},null);showToast('🛒 Added to cart!')" style="padding:6px 14px;border-radius:50px;background:linear-gradient(135deg,#c27a00,#ffa500);color:white;font-family:'Raleway',sans-serif;font-size:10px;font-weight:700;border:none;cursor:pointer">+ Cart</button></div>`).join('');
+  document.getElementById('farmer-modal').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeFarmerModal(){document.getElementById('farmer-modal').classList.remove('open');document.body.style.overflow='';}
+function contactFarmer(){if(currentFarmer)showToast(`📞 Connecting you with ${currentFarmer.name}…`);}
+document.getElementById('farmer-modal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeFarmerModal();});
+
+// ══ CART ══
+function addToCart(itemId, e){
+  if(e)e.stopPropagation();
+  const item=SHOP_ITEMS.find(i=>i.id===itemId);if(!item)return;
+  const existing=cart.find(x=>x.id===itemId);
+  if(existing){existing.qty++;} else {cart.push({...item,qty:1});}
+  updateCart();
+  showToast(`🛒 ${item.emoji} ${item.name} added to cart!`);
+  renderShop(document.querySelector('.shop-filter-bar .sf-chip.active')?.textContent.trim()||'all');
+}
+function removeFromCart(id){cart=cart.filter(x=>x.id!==id);updateCart();}
+function changeQty(id,delta){
+  const item=cart.find(x=>x.id===id);if(!item)return;
+  item.qty+=delta;
+  if(item.qty<=0)removeFromCart(id);
+  else updateCart();
+}
+function updateCart(){
+  const count=cart.reduce((a,x)=>a+x.qty,0);
+  document.getElementById('cart-count').textContent=count;
+  const total=cart.reduce((a,x)=>a+x.price*x.qty,0);
+  document.getElementById('cart-total').textContent='₹'+total.toLocaleString();
+  const list=document.getElementById('cart-items-list');
+  if(cart.length===0){list.innerHTML='<div class="cart-empty"><div class="cart-empty-icon">🛒</div>Your cart is empty</div>';return;}
+  list.innerHTML=cart.map(item=>`
+    <div class="cart-item">
+      <div class="ci-img">${item.emoji}</div>
+      <div class="ci-info"><div class="ci-name">${item.name}</div><div class="ci-farmer">👨‍🌾 ${item.farmer}</div><div class="ci-price">₹${(item.price*item.qty).toLocaleString()}</div></div>
+      <div class="ci-qty">
+        <button class="qty-btn" onclick="changeQty(${item.id},-1)">−</button>
+        <span class="qty-num">${item.qty}</span>
+        <button class="qty-btn" onclick="changeQty(${item.id},1)">+</button>
+      </div>
+    </div>`).join('');
+}
+updateCart();
+function openCart(){document.getElementById('cart-overlay').classList.add('open');document.body.style.overflow='hidden';}
+function closeCart(){document.getElementById('cart-overlay').classList.remove('open');document.body.style.overflow='';}
+document.getElementById('cart-overlay').addEventListener('click',e=>{if(e.target===e.currentTarget)closeCart();});
+function checkout(){if(cart.length===0){showToast('⚠️ Your cart is empty');return;}closeCart();showToast(`✅ Order placed! ₹${cart.reduce((a,x)=>a+x.price*x.qty,0).toLocaleString()} — Farmers notified 🌾`);cart=[];updateCart();}
+
+// ══ GARDEN ADD ══
+function addToGarden(id,name){
+  if(!myGardenPlants.includes(id)){myGardenPlants.push(id);renderMyGarden();showToast(`🌱 ${name} added to your garden!`);}
+}
+
+// ══ WEATHER ══
+async function loadWeather(){
+  try{
+    const pos=await new Promise((res,rej)=>navigator.geolocation.getCurrentPosition(res,rej,{timeout:8000}));
+    const {latitude:lat,longitude:lng}=pos.coords;
+    const geo=await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`);
+    const gd=await geo.json();
+    const city=gd.address?.city||gd.address?.town||gd.address?.village||'Your Location';
+    const state=gd.address?.state||'';
+    const label=`${city}${state?', '+state:''}`;
+    document.getElementById('w-loc-label').textContent=label;
+    document.getElementById('w-loc').textContent='📍 '+label;
+    document.getElementById('farmers-quick-loc').textContent='Near '+city;
+    const wr=await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current=temperature_2m,relative_humidity_2m,wind_speed_10m,precipitation,weather_code&daily=temperature_2m_max,temperature_2m_min,weather_code&timezone=auto&forecast_days=6`);
+    const w=await wr.json();const cur=w.current;const daily=w.daily;
+    const temp=Math.round(cur.temperature_2m);
+    document.getElementById('w-temp').textContent=temp+'°C';
+    document.getElementById('w-cond').textContent=wDesc(cur.weather_code);
+    document.getElementById('w-icon').textContent=wIcon(cur.weather_code);
+    document.getElementById('w-hum').textContent=cur.relative_humidity_2m+'%';
+    document.getElementById('w-wind').textContent=Math.round(cur.wind_speed_10m);
+    document.getElementById('w-rain').textContent=(cur.precipitation||0).toFixed(1)+'mm';
+    const fr=document.getElementById('forecast-row');fr.innerHTML='';
+    const days=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+    for(let i=1;i<6;i++){const d=new Date(daily.time[i]+'T00:00');const fd=document.createElement('div');fd.className='fday';fd.innerHTML=`<div class="fday-n">${days[d.getDay()]}</div><div class="fday-i">${wIcon(daily.weather_code[i])}</div><div class="fday-h">${Math.round(daily.temperature_2m_max[i])}°</div><div class="fday-l">${Math.round(daily.temperature_2m_min[i])}°</div>`;fr.appendChild(fd);}
+  }catch(e){
+    document.getElementById('w-temp').textContent='30°C';document.getElementById('w-cond').textContent='Warm & Sunny';document.getElementById('w-icon').textContent='☀️';
+    document.getElementById('w-hum').textContent='62%';document.getElementById('w-wind').textContent='12';document.getElementById('w-rain').textContent='0mm';
+    document.getElementById('w-loc-label').textContent='India';document.getElementById('w-loc').textContent='📍 India';
+    const fr=document.getElementById('forecast-row');fr.innerHTML='';
+    [{d:'Mon',i:'☀️',h:32,l:22},{d:'Tue',i:'⛅',h:30,l:21},{d:'Wed',i:'🌧️',h:27,l:20},{d:'Thu',i:'☀️',h:33,l:23},{d:'Fri',i:'⛅',h:31,l:22}].forEach(x=>{const fd=document.createElement('div');fd.className='fday';fd.innerHTML=`<div class="fday-n">${x.d}</div><div class="fday-i">${x.i}</div><div class="fday-h">${x.h}°</div><div class="fday-l">${x.l}°</div>`;fr.appendChild(fd);});
+  }
+}
+function wDesc(c){if(c===0)return'Clear Sky';if(c<=2)return'Partly Cloudy';if(c===3)return'Overcast';if(c<=48)return'Foggy';if(c<=57)return'Drizzle';if(c<=67)return'Rainy';if(c<=82)return'Showers';if(c<=99)return'Thunderstorm';return'—';}
+function wIcon(c){if(c===0)return'☀️';if(c<=2)return'⛅';if(c===3)return'☁️';if(c<=48)return'🌫️';if(c<=57)return'🌦️';if(c<=67)return'🌧️';if(c<=77)return'❄️';if(c<=82)return'🌦️';if(c<=99)return'⛈️';return'🌡️';}
+loadWeather();
+
+function globalSearch(q){
+  if(!q.trim())return;
+  const matches=SHOP_ITEMS.filter(i=>i.name.toLowerCase().includes(q.toLowerCase())||i.farmer.toLowerCase().includes(q.toLowerCase()));
+  if(matches.length>0){switchPanel('shop');renderShop('all');}
+}
+
+// Load user data into sidebar and settings
+async function loadConsumerProfile(){
+  const storedUser = JSON.parse(localStorage.getItem('agrolink_user') || '{}');
+  const userId = storedUser.user_id || localStorage.getItem('user_id');
+  
+  if(!userId) return;
+  
+  try {
+    const res = await fetch(`${API_URL}/api/user/${userId}`, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' }
+    });
+    
+    if(!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    
+    if(data.success && data.profile) {
+      const user = data.profile;
+      
+      // Update sidebar
+      const sbName = document.getElementById('sb-pname-display');
+      const sbRole = document.getElementById('sb-prole-display');
+      if(sbName) sbName.textContent = user.full_name || user.username || 'Consumer';
+      if(sbRole) sbRole.textContent = 'Consumer · ' + (user.state || 'India');
+      
+      // Update settings form
+      document.getElementById('inp-name').value = user.full_name || '';
+      document.getElementById('inp-email').value = user.email || '';
+      document.getElementById('inp-phone').value = user.phone || '';
+      document.getElementById('inp-location').value = user.location || '';
+      if(user.state) {
+        const stateSelect = document.getElementById('inp-state');
+        stateSelect.value = user.state.toLowerCase() || '';
+      }
+    }
+  } catch(err) {
+    console.error('Failed to load profile:', err);
+  }
+}
+
+// Save profile changes
+async function saveProfileChanges(){
+  const storedUser = JSON.parse(localStorage.getItem('agrolink_user') || '{}');
+  const userId = storedUser.user_id;
+  
+  if(!userId) {
+    showToast('❌ Not authenticated. Please login again.');
+    return;
+  }
+  
+  const updates = {
+    full_name: document.getElementById('inp-name').value,
+    email: document.getElementById('inp-email').value,
+    phone: document.getElementById('inp-phone').value,
+    location: document.getElementById('inp-location').value,
+    state: document.getElementById('inp-state').value
+  };
+  
+  try {
+    const res = await fetch(`${API_URL}/api/user/${userId}/profile`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(updates)
+    });
+    
+    if(res.ok) {
+      showToast('✅ Profile updated successfully!');
+    } else {
+      showToast('❌ Failed to update profile');
+    }
+  } catch(err) {
+    showToast('❌ Error: ' + err.message);
+  }
+}
+
+// Reset profile form
+function resetProfileForm(){
+  loadConsumerProfile();
+  showToast('↺ Form reset to saved values');
+}
+
+// Save preferences
+async function savePreferences(){
+  const prefs = {
+    garden_type: document.getElementById('inp-garden-type').value,
+    sunlight: document.getElementById('inp-sunlight').value,
+    pref_vegetables: document.getElementById('pref-vegetables').checked,
+    pref_fruits: document.getElementById('pref-fruits').checked,
+    pref_herbs: document.getElementById('pref-herbs').checked,
+    pref_flowers: document.getElementById('pref-flowers').checked
+  };
+  
+  localStorage.setItem('consumer_preferences', JSON.stringify(prefs));
+  showToast('✅ Preferences saved! You\'ll get personalized recommendations');
+}
+
+// Change password
+async function changePassword(){
+  const currentPwd = document.getElementById('inp-current-pwd').value;
+  const newPwd = document.getElementById('inp-new-pwd').value;
+  const confirmPwd = document.getElementById('inp-confirm-pwd').value;
+  
+  if(!currentPwd || !newPwd || !confirmPwd) {
+    showToast('⚠️ Please fill all password fields');
+    return;
+  }
+  
+  if(newPwd !== confirmPwd) {
+    showToast('❌ New passwords do not match');
+    return;
+  }
+  
+  if(newPwd.length < 6) {
+    showToast('⚠️ Password must be at least 6 characters');
+    return;
+  }
+  
+  const storedUser = JSON.parse(localStorage.getItem('agrolink_user') || '{}');
+  const userId = storedUser.user_id;
+  
+  try {
+    const res = await fetch(`${API_URL}/api/user/${userId}/change-password`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ current_password: currentPwd, new_password: newPwd })
+    });
+    
+    if(res.ok) {
+      showToast('✅ Password changed successfully!');
+      document.getElementById('inp-current-pwd').value = '';
+      document.getElementById('inp-new-pwd').value = '';
+      document.getElementById('inp-confirm-pwd').value = '';
+    } else {
+      const err = await res.json();
+      showToast('❌ ' + (err.error || 'Failed to change password'));
+    }
+  } catch(err) {
+    showToast('❌ Error: ' + err.message);
+  }
+}
+
+// Delete account
+async function deleteAccount(){
+  if(!confirm('⚠️ Are you absolutely sure? This will delete all your data permanently and cannot be undone!')) return;
+  if(!confirm('🚨 FINAL WARNING: Your account and all associated data will be deleted. Click OK to confirm.')) return;
+  
+  const storedUser = JSON.parse(localStorage.getItem('agrolink_user') || '{}');
+  const userId = storedUser.user_id;
+  
+  try {
+    const res = await fetch(`${API_URL}/api/user/${userId}`, {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' }
+    });
+    
+    if(res.ok) {
+      showToast('Account deleted. Logging out...');
+      setTimeout(() => {
+        localStorage.clear();
+        window.location.href = '/login';
+      }, 1500);
+    } else {
+      showToast('❌ Failed to delete account');
+    }
+  } catch(err) {
+    showToast('❌ Error: ' + err.message);
+  }
+}
+
+// ── CONSUMER DASHBOARD: Fetch user details by user_id ──
+document.addEventListener('DOMContentLoaded', async () => {
+  const storedUser = JSON.parse(localStorage.getItem('agrolink_user') || '{}');
+  const userId = storedUser.user_id || localStorage.getItem('user_id');
+  
+  if (!userId) {
+    window.location.href = '/login';
+    return;
+  }
+
+  try {
+    const res = await fetch(`${API_URL}/api/user/${userId}`, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' }
+    });
+    
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    
+    const data = await res.json();
+    if (data.success && data.profile) {
+      const user = data.profile;
+      
+      // Update sidebar profile info
+      const pname = document.querySelector('.profile-name');
+      if (pname) pname.textContent = user.full_name || 'Consumer';
+      
+      if (user.profile_photo_url) {
+        const avatar = document.querySelector('.profile-avatar');
+        if (avatar) avatar.style.backgroundImage = `url('${user.profile_photo_url}')`;
+      }
+    }
+    
+    // Load profile into sidebar and settings
+    await loadConsumerProfile();
+    
+  } catch(err) {
+    console.error('Dashboard init error:', err);
+  }
+});
+
+// ══ LOGOUT ══
+function doLogout(){
+  fetch('/auth/logout', {method: 'POST', headers: {'Content-Type': 'application/json'}})
+  .then(() => {
+    localStorage.removeItem('agrolink_token');
+    localStorage.removeItem('agrolink_user');
+    localStorage.removeItem('token');
+    localStorage.removeItem('user_id');
+    localStorage.removeItem('role');
+    localStorage.removeItem('username');
+    window.location.href = '/login';
+  })
+  .catch(err => {
+    console.error('Logout error:', err);
+    localStorage.clear();
+    window.location.href = '/login';
+  });
+}
+</script>
+</body>
+</html>
